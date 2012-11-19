@@ -70,8 +70,8 @@ public class Competition {
             currentWar.loadWarriorGroups(warriorGroups);
             
             // go go go!
-            int round;
-            for (round = 0; round < MAX_ROUND; round++) {
+            int round = 0;
+            while (round < MAX_ROUND) {
                 competitionEventListener.onRound(round);
 
                 // apply speed limits
@@ -81,15 +81,19 @@ public class Competition {
                     if (round % speed == 0) {
                         Thread.sleep(DELAY_UNIT);
                     }
+                    
+                    if (speed == 1) { // paused
+                    	continue;
+                    }
                 }
                 
-                if (speed > 1) {
-                	currentWar.nextRound(round);
-                }
-
+            	currentWar.nextRound(round);
+            	
                 if (currentWar.isOver()) {
                     break;
                 }
+                
+                ++round;
             }
             competitionEventListener.onRound(round);
 

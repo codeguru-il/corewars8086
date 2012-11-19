@@ -61,7 +61,6 @@ public class ColumnGraph extends JComponent {
         g.setColor(Color.BLACK);
         g.fillRect(0,0,d.width, d.height);
         d.setSize(d.width, d.height - NAME_HEIGHT);
-        int colHeight; 
         g.drawRect(0,0,d.width, d.height);
         int columnWidth = d.width / names.length;
         ColorHolder colorHolder= ColorHolder.getInstance();
