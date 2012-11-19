@@ -198,7 +198,6 @@ public class War {
             allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
 
         for (int i = 0; i < warriors.size(); ++i) {
-            ++m_currentWarrior;
 
             WarriorData warrior = warriors.get(i);
 
@@ -228,6 +227,7 @@ public class War {
                 m_core.writeByte(tmp, warriorData[offset]);			
             }
             ++m_numWarriorsAlive;
+			++m_currentWarrior;
 
             // notify listener
             m_warListener.onWarriorBirth(warriorName);		
