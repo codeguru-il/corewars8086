@@ -30,11 +30,13 @@ public class CompetitionWindow extends JFrame
     private Thread warThread;
     private boolean showBattleFrame;
 	private boolean competitionRunning;
+	
+	private JTextField seed;
 
     public CompetitionWindow() throws IOException {
         super("CodeGuru Extreme - Competition Viewer");
         getContentPane().setLayout(new BorderLayout());
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         competition = new Competition();
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition
@@ -47,7 +49,7 @@ public class CompetitionWindow extends JFrame
         controlArea.setLayout(new BoxLayout(controlArea, BoxLayout.Y_AXIS));
         // -------------- Button Panel
         JPanel buttonPanel = new JPanel();
-        runWarButton = new JButton("<html><font color=red>Start!</font>");
+        runWarButton = new JButton("<html><font color=red>Start!</font></html>");
         runWarButton.addActionListener(this);
         buttonPanel.add(runWarButton);
         warCounterDisplay = new JLabel("");
@@ -71,8 +73,12 @@ public class CompetitionWindow extends JFrame
 		warriorsPerGroupField = new JTextField(String.format("%d", numberOfGropus), 3);
 		controlPanel.add(warriorsPerGroupField);
 		controlPanel.add(new JLabel("Sessions per groups combination:"));
-		battlesPerGroupField = new JTextField("1", 3);
+		battlesPerGroupField = new JTextField("100", 4);
 		controlPanel.add(battlesPerGroupField);
+		seed = new JTextField(4);
+		seed.setText("guru");
+		controlPanel.add(new JLabel("seed:"));
+		controlPanel.add(seed);
         controlArea.add(controlPanel);
         // ------------
         getContentPane().add(controlArea, BorderLayout.SOUTH);
@@ -147,7 +153,7 @@ public class CompetitionWindow extends JFrame
 				runWarButton.setEnabled(false);
             }
         } else if (e.getSource() == showBattleButton) {
-            if (battleFrame == null) {
+            if (battleFrame == null || !battleFrame.isVisible()) {
                 if (warThread == null) {
                     // war hasn't started yet
                     showBattleRoom();
@@ -197,7 +203,7 @@ public class CompetitionWindow extends JFrame
         
         competition.addMemoryEventLister(battleFrame);
         competition.addCompetitionEventListener(battleFrame);
-        battleFrame.setSize(750, 700);
+        battleFrame.setSize(1050, 950);
         battleFrame.setVisible(true);
     }
 
@@ -223,6 +229,7 @@ public class CompetitionWindow extends JFrame
     public void onCompetitionStart() {
         warCounter = 0;
         totalWars = competition.getTotalNumberOfWars();
+		this.runWarButton.setEnabled(false);
     }
 
     public void onCompetitionEnd() {
@@ -233,7 +240,13 @@ public class CompetitionWindow extends JFrame
             };
         });
         warThread = null;
+		this.runWarButton.setEnabled(true);
         runWarButton.setEnabled(true);
 		competitionRunning = false;
     }
+    
+	@Override
+	public void onEndRound() {
+	}
+	
 }

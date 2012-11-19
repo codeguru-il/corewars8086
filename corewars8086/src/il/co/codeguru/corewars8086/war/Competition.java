@@ -26,7 +26,9 @@ public class Competition {
 
     private int speed;
     public static final int MAXIMUM_SPEED = -1;
-    private static final long DELAY_UNIT = 10;
+    private static final long DELAY_UNIT = 200;
+    
+    private long seed = 0;
 
     private boolean abort;
 
@@ -66,6 +68,7 @@ public class Competition {
     public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups) throws Exception {
         for(int war = 0; war < numberOfRounds; war++) {
             currentWar = new War(memoryEventListener, competitionEventListener);
+            currentWar.setSeed(this.seed + war);
             competitionEventListener.onWarStart();
             currentWar.loadWarriorGroups(warriorGroups);
             
@@ -74,6 +77,8 @@ public class Competition {
             while (round < MAX_ROUND) {
                 competitionEventListener.onRound(round);
 
+                competitionEventListener.onEndRound();
+                
                 // apply speed limits
                 if (speed != MAXIMUM_SPEED) {
                     // note: if speed is 1 (meaning game is paused), this will
@@ -86,12 +91,19 @@ public class Competition {
                     	continue;
                     }
                 }
-                
-            	currentWar.nextRound(round);
             	
+                //pause
+                while( currentWar.isPaused() ) Thread.sleep(DELAY_UNIT);
+                
+                //Single step run - stop next time
+                if(currentWar.isSingleRound())
+                	currentWar.pause();
+                
                 if (currentWar.isOver()) {
                     break;
                 }
+				
+            	currentWar.nextRound(round);
                 
                 ++round;
             }
@@ -124,10 +136,18 @@ public class Competition {
         competitionEventCaster.add(lis);
     }
 
+    public void removeCompetitionEventListener(CompetitionEventListener lis) {
+    	competitionEventCaster.remove(lis);
+    }
+    
     public void addMemoryEventLister(MemoryEventListener lis) {
         memoryEventCaster.add(lis);
     }
 
+    public void removeMemoryEventLister(MemoryEventListener lis) {
+    	memoryEventCaster.remove(lis);
+    }
+    
     public WarriorRepository getWarriorRepository() {
         return warriorRepository;
     }
@@ -148,4 +168,14 @@ public class Competition {
     public void setAbort() {
         this.abort = true;
     }
+    
+    
+    public War getCurrentWar(){
+    	return currentWar;
+    }
+    
+    public void setSeed(long seed){
+    	this.seed = seed;
+    }
+    
 }

@@ -74,6 +74,9 @@ public class War {
             m_core.writeByte(tmp, ARENA_BYTE);			
         }
 
+        isPaused = false;
+        isSingleRound = false;
+        
         // set the memory listener (we only do this now, to skip initialization)
         m_core.setListener(memoryListener);
     }
@@ -361,4 +364,39 @@ public class War {
     }
     
     private Random rand = new Random();
+    
+    private boolean isSingleRound;
+    private boolean isPaused;
+    
+    public void setSeed(long seed){
+    	rand.setSeed(seed);
+    }
+    
+    public void pause(){
+    	isPaused = true;
+    }
+    
+    public boolean isPaused(){
+    	return isPaused;
+    }
+    
+    public void resume(){
+    	isPaused = false;
+    	isSingleRound = false;
+    }
+    
+    public void runSingleRound(){
+    	this.resume();
+    	isSingleRound = true;
+    }
+    
+    public boolean isSingleRound(){
+    	return this.isSingleRound;
+    }
+    
+    public RealModeMemoryImpl getMemory(){
+    	return m_core;
+    }
+    
+    
 }
