@@ -59,7 +59,8 @@ public class War {
      * Constructor.
      * Fills the Arena with its initial data. 
      */
-    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener) {
+    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener, boolean startPaused) {
+    	isPaused = startPaused;
         m_warListener = warListener;
         m_warriors = new Warrior[MAX_WARRIORS];
         m_numWarriors = 0;
@@ -74,7 +75,6 @@ public class War {
             m_core.writeByte(tmp, ARENA_BYTE);			
         }
 
-        isPaused = false;
         isSingleRound = false;
         
         // set the memory listener (we only do this now, to skip initialization)

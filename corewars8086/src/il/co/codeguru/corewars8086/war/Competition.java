@@ -43,7 +43,7 @@ public class Competition {
         abort = false;
     }
 
-    public void runCompetition (int warsPerCombination, int warriorsPerGroup) throws Exception {
+    public void runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
         this.warsPerCombination = warsPerCombination;
         competitionIterator = new BinomialIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
@@ -52,7 +52,7 @@ public class Competition {
         competitionEventListener.onCompetitionStart();
         while (competitionIterator.hasNext()) {
             runWar(warsPerCombination,
-                warriorRepository.createGroupList((int[])competitionIterator.next()));
+                warriorRepository.createGroupList((int[])competitionIterator.next()), startPaused);
             if (abort) {
                 break;
             }
@@ -65,9 +65,9 @@ public class Competition {
         return (int) competitionIterator.getNumberOfItems() * warsPerCombination;
     }
 
-    public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups) throws Exception {
+    public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups,boolean startPaused) throws Exception {
         for(int war = 0; war < numberOfRounds; war++) {
-            currentWar = new War(memoryEventListener, competitionEventListener);
+            currentWar = new War(memoryEventListener, competitionEventListener, startPaused);
             currentWar.setSeed(this.seed + war);
             competitionEventListener.onWarStart();
             currentWar.loadWarriorGroups(warriorGroups);

@@ -5,6 +5,7 @@ import il.co.codeguru.corewars8086.war.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+
 import javax.swing.*;
 
 /**
@@ -32,6 +33,8 @@ public class CompetitionWindow extends JFrame
 	private boolean competitionRunning;
 	
 	private JTextField seed;
+
+	private JCheckBox startPausedCheckBox;
 
     public CompetitionWindow() throws IOException {
         super("CodeGuru Extreme - Competition Viewer");
@@ -79,7 +82,12 @@ public class CompetitionWindow extends JFrame
 		seed.setText("guru");
 		controlPanel.add(new JLabel("seed:"));
 		controlPanel.add(seed);
-        controlArea.add(controlPanel);
+		
+		startPausedCheckBox = new JCheckBox("Start Paused");
+		controlPanel.add(startPausedCheckBox);
+        
+		controlArea.add(controlPanel);
+        
         // ------------
         getContentPane().add(controlArea, BorderLayout.SOUTH);
 
@@ -120,7 +128,7 @@ public class CompetitionWindow extends JFrame
                 @Override
                 public void run() {
                     try {
-                        competition.runCompetition(battlesPerGroup, warriorsPerGroup);
+                        competition.runCompetition(battlesPerGroup, warriorsPerGroup, startPausedCheckBox.isSelected());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

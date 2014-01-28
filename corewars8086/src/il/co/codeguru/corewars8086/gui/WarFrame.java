@@ -227,6 +227,8 @@ public class WarFrame extends JFrame
         addMessage("=== Session started ===");
         nameListModel.clear();
         warCanvas.clear();
+        if (competition.getCurrentWar().isPaused())
+			btnPause.setText("Resume");
     }
 
     /** @see CompetitionEventListener#onWarEnd(int, String) */
