@@ -2,6 +2,7 @@ package il.co.codeguru.corewars8086.gui;
 
 import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.utils.EventMulticaster;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 import il.co.codeguru.corewars8086.war.*;
 
@@ -137,6 +138,8 @@ public class WarFrame extends JFrame
 			}
 		});
 
+		competition.addCompetitionEventListener(this);
+		
 		btnPause = new JButton("Pause");
 		btnPause.setEnabled(false);
 		btnPause.addActionListener(new ActionListener() {
@@ -227,8 +230,10 @@ public class WarFrame extends JFrame
         addMessage("=== Session started ===");
         nameListModel.clear();
         warCanvas.clear();
-        if (competition.getCurrentWar().isPaused())
+        if (competition.getCurrentWar().isPaused()){
 			btnPause.setText("Resume");
+			btnSingleRound.setEnabled(true);
+        }
     }
 
     /** @see CompetitionEventListener#onWarEnd(int, String) */

@@ -162,6 +162,9 @@ public class CompetitionWindow extends JFrame
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == runWarButton) {
+        	if (showBattleCheckBox.isSelected() == true && battleFrame == null ) {
+                showBattleRoom();
+            }
             if (runWar()) {
             	competitionRunning = true;
 				runWarButton.setEnabled(false);
