@@ -21,7 +21,7 @@ public class CompetitionWindow extends JFrame
     // widgets
     private JButton runWarButton;
     private JLabel warCounterDisplay;
-    private JButton showBattleButton;
+    private JCheckBox showBattleCheckBox;
     private JTextField battlesPerGroupField;
     private JTextField warriorsPerGroupField;
     private WarFrame battleFrame;
@@ -29,7 +29,6 @@ public class CompetitionWindow extends JFrame
     private int warCounter;
     private int totalWars;
     private Thread warThread;
-    private boolean showBattleFrame;
 	private boolean competitionRunning;
 	
 	private JTextField seed;
@@ -58,9 +57,19 @@ public class CompetitionWindow extends JFrame
         warCounterDisplay = new JLabel("");
         buttonPanel.add(warCounterDisplay);
         buttonPanel.add(Box.createHorizontalStrut(30));
-        showBattleButton = new JButton("Show session");
-        showBattleButton.addActionListener(this);
-        buttonPanel.add(showBattleButton);
+        showBattleCheckBox = new JCheckBox("Show session on start");
+        buttonPanel.add(showBattleCheckBox);
+        
+        startPausedCheckBox = new JCheckBox("Start Paused");
+		startPausedCheckBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(startPausedCheckBox.isSelected())
+					showBattleCheckBox.setSelected(true);
+			}
+		});
+		buttonPanel.add(startPausedCheckBox);
+        
         controlArea.add(buttonPanel);
         // -------------
         controlArea.add(new JSeparator(JSeparator.HORIZONTAL));
@@ -83,9 +92,6 @@ public class CompetitionWindow extends JFrame
 		controlPanel.add(new JLabel("seed:"));
 		controlPanel.add(seed);
 		
-		startPausedCheckBox = new JCheckBox("Start Paused");
-		controlPanel.add(startPausedCheckBox);
-        
 		controlArea.add(controlPanel);
         
         // ------------
@@ -160,23 +166,12 @@ public class CompetitionWindow extends JFrame
             	competitionRunning = true;
 				runWarButton.setEnabled(false);
             }
-        } else if (e.getSource() == showBattleButton) {
-            if (battleFrame == null || !battleFrame.isVisible()) {
-                if (warThread == null) {
-                    // war hasn't started yet
-                    showBattleRoom();
-                } else {
-                    // show the battle frame when the next battle starts
-                    showBattleFrame = true;
-                }
-            }
         }
     }
 
     public void onWarStart() {
-        if (showBattleFrame == true) {
+        if (showBattleCheckBox.isSelected() == true && battleFrame == null ) {
             showBattleRoom();
-            showBattleFrame = false;
         }
     }
 
