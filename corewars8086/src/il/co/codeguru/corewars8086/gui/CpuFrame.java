@@ -1,9 +1,12 @@
 package il.co.codeguru.corewars8086.gui;
 
+import il.co.codeguru.corewars8086.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.utils.Disassembler;
 import il.co.codeguru.corewars8086.war.Competition;
 import il.co.codeguru.corewars8086.war.CompetitionEventListener;
 import il.co.codeguru.corewars8086.war.War;
 
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +16,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
 public class CpuFrame extends JFrame implements CompetitionEventListener {
 	
@@ -36,12 +40,14 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 						flagCF;
 
 	private JButton btnRefrash,btnSave;
+
+	private JTextArea instructionArea;
 					
 	
 	public CpuFrame(Competition c){
 		super("CPU state viewer - CodeGuru");
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.setSize(550, 200);
+		this.setSize(550, 400);
 		this.competition = c;
 		this.currentWar = c.getCurrentWar();
 		
@@ -118,17 +124,27 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 			}
 		});
 		
+		instructionArea = new JTextArea(); 
+		instructionArea.setFont(new Font("Monospaced",Font.PLAIN,15));
+		instructionArea.setSize(50, 100);
+		
 		this.updateFileds();
 		
 		menuPanel.add(dropMenu);
 		menuPanel.add(btnRefrash);
 		menuPanel.add(btnSave);
 		
-		this.add(menuPanel);
-		this.add(flagPanel);
-		this.add(regPanel);
 		
-		this.setLayout(new GridLayout(0,3));
+		
+		JPanel cpuPanel = new JPanel(new GridLayout(1, 3));
+		cpuPanel.add(menuPanel);
+		cpuPanel.add(flagPanel);
+		cpuPanel.add(regPanel);
+		
+		this.add(cpuPanel);
+		this.add(instructionArea);
+		
+		this.setLayout(new GridLayout(2,1,10,10));
 		this.setResizable(false);
 		this.setVisible(true);
 		
@@ -161,6 +177,25 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 		flagPF.setValue( currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getParityFlag() );
 		flagCF.setValue( currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getCarryFlag() );
 		
+		String fin = "";
+		
+		byte[] bytes = new byte[30];
+		
+		for (short i = 0; i < 30; i++) {
+			short ip = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getIP();
+			short cs = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getCS();
+			short vs = currentWar.getMemory().readByte(new RealModeAddress(cs, (short) (ip + i)));
+			bytes[i] = (byte) vs;
+		}
+		
+		
+		
+		try {
+			instructionArea.setText(Disassembler.disassembler(bytes));
+		} catch (Exception e) {
+			instructionArea.setText("error");
+			e.printStackTrace();
+		}
 	}
 	
 	public void saveFileds(){
