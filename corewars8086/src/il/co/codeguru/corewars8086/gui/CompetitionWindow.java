@@ -162,9 +162,7 @@ public class CompetitionWindow extends JFrame
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == runWarButton) {
-        	if (showBattleCheckBox.isSelected() == true && battleFrame == null ) {
-                showBattleRoom();
-            }
+        	showBattleFrameIfNeeded();
             if (runWar()) {
             	competitionRunning = true;
 				runWarButton.setEnabled(false);
@@ -172,12 +170,18 @@ public class CompetitionWindow extends JFrame
         }
     }
 
+
     public void onWarStart() {
-        if (showBattleCheckBox.isSelected() == true && battleFrame == null ) {
-            showBattleRoom();
-        }
+    	showBattleFrameIfNeeded();
     }
 
+    private void showBattleFrameIfNeeded() {
+    	if (showBattleCheckBox.isSelected() == true && battleFrame == null ) {
+    		showBattleRoom();
+    		showBattleCheckBox.setSelected(false);
+    	}
+    }
+    
     private void showBattleRoom() {
         competition.setSpeed(5);
         battleFrame = new WarFrame(competition);
