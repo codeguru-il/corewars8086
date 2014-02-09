@@ -119,6 +119,7 @@ public class CompetitionWindow extends JFrame
      */
     public boolean runWar() {
         try {
+        	competition.setSeed(seed.getText().hashCode());
             final int battlesPerGroup = Integer.parseInt(
                 battlesPerGroupField.getText().trim());
             final int warriorsPerGroup = Integer.parseInt(
