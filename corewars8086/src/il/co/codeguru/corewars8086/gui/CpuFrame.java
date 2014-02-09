@@ -127,6 +127,8 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 		instructionArea = new JTextArea(); 
 		instructionArea.setFont(new Font("Monospaced",Font.PLAIN,15));
 		instructionArea.setSize(50, 100);
+		instructionArea.setLineWrap(true);
+		instructionArea.setWrapStyleWord(true);
 		
 		this.updateFileds();
 		
@@ -177,8 +179,6 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 		flagPF.setValue( currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getParityFlag() );
 		flagCF.setValue( currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getCarryFlag() );
 		
-		String fin = "";
-		
 		byte[] bytes = new byte[30];
 		
 		for (short i = 0; i < 30; i++) {
@@ -188,12 +188,10 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 			bytes[i] = (byte) vs;
 		}
 		
-		
-		
 		try {
 			instructionArea.setText(Disassembler.disassembler(bytes));
 		} catch (Exception e) {
-			instructionArea.setText("error");
+			instructionArea.setText(e.getMessage());
 			e.printStackTrace();
 		}
 	}

@@ -19,17 +19,20 @@ public class Disassembler {
 		bos.flush();
 		bos.close();
 		
-		ProcessBuilder pb = new ProcessBuilder(root + "\\nasm\\ndisasm.exe", "-b 16","-pintel" , tempfile + "");
+		File excutable = new File(root + "\\nasm\\ndisasm.exe");
+		
+		if(excutable.exists() == false)
+			throw new Exception("Executable not found: " + excutable);
+		
+		ProcessBuilder pb = new ProcessBuilder(excutable.getPath(), "-b 16","-pintel" , tempfile + "");
 		pb.redirectOutput();
 		Process p = pb.start();
 		
 		String error = getStringFromInput(p.getErrorStream());
-		System.out.println(error);
 		if(error == null)
-			throw new Exception("error");
+			throw new Exception(error);
 		
 		String result = getStringFromInput(p.getInputStream());
-		System.out.println(result);
 		
 		StringBuilder sb = new StringBuilder();
 		String[] lines = result.split("\n");
