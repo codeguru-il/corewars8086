@@ -63,6 +63,8 @@ public class WarFrame extends JFrame
 
     private final Competition competition;
 
+	private MemoryFrame memory_frame;
+
     public WarFrame(final Competition competition) {
         super("CodeGuru Extreme - Session Viewer");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -123,7 +125,7 @@ public class WarFrame extends JFrame
         infoZone.setBackground(Color.black);
         
 		// Debugger
-		addressFiled = new JLabel("");
+		addressFiled = new JLabel("Click on the arena to see the memory");
 		warCanvas.addListener(this);
 
 		btnCpuState = new JButton("View CPU");
@@ -412,6 +414,13 @@ public class WarFrame extends JFrame
 
 		this.addressFiled.setText(Integer.toHexString(address).toUpperCase()
 				+ ": " + String.format("%02X", data).toUpperCase());
+		
+		if(memory_frame == null || memory_frame.isVisible() == false){
+			memory_frame = new MemoryFrame(competition, tmp.getLinearAddress());
+			WarFrame.this.competition.addCompetitionEventListener(memory_frame);
+		}
+		else
+			memory_frame.refrash(tmp.getLinearAddress());
 	}
  
 }
