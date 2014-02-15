@@ -461,7 +461,8 @@ public class Cpu {
                     case 1: // OR
                         m_indirect.setMem8(
                             or8(m_indirect.getMem8(), m_fetcher.nextByte()));
-                        case 2: // ADC
+                        break;
+                    case 2: // ADC
                         m_indirect.setMem8(
                             adc8(m_indirect.getMem8(), m_fetcher.nextByte()));						
                         break;
@@ -498,6 +499,7 @@ public class Cpu {
                     case 1: // OR
                         m_indirect.setMem16(
                             or16(m_indirect.getMem16(), m_fetcher.nextWord()));
+                        break;
                     case 2: // ADC
                         m_indirect.setMem16(
                             adc16(m_indirect.getMem16(), m_fetcher.nextWord()));						
