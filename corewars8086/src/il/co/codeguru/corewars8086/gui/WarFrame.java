@@ -217,14 +217,13 @@ public class WarFrame extends JFrame
 
     /** @see MemoryEventListener#onMemoryWrite(RealModeAddress) */
     public void onMemoryWrite(RealModeAddress address) {
-        // we are only interested in addresses in the ARENA segment
-        // FIXME: calculate using linear addresses to suport CS+1
-        if (address.getSegment() != War.ARENA_SEGMENT) {
-            return;
+		int ipInsideArena = address.getLinearAddress() - 0x1000 *0x10; // arena * paragraph
+		
+        if ( address.getLinearAddress() >= War.ARENA_SEGMENT*0x10 && address.getLinearAddress() < 2*War.ARENA_SEGMENT*0x10 ) {
+        	warCanvas.paintPixel(
+        			Unsigned.unsignedShort(ipInsideArena),
+        			(byte)competition.getCurrentWarrior());
         }
-        warCanvas.paintPixel(
-            Unsigned.unsignedShort(address.getOffset()),
-            (byte)competition.getCurrentWarrior());
     }
 
     /** @see CompetitionEventListener#onWarStart(int) */
@@ -373,9 +372,12 @@ public class WarFrame extends JFrame
 		this.warCanvas.deletePointers();
 		for (int i = 0; i < this.competition.getCurrentWar().getNumWarriors(); i++)
 			if (this.competition.getCurrentWar().getWarrior(i).isAlive()) {
-				this.warCanvas.paintPointer((char) this.competition
-						.getCurrentWar().getWarrior(i).getCpuState().getIP(),
-						(byte) i);
+				short ip = this.competition.getCurrentWar().getWarrior(i).getCpuState().getIP();
+				short cs = this.competition.getCurrentWar().getWarrior(i).getCpuState().getCS();
+				
+				int ipInsideArena = new RealModeAddress(cs, ip).getLinearAddress() - 0x10000;
+				
+				this.warCanvas.paintPointer((char) ipInsideArena,(byte) i);
 			}
 	}
 
