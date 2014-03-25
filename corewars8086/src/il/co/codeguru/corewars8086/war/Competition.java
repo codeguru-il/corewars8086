@@ -41,29 +41,53 @@ public class Competition {
         abort = false;
     }
 
-    public void runCompetition (int warsPerCombination, int warriorsPerGroup) throws Exception {
+    public String runCompetition (int warsPerCombination, int warriorsPerGroup, boolean getScores, boolean tillEnd, String groupName) throws Exception {
         this.warsPerCombination = warsPerCombination;
         competitionIterator = new BinomialIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
 
         // run on every possible combination of warrior groups
         competitionEventListener.onCompetitionStart();
-        while (competitionIterator.hasNext()) {
-            runWar(warsPerCombination,
-                warriorRepository.createGroupList((int[])competitionIterator.next()));
-            if (abort) {
-                break;
+        for (int i = 0; i < warsPerCombination; i++)
+        {
+        	competitionIterator.reset();
+        	while (competitionIterator.hasNext())
+        	{
+        		WarriorGroup[] curGroups = warriorRepository.createGroupList((int[])competitionIterator.next());
+            	
+            	if (groupName != "")
+            	{
+            		boolean found = false;
+                	for (int j = 0; j < curGroups.length && !found; j++)
+                		if (curGroups[j].getName().equalsIgnoreCase(groupName))
+                			found = true;
+                	
+                	if (!found)
+                		continue;
+            	}
+            	
+                runWar(1, curGroups, tillEnd);
+                
+                if (abort)
+                {
+                    break;
+                }
             }
         }
         competitionEventListener.onCompetitionEnd();
-        warriorRepository.saveScoresToFile(SCORE_FILENAME);
+        
+        if (getScores)
+        	return warriorRepository.getScores();
+        else
+        	warriorRepository.saveScoresToFile(SCORE_FILENAME);
+        return null;
     }
 
     public int getTotalNumberOfWars() {
         return (int) competitionIterator.getNumberOfItems() * warsPerCombination;
     }
 
-    public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups) throws Exception {
+    public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups, boolean tillEnd) throws Exception {
         for(int war = 0; war < numberOfRounds; war++) {
             currentWar = new War(memoryEventListener, competitionEventListener);
             competitionEventListener.onWarStart();
@@ -89,7 +113,7 @@ public class Competition {
                 
             	currentWar.nextRound(round);
             	
-                if (currentWar.isOver()) {
+                if (currentWar.isOver() && !tillEnd) {
                     break;
                 }
                 

@@ -84,6 +84,7 @@ public class WarriorRepository {
             }
 
             String name = file.getName();
+            	
             WarriorData data = readWarriorFile(file);
             if (name.endsWith("1")) {
                 // start a new group!
@@ -168,7 +169,8 @@ public class WarriorRepository {
         return groups;
     }
 
-    public void saveScoresToFile(String filename) {
+    public void saveScoresToFile(String filename)
+    {
         try {
             FileOutputStream fos = new FileOutputStream(filename);
             PrintStream ps = new PrintStream(fos);
@@ -190,5 +192,18 @@ public class WarriorRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public String getScores()
+    {
+    	String str = "";
+    	for (WarriorGroup group: warriorGroups) {
+            List<Float> scores  = group.getScores();
+            List<WarriorData> data = group.getWarriors();
+            for (int i = 0; i < scores.size(); i++) {
+                str += data.get(i).getName() + "," + scores.get(i)+"\n";
+            }
+        }
+    	return str;
     }
 }
