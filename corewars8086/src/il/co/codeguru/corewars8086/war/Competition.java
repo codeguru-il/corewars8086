@@ -47,11 +47,12 @@ public class Competition {
 
     public void runAndSaveCompetition(int warsPerCombination, int warriorsPerGroup, String groupName) throws Exception
     {
+    	String results = runCompetition(warsPerCombination, warriorsPerGroup, groupName);
     	try
     	{
             FileOutputStream fos = new FileOutputStream(SCORE_FILENAME);
             PrintStream ps = new PrintStream(fos);
-            ps.print(runCompetition(warsPerCombination, warriorsPerGroup, groupName));
+            ps.print(results);
             fos.close();
         }
     	catch (FileNotFoundException e)
