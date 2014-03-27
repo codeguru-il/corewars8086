@@ -35,7 +35,7 @@ public class CompetitionWindow extends JFrame
         super("CodeGuru Extreme - Competition Viewer");
         getContentPane().setLayout(new BorderLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        competition = new Competition();
+        competition = new Competition(false);
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition
                         .getWarriorRepository();
@@ -114,7 +114,7 @@ public class CompetitionWindow extends JFrame
                 @Override
                 public void run() {
                     try {
-                        competition.runCompetition(battlesPerGroup, warriorsPerGroup, false, false, "");
+                        competition.runAndSaveCompetition(battlesPerGroup, warriorsPerGroup, "");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

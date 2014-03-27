@@ -169,7 +169,7 @@ public class WarriorRepository {
         return groups;
     }
 
-    public void saveScoresToFile(String filename)
+    /*public void saveScoresToFile(String filename)
     {
         try {
             FileOutputStream fos = new FileOutputStream(filename);
@@ -192,7 +192,7 @@ public class WarriorRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
     
     public String getScores()
     {
@@ -200,9 +200,11 @@ public class WarriorRepository {
     	for (WarriorGroup group: warriorGroups) {
             List<Float> scores  = group.getScores();
             List<WarriorData> data = group.getWarriors();
+            str += group.getName() + "," + group.getGroupScore();
             for (int i = 0; i < scores.size(); i++) {
-                str += data.get(i).getName() + "," + scores.get(i)+"\n";
+                str += "," + data.get(i).getName() + "," + scores.get(i);
             }
+            str += "\n";
         }
     	return str;
     }

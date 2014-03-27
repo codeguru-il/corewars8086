@@ -3,7 +3,10 @@ package il.co.codeguru.corewars8086.war;
 import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.utils.EventMulticaster;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 
 public class Competition {
@@ -28,9 +31,9 @@ public class Competition {
     public static final int MAXIMUM_SPEED = -1;
     private static final long DELAY_UNIT = 10;
 
-    private boolean abort;
+    private boolean abort, tillEnd;
 
-    public Competition() throws IOException {
+    public Competition(boolean tillEnd) throws IOException {
         warriorRepository = new WarriorRepository();
 
         competitionEventCaster = new EventMulticaster(CompetitionEventListener.class);
@@ -39,10 +42,30 @@ public class Competition {
         memoryEventListener = (MemoryEventListener) memoryEventCaster.getProxy();
         speed = MAXIMUM_SPEED;
         abort = false;
+        this.tillEnd = tillEnd;
     }
 
-    public String runCompetition (int warsPerCombination, int warriorsPerGroup, boolean getScores, boolean tillEnd, String groupName) throws Exception {
-        this.warsPerCombination = warsPerCombination;
+    public void runAndSaveCompetition(int warsPerCombination, int warriorsPerGroup, String groupName) throws Exception
+    {
+    	try
+    	{
+            FileOutputStream fos = new FileOutputStream(SCORE_FILENAME);
+            PrintStream ps = new PrintStream(fos);
+            ps.print(runCompetition(warsPerCombination, warriorsPerGroup, groupName));
+            fos.close();
+        }
+    	catch (FileNotFoundException e)
+    	{
+            e.printStackTrace();
+        }
+    	catch (IOException e)
+    	{
+            e.printStackTrace();
+        }
+    }
+    
+    public String runCompetition (int warsPerCombination, int warriorsPerGroup, String groupName) throws Exception {
+    	this.warsPerCombination = warsPerCombination;
         competitionIterator = new BinomialIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
 
@@ -66,7 +89,7 @@ public class Competition {
                 		continue;
             	}
             	
-                runWar(1, curGroups, tillEnd);
+                runWar(1, curGroups);
                 
                 if (abort)
                 {
@@ -76,18 +99,14 @@ public class Competition {
         }
         competitionEventListener.onCompetitionEnd();
         
-        if (getScores)
-        	return warriorRepository.getScores();
-        else
-        	warriorRepository.saveScoresToFile(SCORE_FILENAME);
-        return null;
+        return warriorRepository.getScores();
     }
 
     public int getTotalNumberOfWars() {
         return (int) competitionIterator.getNumberOfItems() * warsPerCombination;
     }
 
-    public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups, boolean tillEnd) throws Exception {
+    public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups) throws Exception {
         for(int war = 0; war < numberOfRounds; war++) {
             currentWar = new War(memoryEventListener, competitionEventListener);
             competitionEventListener.onWarStart();
