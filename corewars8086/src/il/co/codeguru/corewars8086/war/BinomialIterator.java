@@ -9,28 +9,39 @@ import java.util.Iterator;
  * @author bs
  */
 public class BinomialIterator implements Iterator<int[]> {
-    private int[] group;
-    private int size, numItems;
+    //private int[] group;
+    //private int size, numItems;
+	private int[] counters;
+	private int itemsNum;
 
     public BinomialIterator(int numItems, int groupSize) {
         assert numItems >= groupSize;
-        group = new int[groupSize];
+        itemsNum = numItems;
+        counters = new int[groupSize];
+        
+        /*group = new int[groupSize];
         size = groupSize;
         this.numItems = numItems;
         for (int i = 1; i < groupSize; i++) {
             group[i] = i;
-        }
+        }*/
     }	
-
-    public boolean hasNext() {
-        return group != null;
-    }
 
     /**
      * Returns the next group in the sequence
      */
-    public int[] next() {
-        int i;
+    public int[] next()
+    {
+    	int[] results = new int[counters.length];
+    	results[0] = counters[0];
+    	for (int i = 1; i < counters.length; i++)
+    		results[i] = results[i - 1] + counters[i] + 1;
+    	
+    	if (!increaseCounter(0))
+    		counters[0] = -1;
+    	
+    	return results;
+        /*int i;
         int[] copy = new int[size];
         System.arraycopy(group, 0, copy, 0, size);
         for (i = size -1; i >= 0; i--) {
@@ -45,15 +56,69 @@ public class BinomialIterator implements Iterator<int[]> {
         if (i == -1) {
             group = null;
         }
-        return copy;
+        return copy;*/
+    }
+    
+    /**
+     * increases the counter given
+     * @param i the number of the counter in the order
+     * @return did it work
+     */
+	private boolean increaseCounter(int i)
+    {
+		counters[getCounterNum(i)]++;
+		int sum = 0;
+		for (int j = 0; j < counters.length; j++)
+			sum += counters[j] + 1;
+
+		if (sum > itemsNum)
+		{
+			if (i < counters.length - 1)
+			{
+				counters[getCounterNum(i)] = 0;
+				return increaseCounter(i+1);
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return true;
+		}
     }
 
+	public boolean hasNext() {
+        return counters[0] != -1;
+    }
+    
     public void remove() {
+    }
+    
+    public void reset()
+    {
+    	for (int i = 0; i < counters.length; i++)
+        	counters[i] = 0;
+    }
+    
+    /**
+     * in order to make the wars more distributed, we are using a different counter system for each item
+     * in the group than usual
+     * @param i the counter index
+     * @return the number in the actual order of the counters
+     */
+	private int getCounterNum(int i)
+    {
+    	if (i % 2 == 0)
+    		return i / 2;
+    	else
+    		return counters.length - 1 - i / 2;
     }
 
     public long getNumberOfItems() {
-        return factorial(numItems) / (factorial(size)*factorial(numItems-size));
-    }
+        return factorial(itemsNum) / (factorial(counters.length)*factorial(itemsNum-counters.length));
+    } 
 
     /**
      * calculate n factorial. Only good for 0 <= n <= 20
