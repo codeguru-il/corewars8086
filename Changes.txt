@@ -5,3 +5,4 @@ Changes to the engine, done by Yoav Kaempfer and Idan Dor.
 3. The color of the round-number text box is now darker.
 4. The session window is now opened near the main window, not on top of him. supports more than one monitor
 5. The order of the warrior groups inside each war is random, including the zombies.
+6. BUGFIX: SHR, ROR, RCR now works as intended.
