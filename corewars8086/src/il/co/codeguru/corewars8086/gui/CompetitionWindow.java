@@ -130,12 +130,6 @@ public class CompetitionWindow extends JFrame
         return false;
     }
 
-    public static void main(String[] args) throws IOException {
-        CompetitionWindow c = new CompetitionWindow();
-        c.setVisible(true);
-        c.pack();
-    }
-
     public void scoreChanged(String name, float addedValue, int groupIndex, int subIndex) {
         columnGraph.addToValue(groupIndex, subIndex, addedValue);
     }
