@@ -26,7 +26,7 @@ public class Cpu {
         m_regs = new RegisterIndexingDecoder(m_state);
         m_indirect = new IndirectAddressingDecoder(m_state, m_memory, m_fetcher);
     }
-	
+
     /**
      * Performs the next single opcode.
      * 
@@ -86,7 +86,7 @@ public class Cpu {
                 break;
         }
     }
-	
+
     private void opcode0X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {
             case (byte)0x00: // ADD [X], reg8
@@ -212,7 +212,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcode2X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {			
             case (byte)0x20: // AND [X], reg8
@@ -269,7 +269,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcode3X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {			
             case (byte)0x30: // XOR [X], reg8
@@ -326,7 +326,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcode4X(byte opcode) {
         byte index = (byte)(opcode & 0x07);
         switch (opcode) {
@@ -354,7 +354,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcode5X(byte opcode) throws MemoryException {
         byte index = (byte)(opcode & 0x07);
         switch (opcode) {
@@ -382,7 +382,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcode6X(byte opcode) throws CpuException {
         // 0x60.. 0x6F - invalid opcodes
         throw new InvalidOpcodeException();		
@@ -628,7 +628,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcode9X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {
             case (byte)0x90: // XCHG reg16, AX
@@ -695,7 +695,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcodeAX(byte opcode) throws MemoryException {
         RealModeAddress address = null;
         switch (opcode) {
@@ -755,7 +755,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcodeBX(byte opcode) throws MemoryException {
         byte index = (byte)(opcode & 0x07);
         switch (opcode) {
@@ -783,7 +783,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }	
-	
+
     private void opcodeCX(byte opcode) throws CpuException, MemoryException {
         short sizeToPop;
         RealModeAddress address1 = null;
@@ -878,7 +878,7 @@ public class Cpu {
                 throw new RuntimeException();
         }		
     }
-	
+
     private void opcodeDX(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {
             case (byte)0xD0: // <?> byte ptr [X], 1
@@ -1025,7 +1025,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcodeEX(byte opcode) throws CpuException, MemoryException {
         byte offset8;
         short offset16;
@@ -1095,7 +1095,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void opcodeFX(byte opcode) throws CpuException, MemoryException {
         byte nextOpcode;
         boolean doneLooping;
@@ -1423,14 +1423,14 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-	
+
     private void push(short value) throws MemoryException {
         m_state.setSP((short)(m_state.getSP() - 2));
         RealModeAddress stackPtr = new RealModeAddress(
             m_state.getSS(), m_state.getSP());
         m_memory.writeWord(stackPtr, value);
     }
-	
+
     private short pop() throws MemoryException {
         RealModeAddress stackPtr = new RealModeAddress(
             m_state.getSS(), m_state.getSP());
@@ -1438,7 +1438,7 @@ public class Cpu {
         m_state.setSP((short)(m_state.getSP() + 2));
         return value;
     }	
-	
+
     /**
      * Updates the CPU flags register after an 8bit operation.
      * @param value  Result of an 8bit operation.
@@ -1458,7 +1458,7 @@ public class Cpu {
         // TODO: update overflow flag
         updateFlagsNoCarryOverflow16((short)value);
     }
-	
+
     /**
      * Updates the CPU flags register after an 8bit operation, except for the
      * Carry and Overflow flags.
@@ -1483,7 +1483,7 @@ public class Cpu {
         m_state.setSignFlag((value & 0x8000) != 0);
         m_state.setZeroFlag(value == 0);
     }	
-	
+
     /**
      * Adds two 8bit values, updates the flags and returns the result.
      */
@@ -1505,7 +1505,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-	
+
     /**
      * Increments an 8bit value, updates the flags and returns the result.
      * Note: does not modify the carry flag.
@@ -1527,7 +1527,7 @@ public class Cpu {
         m_state.setCarryFlag(oldCarry);
         return result;		
     }
-	
+
     /**
      * Decrements an 8bit value, updates the flags and returns the result.
      * Note: does not modify the carry flag.
@@ -1549,7 +1549,7 @@ public class Cpu {
         m_state.setCarryFlag(oldCarry);
         return result;		
     }
-	
+
     /**
      * ORs two 8bit values, updates the flags and returns the result.
      */
@@ -1571,7 +1571,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-	
+
     /**
      * Adds two 8bit values with the carry flag, updates the flags and returns
      * the result.
@@ -1631,7 +1631,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-	
+
     /**
      * ANDs two 8bit values, updates the flags and returns the result.
      */
@@ -1653,7 +1653,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }	
-	
+
     /**
      * Subtracts two 8bit values, updates the flags and returns the result.
      */
@@ -1675,7 +1675,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-	
+
     /**
      * XORs two 8bit values, updates the flags and returns the result.
      */
@@ -1697,7 +1697,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-	
+
     /**
      * Implements a near call opcode.
      * @param offset    New value for IP (CS stays the same).
@@ -1707,7 +1707,7 @@ public class Cpu {
         push(m_state.getIP());
         m_state.setIP(offset);
     }
-	
+
     /**
      * Implements a far call opcode.
      * @param segment   New value for CS.
@@ -1719,7 +1719,7 @@ public class Cpu {
         m_state.setCS(segment);
         callNear(offset);
     }
-	
+
     /**
      * Implements the 'movsb' opcode.
      * @throws MemoryException
@@ -1751,7 +1751,7 @@ public class Cpu {
         m_state.setSI((short)(m_state.getSI() + diff));
         m_state.setDI((short)(m_state.getDI() + diff));		
     }
-	
+
     /**
      * Implements the 'cmpsb' opcode.
      * @throws MemoryException
@@ -1795,7 +1795,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-1 : (byte)1); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-	
+
     /**
      * Implements the 'stosw' opcode.
      * @throws MemoryException
@@ -1807,7 +1807,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-2 : (byte)2); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-	
+
     /**
      * Implements the virtual 'stosdw' opcode.
      * @throws MemoryException
@@ -1824,7 +1824,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-4 : (byte)4); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-	
+
     /**
      * Implements the 'lodsb' opcode.
      * @throws MemoryException
@@ -1836,7 +1836,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-1 : (byte)1); 
         m_state.setSI((short)(m_state.getSI() + diff));		
     }
-	
+
     /**
      * Implements the 'lodsw' opcode.
      * @throws MemoryException
@@ -1848,7 +1848,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-2 : (byte)2); 
         m_state.setSI((short)(m_state.getSI() + diff));
     }
-	
+
     /**
      * Implements the 'scasb' opcode.
      * @throws MemoryException
@@ -1872,7 +1872,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-2 : (byte)2); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-	
+
     private void rol8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1888,7 +1888,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-	
+
     private void ror8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1896,7 +1896,7 @@ public class Cpu {
             byte val = m_indirect.getMem8();
             byte lsb = (byte)(val & 0x01);
 
-            val = (byte)((val >>> 1) | (lsb << 7));
+            val = (byte)(((val & 0xFF) >>> 1) | (lsb << 7));
             m_indirect.setMem8(val);
 
             byte msb1 = (byte)((val >> 7) & 0x01);
@@ -1906,7 +1906,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-	
+
     private void rcl8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1923,7 +1923,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-	
+
     private void rcr8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1932,7 +1932,7 @@ public class Cpu {
             byte lsb = (byte)(val & 0x01);
             byte cf = (byte)(m_state.getCarryFlag() ? 1 : 0);
 
-            val = (byte)((val >>> 1) | (cf << 7));
+            val = (byte)(((val & 0xFF) >>> 1) | (cf << 7));
             m_indirect.setMem8(val);
 
             byte msb1 = (byte)((val >> 7) & 0x01);
@@ -1942,7 +1942,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-	
+
     private void shl8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1959,7 +1959,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow8(val);
         }
     }
-	
+
     private void shr8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1967,7 +1967,7 @@ public class Cpu {
             byte val = m_indirect.getMem8();
             byte lsb = (byte)(val & 0x01);
 
-            val = (byte)(val >>> 1);
+            val = (byte)((val & 0xFF) >>> 1);
             m_indirect.setMem8(val);
 
             byte msb1 = (byte)((val >> 7) & 0x01);
@@ -1978,7 +1978,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow8(val);
         }
     }
-	
+
     private void sar8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1997,7 +1997,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow8(val);
         }
     }
-	
+
     private void rol16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2014,7 +2014,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow16(val);
         }
     }
-	
+
     private void ror16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2022,7 +2022,7 @@ public class Cpu {
             short val = m_indirect.getMem16();
             byte lsb = (byte)(val & 0x01);
 
-            val = (short)((val >>> 1) | (lsb << 15));
+            val = (short)(((val & 0xFFFF) >>> 1) | (lsb << 15));
             m_indirect.setMem16(val);
 
             byte msb1 = (byte)((val >> 15) & 0x01);
@@ -2033,7 +2033,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow16(val);
         }
     }
-	
+
     private void rcl16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2051,7 +2051,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow16(val);
         }
     }
-	
+
     private void rcr16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2060,7 +2060,7 @@ public class Cpu {
             byte lsb = (byte)(val & 0x01);
             byte cf = (byte)(m_state.getCarryFlag() ? 1 : 0);
 
-            val = (short)((val >>> 1) | (cf << 15));
+            val = (short)(((val & 0xFFFF) >>> 1) | (cf << 15));
             m_indirect.setMem16(val);
 
             byte msb1 = (byte)((val >> 15) & 0x01);
@@ -2070,7 +2070,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-	
+
     private void shl16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2095,7 +2095,7 @@ public class Cpu {
             short val = m_indirect.getMem16();
             byte lsb = (byte)(val & 0x01);
 
-            val = (short)(val >>> 1);
+            val = (short) ((val & 0xFFFF) >>> 1);
             m_indirect.setMem16(val);
 
             byte msb1 = (byte)((val >> 15) & 0x01);
@@ -2106,7 +2106,7 @@ public class Cpu {
             m_state.setZeroFlag(val == 0);
         }
     }
-	
+
     private void sar16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2125,8 +2125,8 @@ public class Cpu {
             m_state.setZeroFlag(val == 0);
         }
     }
-	
-	
+
+
     /**
      * Implements the virtual INT 0x86 opcode.
      * If enough bombs are left, calls the stosdw virtual
@@ -2144,7 +2144,7 @@ public class Cpu {
             }
         }
     }
-	
+
     /**
      * Implements the virtual INT 0x87 opcode.
      * If enough bombs are left, searches for a given 4 bytes and replaces
@@ -2177,7 +2177,7 @@ public class Cpu {
             }
         }
     }
-	
+
     /**
      * Returns true iff the given byte's bit parity is EVEN.
      * @param value  Value for which bit parity will be tested.
@@ -2186,7 +2186,7 @@ public class Cpu {
     private boolean getParity(byte value) {
         return PARITY_TABLE[Unsigned.unsignedByte(value)];
     }
-	
+
     /**
      * Parity table implementation.
      * An array memeber of 'true' means the bit parity for the given index is EVEN.
@@ -2225,7 +2225,7 @@ public class Cpu {
         true, false, false, true, false, true, true, false,
         false, true, true, false, true, false, false, true
     };
-	
+
     /** Current state of registers & flags */
     private final CpuState m_state;
 
