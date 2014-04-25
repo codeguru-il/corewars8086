@@ -1896,7 +1896,7 @@ public class Cpu {
             byte val = m_indirect.getMem8();
             byte lsb = (byte)(val & 0x01);
 
-            val = (byte)(((val & 0xFF) >>> 1) | (lsb << 7));
+            val = (byte)((val >>> 1) | (lsb << 7));
             m_indirect.setMem8(val);
 
             byte msb1 = (byte)((val >> 7) & 0x01);
@@ -1932,7 +1932,7 @@ public class Cpu {
             byte lsb = (byte)(val & 0x01);
             byte cf = (byte)(m_state.getCarryFlag() ? 1 : 0);
 
-            val = (byte)(((val & 0xFF) >>> 1) | (cf << 7));
+            val = (byte)((val >>> 1) | (cf << 7));
             m_indirect.setMem8(val);
 
             byte msb1 = (byte)((val >> 7) & 0x01);
@@ -1967,7 +1967,7 @@ public class Cpu {
             byte val = m_indirect.getMem8();
             byte lsb = (byte)(val & 0x01);
 
-            val = (byte)((val & 0xFF) >>> 1);
+            val = (byte)(val >>> 1);
             m_indirect.setMem8(val);
 
             byte msb1 = (byte)((val >> 7) & 0x01);
@@ -2022,7 +2022,7 @@ public class Cpu {
             short val = m_indirect.getMem16();
             byte lsb = (byte)(val & 0x01);
 
-            val = (short)(((val & 0xFFFF) >>> 1) | (lsb << 15));
+            val = (short)((val >>> 1) | (lsb << 15));
             m_indirect.setMem16(val);
 
             byte msb1 = (byte)((val >> 15) & 0x01);
@@ -2060,7 +2060,7 @@ public class Cpu {
             byte lsb = (byte)(val & 0x01);
             byte cf = (byte)(m_state.getCarryFlag() ? 1 : 0);
 
-            val = (short)(((val & 0xFFFF) >>> 1) | (cf << 15));
+            val = (short)((val >>> 1) | (cf << 15));
             m_indirect.setMem16(val);
 
             byte msb1 = (byte)((val >> 15) & 0x01);
@@ -2095,7 +2095,7 @@ public class Cpu {
             short val = m_indirect.getMem16();
             byte lsb = (byte)(val & 0x01);
 
-            val = (short) ((val & 0xFFFF) >>> 1);
+            val = (short)(val >>> 1);
             m_indirect.setMem16(val);
 
             byte msb1 = (byte)((val >> 15) & 0x01);

@@ -35,7 +35,7 @@ public class CompetitionWindow extends JFrame
         super("CodeGuru Extreme - Competition Viewer");
         getContentPane().setLayout(new BorderLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        competition = new Competition(false);
+        competition = new Competition();
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition
                         .getWarriorRepository();
@@ -114,7 +114,7 @@ public class CompetitionWindow extends JFrame
                 @Override
                 public void run() {
                     try {
-                        competition.runAndSaveCompetition(battlesPerGroup, warriorsPerGroup, "");
+                        competition.runCompetition(battlesPerGroup, warriorsPerGroup);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -128,6 +128,12 @@ public class CompetitionWindow extends JFrame
             JOptionPane.showMessageDialog(this, "Error in configuration");
         }
         return false;
+    }
+
+    public static void main(String[] args) throws IOException {
+        CompetitionWindow c = new CompetitionWindow();
+        c.setVisible(true);
+        c.pack();
     }
 
     public void scoreChanged(String name, float addedValue, int groupIndex, int subIndex) {
@@ -191,29 +197,7 @@ public class CompetitionWindow extends JFrame
         
         competition.addMemoryEventLister(battleFrame);
         competition.addCompetitionEventListener(battleFrame);
-        
-        Rectangle battleFrameRect = new Rectangle(0, getY(), 750, 700);
-        Rectangle screen = getGraphicsConfiguration().getBounds(); //for multiple monitors
-        
-        if (getX() + getWidth() <= screen.getX() + screen.getWidth()
-        		- battleFrameRect.width)
-        {
-        	battleFrameRect.x = getX() + getWidth();
-        }
-        else if (screen.getX() + screen.getWidth() - battleFrameRect.width
-        		- getWidth() >= screen.getX())
-        {
-        	setLocation((int) (screen.getX() + screen.getWidth() - battleFrameRect.width
-            		- getWidth()), getY());
-        	battleFrameRect.x = getX() + getWidth();
-        }
-        else
-        {
-        	setLocation((int)screen.getX(), getY());
-        	battleFrameRect.x = getWidth();
-        }
-        
-        battleFrame.setBounds(battleFrameRect);
+        battleFrame.setSize(750, 700);
         battleFrame.setVisible(true);
     }
 

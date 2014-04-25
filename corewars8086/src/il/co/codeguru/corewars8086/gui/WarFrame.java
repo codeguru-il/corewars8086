@@ -90,7 +90,7 @@ public class WarFrame extends JFrame
 
         buttonPanel.add(new JLabel("Round:"));
         roundNumber = new JTextField(4);
-        roundNumber.setEditable(false);
+        roundNumber.setEnabled(false);
         buttonPanel.add(roundNumber);
         buttonPanel.add(Box.createHorizontalStrut(20));
         JButton closeButton = new JButton("Close");
@@ -212,7 +212,7 @@ public class WarFrame extends JFrame
     /** @see CompetitionEventListener#onWarriorDeath(String) */
     public void onWarriorDeath(String warriorName, String reason) {
         addMessage(nRoundNumber, warriorName + " died due to " + reason + ".");
-		Enumeration namesListElements = nameListModel.elements();
+        Enumeration namesListElements = nameListModel.elements();
         while(namesListElements.hasMoreElements()) {
             WarriorInfo info = (WarriorInfo) namesListElements.nextElement();
             if (info.name.equals(warriorName)) {

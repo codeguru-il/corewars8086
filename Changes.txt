@@ -1,8 +1,0 @@
-Changes to the engine, done by Yoav Kaempfer and Idan Dor.
-
-1. The engine is now runnable using double click.
-2. The order of the group combinations is now more distributed, in order to remove the temporary boost in the beginning.
-3. The color of the round-number text box is now darker.
-4. The session window is now opened near the main window, not on top of him. supports more than one monitor
-5. The order of the warrior groups inside each war is random, including the zombies.
-6. BUGFIX: SHR, ROR, RCR now works as intended.

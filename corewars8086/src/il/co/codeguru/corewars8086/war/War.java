@@ -7,7 +7,6 @@ import il.co.codeguru.corewars8086.memory.RealModeAddress;
 import il.co.codeguru.corewars8086.memory.RealModeMemoryImpl;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -86,15 +85,8 @@ public class War {
      */
     public void loadWarriorGroups(WarriorGroup[] warriorGroups) throws Exception {
         m_currentWarrior = 0;
-        ArrayList<WarriorGroup> groupsLeftToLoad = new ArrayList<WarriorGroup>();
-        for (int i = 0; i < warriorGroups.length; ++i)
-        	groupsLeftToLoad.add(warriorGroups[i]);
-        
-        while (groupsLeftToLoad.size() > 0)
-        {
-        	int randomInt = rand.nextInt(groupsLeftToLoad.size());
-        	loadWarriorGroup(groupsLeftToLoad.get(randomInt));
-        	groupsLeftToLoad.remove(randomInt);
+        for (int i = 0; i < warriorGroups.length; ++i) {
+            loadWarriorGroup(warriorGroups[i]);
         }
     }
 	
