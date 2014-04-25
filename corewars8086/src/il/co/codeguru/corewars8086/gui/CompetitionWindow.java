@@ -191,7 +191,28 @@ public class CompetitionWindow extends JFrame
         
         competition.addMemoryEventLister(battleFrame);
         competition.addCompetitionEventListener(battleFrame);
-        battleFrame.setSize(750, 700);
+        Rectangle battleFrameRect = new Rectangle(0, getY(), 750, 700);
+        Rectangle screen = getGraphicsConfiguration().getBounds(); //for multiple monitors
+           
+        if (getX() + getWidth() <= screen.getX() + screen.getWidth()
+        		- battleFrameRect.width)
+        {
+        	battleFrameRect.x = getX() + getWidth();
+        }
+        else if (screen.getX() + screen.getWidth() - battleFrameRect.width
+        	- getWidth() >= screen.getX())
+        {
+        	setLocation((int) (screen.getX() + screen.getWidth() - battleFrameRect.width
+        			- getWidth()), getY());
+        	battleFrameRect.x = getX() + getWidth();
+        }
+        else
+        {
+        	setLocation((int)screen.getX(), getY());
+        	battleFrameRect.x = getWidth();
+        }
+               
+        battleFrame.setBounds(battleFrameRect);
         battleFrame.setVisible(true);
     }
 
