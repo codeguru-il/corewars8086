@@ -90,7 +90,7 @@ public class WarFrame extends JFrame
 
         buttonPanel.add(new JLabel("Round:"));
         roundNumber = new JTextField(4);
-        roundNumber.setEnabled(false);
+        roundNumber.setEditable(false);
         buttonPanel.add(roundNumber);
         buttonPanel.add(Box.createHorizontalStrut(20));
         JButton closeButton = new JButton("Close");
