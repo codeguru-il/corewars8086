@@ -182,6 +182,10 @@ public class Warrior {
         m_state.setBomb1Count((byte)2);
         m_state.setBomb2Count((byte)1);
     }
+    
+    public CpuState getCpuState(){
+    	return m_state;
+    }
 
     /** Warrior's name */
     private final String m_name;	
