@@ -60,7 +60,8 @@ public class War {
      * Constructor.
      * Fills the Arena with its initial data. 
      */
-    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener) {
+    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener, boolean startPaused) {
+    	isPaused = startPaused;
         m_warListener = warListener;
         m_warriors = new Warrior[MAX_WARRIORS];
         m_numWarriors = 0;
@@ -75,6 +76,8 @@ public class War {
             m_core.writeByte(tmp, ARENA_BYTE);			
         }
 
+        isSingleRound = false;
+        
         // set the memory listener (we only do this now, to skip initialization)
         m_core.setListener(memoryListener);
     }
@@ -206,7 +209,6 @@ public class War {
             allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
 
         for (int i = 0; i < warriors.size(); ++i) {
-            ++m_currentWarrior;
 
             WarriorData warrior = warriors.get(i);
 
@@ -236,6 +238,7 @@ public class War {
                 m_core.writeByte(tmp, warriorData[offset]);			
             }
             ++m_numWarriorsAlive;
+			++m_currentWarrior;
 
             // notify listener
             m_warListener.onWarriorBirth(warriorName);		
@@ -369,4 +372,39 @@ public class War {
     }
     
     private Random rand = new Random();
+    
+    private boolean isSingleRound;
+    private boolean isPaused;
+    
+    public void setSeed(long seed){
+    	rand.setSeed(seed);
+    }
+    
+    public void pause(){
+    	isPaused = true;
+    }
+    
+    public boolean isPaused(){
+    	return isPaused;
+    }
+    
+    public void resume(){
+    	isPaused = false;
+    	isSingleRound = false;
+    }
+    
+    public void runSingleRound(){
+    	this.resume();
+    	isSingleRound = true;
+    }
+    
+    public boolean isSingleRound(){
+    	return this.isSingleRound;
+    }
+    
+    public RealModeMemoryImpl getMemory(){
+    	return m_core;
+    }
+    
+    
 }
