@@ -19,12 +19,7 @@ public class Disassembler {
 		bos.flush();
 		bos.close();
 		
-		File excutable = new File(root + "\\nasm\\ndisasm.exe");
-		
-		if(excutable.exists() == false)
-			throw new Exception("Executable not found: " + excutable);
-		
-		ProcessBuilder pb = new ProcessBuilder(excutable.getPath(), "-b 16","-pintel" , tempfile + "");
+		ProcessBuilder pb = new ProcessBuilder("ndisasm", "-b 16","-pintel" , tempfile + "");
 		pb.redirectOutput();
 		Process p = pb.start();
 		
