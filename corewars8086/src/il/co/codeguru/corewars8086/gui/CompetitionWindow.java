@@ -37,7 +37,7 @@ public class CompetitionWindow extends JFrame
     public CompetitionWindow() throws IOException {
         super("CodeGuru Extreme - Competition Viewer");
         getContentPane().setLayout(new BorderLayout());
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         competition = new Competition();
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition
@@ -170,7 +170,7 @@ public class CompetitionWindow extends JFrame
     }
 
     private void showBattleFrameIfNeeded() {
-    	if (showBattleCheckBox.isSelected() == true && battleFrame == null ) {
+    	if (showBattleCheckBox.isSelected() && battleFrame == null ) {
     		showBattleRoom();
     		showBattleCheckBox.setSelected(false);
     	}
