@@ -110,6 +110,9 @@ public class WarriorRepository {
     }
 
     private void fixFiles(File warriorsDirectory) {
+		if (!warriorsDirectory.exists()) {
+			throw new RuntimeException("Missing directory " + warriorsDirectory.getAbsolutePath());
+		}
     	File[] files = warriorsDirectory.listFiles();
     	for (File file : files) {
 			if(file.getName().endsWith(".bin")){
