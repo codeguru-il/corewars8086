@@ -1,5 +1,7 @@
 package il.co.codeguru.corewars8086.war;
 
+import org.apache.commons.math3.util.CombinatoricsUtils;
+
 import java.util.Iterator;
 
 /**
@@ -117,42 +119,6 @@ public class BinomialIterator implements Iterator<int[]> {
     }
 
     public long getNumberOfItems() {
-        return factorial(itemsNum) / (factorial(counters.length)*factorial(itemsNum-counters.length));
-    } 
-
-    /**
-     * calculate n factorial. Only good for 0 <= n <= 20
-     * 
-     * @author Roedy Green email
-     */
-    static long factorial (int n) {
-        if ( ! ( 0 <= n && n <= 20 ) ) {
-            throw new IllegalArgumentException( "factorial can only handle 0 <= n <= 20" );
-        }
-        return factorials[n];
+		return CombinatoricsUtils.binomialCoefficient(itemsNum, counters.length);
     }
-
-    private static long [] factorials = {
-        1L /* 0 */,
-        1L /* 1 */,
-        2L /* 2 */,
-        6L /* 3 */,
-        24L /* 4 */,
-        120L /* 5 */,
-        720L /* 6 */ ,
-        5040L /* 7 */ ,
-        40320L /* 8 */ ,
-        362880L /* 9 */ ,
-        3628800L /* 10 */ ,
-        39916800L /* 11 */ ,
-        479001600L /* 12 */ ,
-        6227020800L /* 13 */ ,
-        87178291200L /* 14 */ ,
-        1307674368000L /* 15 */ ,
-        20922789888000L /* 16 */ ,
-        355687428096000L /* 17 */ ,
-        6402373705728000L /* 18 */ ,
-        121645100408832000L /* 19 */ ,
-        2432902008176640000L /* 20 */
-    };
 }
