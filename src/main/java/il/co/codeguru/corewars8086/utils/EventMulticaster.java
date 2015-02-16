@@ -3,10 +3,7 @@ package il.co.codeguru.corewars8086.utils;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.EventListener;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * An event multicaster which broadcasts Events to a number of listeners.
@@ -16,8 +13,9 @@ public class EventMulticaster {
     
     private Class mListenerInterface;
     private EventListener mProxy;
-    private Set<EventListener> mListeners = new HashSet<EventListener>();
-    private Set<EventListener> mWaitingListeners = new HashSet<EventListener>();
+    private Set<EventListener> mListeners = new LinkedHashSet<>();
+	private EventListener[] mListenersArr = new EventListener[0];
+    private Set<EventListener> mWaitingListeners = new LinkedHashSet<EventListener>();
     private boolean isCasting;
 
     /** Construct a new EventMulticaster for the given listener class.
@@ -37,12 +35,14 @@ public class EventMulticaster {
     	} else {
     		mListeners.add(pListener);
     	}
+		mListenersArr = mListeners.toArray(new EventListener[mListeners.size()]);
     }
     
     /** Remove an event listener from the list.
      */
     public void remove(EventListener pListener) {
         mListeners.remove(pListener);
+		mListenersArr = mListeners.toArray(new EventListener[mListeners.size()]);
     }
 
     /** Get the proxy for this event multicaster. This proxy can then be
@@ -65,12 +65,11 @@ public class EventMulticaster {
             throws Throwable {
             
             isCasting = true;
-            Iterator lListeners = mListeners.iterator();
-            while ( lListeners.hasNext() ) {
-                pMethod.invoke(lListeners.next(),pArgs);
-            }
+			for (EventListener mListener : mListenersArr) {
+				pMethod.invoke(mListener, pArgs);
+			}
             isCasting = false;
-            if (mWaitingListeners.size() != 0) {
+            if (!mWaitingListeners.isEmpty()) {
             	// listeners are waiting to be added, add them after multicasting
             	for (EventListener lis: mWaitingListeners) {
             		add(lis);
