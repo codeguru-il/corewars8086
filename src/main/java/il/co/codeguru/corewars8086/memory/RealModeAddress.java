@@ -18,6 +18,12 @@ public class RealModeAddress {
     public RealModeAddress(short segment, short offset) {
         m_segment = segment;
         m_offset = offset;
+
+		int unsignedSegment = Unsigned.unsignedShort(m_segment);
+		int unsignedOffset = Unsigned.unsignedShort(m_offset);
+
+		int linearAddressFull = unsignedSegment * PARAGRAPH_SIZE + unsignedOffset;
+		m_linearAddress = linearAddressFull % MEMORY_SIZE;
     }
 
     /**
@@ -37,6 +43,8 @@ public class RealModeAddress {
 
         m_segment = (short)unsignedSegment;
         m_offset = (short)unsignedOffset;
+
+		m_linearAddress = linearAddress;
     }	
 
     /**
@@ -57,11 +65,7 @@ public class RealModeAddress {
      * @return 32bit linear address.
      */
     public int getLinearAddress() {
-        int unsignedSegment = Unsigned.unsignedShort(m_segment);
-        int unsignedOffset = Unsigned.unsignedShort(m_offset);
-
-        int linearAddress = unsignedSegment*PARAGRAPH_SIZE + unsignedOffset; 
-        return linearAddress % MEMORY_SIZE;
+		return m_linearAddress;
     }
 
     /** Various real-mode memory constants. */	
@@ -74,5 +78,8 @@ public class RealModeAddress {
     private final short m_segment;
 
     /** 16bit Real-Mode offset. */	
-    private final short m_offset;	
+    private final short m_offset;
+
+	/** cached linear representation of segment and offset */
+	private int m_linearAddress;
 }
