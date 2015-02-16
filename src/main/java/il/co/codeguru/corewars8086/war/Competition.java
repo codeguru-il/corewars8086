@@ -12,7 +12,7 @@ public class Competition {
     public final static int MAX_ROUND = 200000;
     private static final String SCORE_FILENAME= "scores.csv";
 
-    private BinomialIterator competitionIterator;
+    private CompetitionIterator competitionIterator;
 
     private EventMulticaster competitionEventCaster, memoryEventCaster;
     private CompetitionEventListener competitionEventListener;
@@ -45,20 +45,17 @@ public class Competition {
 
     public void runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
         this.warsPerCombination = warsPerCombination;
-        competitionIterator = new BinomialIterator(
+        competitionIterator = new CompetitionIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
 
         // run on every possible combination of warrior groups
         competitionEventListener.onCompetitionStart();
         for (int i = 0; i < warsPerCombination; i++)
         {
-        	competitionIterator.reset();
-        	while (competitionIterator.hasNext()) {
-                runWar(1, warriorRepository.createGroupList((int[])competitionIterator.next()), startPaused);
-                if (abort) {
-                    break;
-                }
-            }
+			runWar(1, warriorRepository.createGroupList(competitionIterator.next()), startPaused);
+            if (abort) {
+				break;
+			}
         }
         competitionEventListener.onCompetitionEnd();
         warriorRepository.saveScoresToFile(SCORE_FILENAME);
