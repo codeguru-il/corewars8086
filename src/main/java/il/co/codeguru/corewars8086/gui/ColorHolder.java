@@ -8,15 +8,18 @@ import java.awt.Color;
 public class ColorHolder {
     private Color colors[];
     private Color darkColors[];
-    private static ColorHolder ins;
+	public static final int MAX_COLORS = 360;
+	private static ColorHolder ins = new ColorHolder(MAX_COLORS);
 
     private ColorHolder(int numPlayers) {
+		// see http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+
 		colors = new Color[numPlayers];
-		float interval = 360 / (numPlayers);
+		float golden_ratio_conjugate = 0.618033988749895f;
 		float x = 0;
-		for (int i = 0; i < numPlayers; i++) {
-			colors[i] = Color.getHSBColor(x / 360, 1, 1);
-			x += interval;
+		for (int i = 0; i < MAX_COLORS; i++) {
+			colors[i] = Color.getHSBColor(x % 1, 0.8f, 0.95f);
+			x += golden_ratio_conjugate;
 		}
 
         darkColors = new Color[colors.length];
@@ -26,24 +29,14 @@ public class ColorHolder {
     }
 
 	public static ColorHolder getInstance() {
-		if (ins == null) {
-			throw new IllegalArgumentException("First call getInstance with numPlayers to init instance");
-		}
 		return ins;
 	}
 
-    public static ColorHolder getInstance(int numPlayers) {
-        if (ins == null) {
-            ins = new ColorHolder(numPlayers);
-        }
-        return ins;
-    }
-
     public Color getColor(int pos, boolean darker) {
-        if (darker) {
-            return darkColors[pos];
-        } else {
-            return colors[pos];
-        }
+		if (darker) {
+			return darkColors[pos];
+		} else {
+			return colors[pos];
+		}
     }
 }

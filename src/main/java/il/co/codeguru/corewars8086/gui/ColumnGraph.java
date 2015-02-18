@@ -64,7 +64,7 @@ public class ColumnGraph extends JComponent {
         g.drawRect(0,0,d.width, d.height);
 		final int numPlayers = names.length;
 		int columnWidth = d.width / numPlayers;
-        ColorHolder colorHolder= ColorHolder.getInstance(numPlayers);
+        ColorHolder colorHolder= ColorHolder.getInstance();
         for (int i = 0; i < numPlayers; i++) {
             paintColumn(g, i, columnWidth, d.height, colorHolder);
             g.setColor(colorHolder.getColor(i, false));
