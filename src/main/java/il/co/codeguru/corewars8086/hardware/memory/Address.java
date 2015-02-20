@@ -7,7 +7,7 @@ import il.co.codeguru.corewars8086.util.Unsigned;
  * 
  * @author DL
  */
-public class RealModeAddress {
+public class Address {
 
     /**
      * Constructor from segment:offset.
@@ -15,7 +15,7 @@ public class RealModeAddress {
      * @param segment    16bit Real-mode segment.
      * @param offset     16bit Real-mode offset.
      */
-    public RealModeAddress(short segment, short offset) {
+    public Address(short segment, short offset) {
         m_segment = segment;
         m_offset = offset;
 
@@ -34,7 +34,7 @@ public class RealModeAddress {
      *  
      * @param linearAddress    32bit linear address.
      */
-    public RealModeAddress(int linearAddress) {
+    public Address(int linearAddress) {
         linearAddress %= MEMORY_SIZE;
 
         int unsignedSegment = Unsigned.unsignedShort(linearAddress / PARAGRAPH_SIZE);

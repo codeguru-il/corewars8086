@@ -4,7 +4,7 @@ import il.co.codeguru.corewars8086.hardware.cpu.Cpu;
 import il.co.codeguru.corewars8086.hardware.cpu.CpuException;
 import il.co.codeguru.corewars8086.hardware.cpu.CpuState;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
-import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemoryRegion;
 import il.co.codeguru.corewars8086.hardware.memory.RestrictedAccessRealModeMemory;
@@ -32,9 +32,9 @@ public class Warrior {
         String name,
         int codeSize,
         RealModeMemory core,
-        RealModeAddress loadAddress,
-        RealModeAddress initialStack,
-        RealModeAddress groupSharedMemory,
+        Address loadAddress,
+        Address initialStack,
+        Address groupSharedMemory,
         short groupSharedMemorySize) {
 
         m_name = name;
@@ -45,14 +45,14 @@ public class Warrior {
         initializeCpuState(loadAddress, initialStack, groupSharedMemory);
 
         // initialize read-access regions
-        RealModeAddress lowestStackAddress =
-            new RealModeAddress(initialStack.getSegment(), (short)0); 
-        RealModeAddress lowestCoreAddress =
-            new RealModeAddress(loadAddress.getSegment(), (short)0);
-        RealModeAddress highestCoreAddress =
-            new RealModeAddress(loadAddress.getSegment(), (short)-1);
-        RealModeAddress highestGroupSharedMemoryAddress =
-            new RealModeAddress(groupSharedMemory.getSegment(),
+        Address lowestStackAddress =
+            new Address(initialStack.getSegment(), (short)0);
+        Address lowestCoreAddress =
+            new Address(loadAddress.getSegment(), (short)0);
+        Address highestCoreAddress =
+            new Address(loadAddress.getSegment(), (short)-1);
+        Address highestGroupSharedMemoryAddress =
+            new Address(groupSharedMemory.getSegment(),
             (short)(groupSharedMemorySize-1));
 
         RealModeMemoryRegion[] readAccessRegions =
@@ -153,8 +153,8 @@ public class Warrior {
      * @param groupSharedMemory The warrior's group shared memory.
      */
     private void initializeCpuState(
-        RealModeAddress loadAddress, RealModeAddress initialStack,
-        RealModeAddress groupSharedMemory) {
+        Address loadAddress, Address initialStack,
+        Address groupSharedMemory) {
 
         // initialize registers
         m_state.setAX(loadAddress.getOffset());
@@ -192,7 +192,7 @@ public class Warrior {
     /** Warrior's initial code size */	
     private final int m_codeSize;
     /** Warrior's initial load address */	
-    private final RealModeAddress m_loadAddress;
+    private final Address m_loadAddress;
     /** Current state of registers & flags */	
     private CpuState m_state;
     /** Applies restricted access logic on top of the actual core memory */

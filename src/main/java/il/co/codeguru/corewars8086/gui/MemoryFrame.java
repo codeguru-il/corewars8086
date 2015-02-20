@@ -5,7 +5,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
-import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.util.Disassembler;
 import il.co.codeguru.corewars8086.war.Competition;
 import il.co.codeguru.corewars8086.war.CompetitionEventListener;
@@ -77,7 +77,7 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 		
 		i = 0;
 		for (JTextField tf : cells) {
-			byte b = comp.getCurrentWar().getMemory().readByte(new RealModeAddress(address + i++));
+			byte b = comp.getCurrentWar().getMemory().readByte(new Address(address + i++));
 			tf.setText("" + String.format("%02X", b & 0xFF));
 		}
 		
@@ -85,7 +85,7 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 		byte[] bytes = new byte[30];
 		
 		for (short k = 0; k < 30; k++) {
-			short vs = comp.getCurrentWar().getMemory().readByte(new RealModeAddress(address +k));
+			short vs = comp.getCurrentWar().getMemory().readByte(new Address(address +k));
 			bytes[k] = (byte) vs;
 		}
 		

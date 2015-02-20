@@ -36,7 +36,7 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
      * 
      * @throws MemoryException  if reading is not allowed from this address.
      */
-    public byte readByte(RealModeAddress address) throws MemoryException {
+    public byte readByte(Address address) throws MemoryException {
         // is reading allowed from this address ?
         if (!isAddressInRegions(m_readAccessRegions, address)) {
             throw new MemoryException();			
@@ -53,7 +53,7 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
      * 
      * @throws MemoryException  if writing is not allowed to this address. 
      */
-    public void writeByte(RealModeAddress address, byte value) throws MemoryException {
+    public void writeByte(Address address, byte value) throws MemoryException {
         // is writing allowed to this address ?
         if (!isAddressInRegions(m_writeAccessRegions, address)) {
             throw new MemoryException();			
@@ -70,7 +70,7 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
      * 
      * @throws MemoryException  if reading is not allowed from this address.
      */
-    public byte readExecuteByte(RealModeAddress address) throws MemoryException {
+    public byte readExecuteByte(Address address) throws MemoryException {
         // is reading allowed from this address ?
         if (!isAddressInRegions(m_executeAccessRegions, address)) {
             throw new MemoryException();			
@@ -88,7 +88,7 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
      * @return whether or not the address is within at least one of the regions.
      */
     private boolean isAddressInRegions(
-        RealModeMemoryRegion[] regions, RealModeAddress address) {
+        RealModeMemoryRegion[] regions, Address address) {
 
         // iterate all regions, attempt to match address
         boolean found = false;

@@ -17,7 +17,7 @@ public class RealModeMemoryImpl extends AbstractRealModeMemory {
      * Constructor.
      */
     public RealModeMemoryImpl() {
-        m_data = new byte[RealModeAddress.MEMORY_SIZE];
+        m_data = new byte[Address.MEMORY_SIZE];
     }
 
     /**
@@ -28,7 +28,7 @@ public class RealModeMemoryImpl extends AbstractRealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public byte readByte(RealModeAddress address) {
+    public byte readByte(Address address) {
         return m_data[address.getLinearAddress()];		
     }
 
@@ -40,7 +40,7 @@ public class RealModeMemoryImpl extends AbstractRealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public void writeByte(RealModeAddress address, byte value) {
+    public void writeByte(Address address, byte value) {
         m_data[address.getLinearAddress()] = value;
         if (listener != null) {
             listener.onMemoryWrite(address);
@@ -55,7 +55,7 @@ public class RealModeMemoryImpl extends AbstractRealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public byte readExecuteByte(RealModeAddress address) {
+    public byte readExecuteByte(Address address) {
         return m_data[address.getLinearAddress()];		
     }	
 

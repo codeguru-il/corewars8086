@@ -1,7 +1,7 @@
 package il.co.codeguru.corewars8086.gui;
 
 import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
-import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.util.Unsigned;
 import il.co.codeguru.corewars8086.war.*;
 
@@ -214,8 +214,8 @@ public class WarFrame extends JFrame
         addMessage("[" + round + "] "+ message);
     }	
 
-    /** @see MemoryEventListener#onMemoryWrite(RealModeAddress) */
-    public void onMemoryWrite(RealModeAddress address) {
+    /** @see MemoryEventListener#onMemoryWrite(il.co.codeguru.corewars8086.hardware.memory.Address) */
+    public void onMemoryWrite(Address address) {
 		int ipInsideArena = address.getLinearAddress() - 0x1000 *0x10; // arena * paragraph
 		
         if ( address.getLinearAddress() >= War.ARENA_SEGMENT*0x10 && address.getLinearAddress() < 2*War.ARENA_SEGMENT*0x10 ) {
@@ -374,7 +374,7 @@ public class WarFrame extends JFrame
 				short ip = this.competition.getCurrentWar().getWarrior(i).getCpuState().getIP();
 				short cs = this.competition.getCurrentWar().getWarrior(i).getCpuState().getCS();
 				
-				int ipInsideArena = new RealModeAddress(cs, ip).getLinearAddress() - 0x10000;
+				int ipInsideArena = new Address(cs, ip).getLinearAddress() - 0x10000;
 				
 				this.warCanvas.paintPointer((char) ipInsideArena,(byte) i);
 			}
@@ -407,7 +407,7 @@ public class WarFrame extends JFrame
 
 	@Override
 	public void addressAtMouseLocationRequested(int address) {
-		RealModeAddress tmp = new RealModeAddress(
+		Address tmp = new Address(
 				this.competition.getCurrentWar().ARENA_SEGMENT, (short) address);
 		byte data = this.competition.getCurrentWar().getMemory().readByte(tmp);
 

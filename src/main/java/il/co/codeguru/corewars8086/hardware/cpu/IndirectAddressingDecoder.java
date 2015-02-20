@@ -1,7 +1,7 @@
 package il.co.codeguru.corewars8086.hardware.cpu;
 
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
-import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
 
 /**
@@ -88,7 +88,7 @@ public class IndirectAddressingDecoder {
      * @return The indirect memory operand's address (or null if the latter
      *         refers to a register).
      */
-    public RealModeAddress getMemAddress() {
+    public Address getMemAddress() {
         return m_memAddress;
     }
 
@@ -202,28 +202,28 @@ public class IndirectAddressingDecoder {
      *         refers to.
      * @throws MemoryException on any error while reading from memory.
      */
-    private RealModeAddress getMode0Address() throws MemoryException {
+    private Address getMode0Address() throws MemoryException {
         switch (m_memIndex) {
             case 0:
-                return new RealModeAddress(
+                return new Address(
                     m_state.getDS(), (short)(m_state.getBX() + m_state.getSI()));
             case 1:
-                return new RealModeAddress(
+                return new Address(
                     m_state.getDS(), (short)(m_state.getBX() + m_state.getDI()));
             case 2:
-                return new RealModeAddress(
+                return new Address(
                     m_state.getSS(), (short)(m_state.getBP() + m_state.getSI()));
             case 3:
-                return new RealModeAddress(
+                return new Address(
                     m_state.getSS(), (short)(m_state.getBP() + m_state.getDI()));
             case 4:
-                return new RealModeAddress(m_state.getDS(), m_state.getSI());
+                return new Address(m_state.getDS(), m_state.getSI());
             case 5:
-                return new RealModeAddress(m_state.getDS(), m_state.getDI());
+                return new Address(m_state.getDS(), m_state.getDI());
             case 6:
-                return new RealModeAddress(m_state.getDS(), m_fetcher.nextWord());
+                return new Address(m_state.getDS(), m_fetcher.nextWord());
             case 7:
-                return new RealModeAddress(m_state.getDS(), m_state.getBX());
+                return new Address(m_state.getDS(), m_state.getBX());
             default:
                 throw new RuntimeException();			
         }
@@ -235,31 +235,31 @@ public class IndirectAddressingDecoder {
      *         refers to.
      * @throws MemoryException on any error while reading from memory.
      */
-    private RealModeAddress getMode1Address() throws MemoryException {
+    private Address getMode1Address() throws MemoryException {
         switch (m_memIndex) {
             case 0:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getBX() + m_state.getSI() + m_fetcher.nextByte()));
             case 1:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getBX() + m_state.getDI() + m_fetcher.nextByte()));
             case 2:
-                return new RealModeAddress(m_state.getSS(),
+                return new Address(m_state.getSS(),
                     (short)(m_state.getBP() + m_state.getSI() + m_fetcher.nextByte()));
             case 3:
-                return new RealModeAddress(m_state.getSS(),
+                return new Address(m_state.getSS(),
                     (short)(m_state.getBP() + m_state.getDI() + m_fetcher.nextByte()));
             case 4:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getSI() + m_fetcher.nextByte()));
             case 5:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getDI() + m_fetcher.nextByte()));
             case 6:
-                return new RealModeAddress(m_state.getSS(),
+                return new Address(m_state.getSS(),
                     (short)(m_state.getBP() + m_fetcher.nextByte()));
             case 7:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getBX() + m_fetcher.nextByte()));
             default:
                 throw new RuntimeException();			
@@ -272,31 +272,31 @@ public class IndirectAddressingDecoder {
      *         refers to.
      * @throws MemoryException on any error while reading from memory.
      */
-    private RealModeAddress getMode2Address() throws MemoryException {
+    private Address getMode2Address() throws MemoryException {
         switch (m_memIndex) {
             case 0:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getBX() + m_state.getSI() + m_fetcher.nextWord()));
             case 1:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getBX() + m_state.getDI() + m_fetcher.nextWord()));
             case 2:
-                return new RealModeAddress(m_state.getSS(),
+                return new Address(m_state.getSS(),
                     (short)(m_state.getBP() + m_state.getSI() + m_fetcher.nextWord()));
             case 3:
-                return new RealModeAddress(m_state.getSS(),
+                return new Address(m_state.getSS(),
                     (short)(m_state.getBP() + m_state.getDI() + m_fetcher.nextWord()));
             case 4:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getSI() + m_fetcher.nextWord()));
             case 5:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getDI() + m_fetcher.nextWord()));
             case 6:
-                return new RealModeAddress(m_state.getSS(),
+                return new Address(m_state.getSS(),
                     (short)(m_state.getBP() + m_fetcher.nextWord()));
             case 7:
-                return new RealModeAddress(m_state.getDS(),
+                return new Address(m_state.getDS(),
                     (short)(m_state.getBX() + m_fetcher.nextWord()));
             default:
                 throw new RuntimeException();			
@@ -309,7 +309,7 @@ public class IndirectAddressingDecoder {
      * of the registers, the method simply returns 'null'.
      * @return null (meaning the indirect operand refers to a register).
      */
-    private RealModeAddress getMode3Address() {
+    private Address getMode3Address() {
         return null;
     }
 
@@ -327,5 +327,5 @@ public class IndirectAddressingDecoder {
 
     private byte m_regIndex;
     private byte m_memIndex;
-    private RealModeAddress m_memAddress;
+    private Address m_memAddress;
 }

@@ -15,7 +15,7 @@ public interface RealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public abstract byte readByte(RealModeAddress address) throws MemoryException;
+    public abstract byte readByte(Address address) throws MemoryException;
 
     /**
      * Reads a single word from the specified address.
@@ -25,7 +25,7 @@ public interface RealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public abstract short readWord(RealModeAddress address) throws MemoryException;
+    public abstract short readWord(Address address) throws MemoryException;
 
     /**
      * Writes a single byte to the specified address.
@@ -35,7 +35,7 @@ public interface RealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public abstract void writeByte(RealModeAddress address, byte value)
+    public abstract void writeByte(Address address, byte value)
         throws MemoryException;
 
     /**
@@ -46,7 +46,7 @@ public interface RealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */	
-    public abstract void writeWord(RealModeAddress address, short value)
+    public abstract void writeWord(Address address, short value)
         throws MemoryException;
 
     /**
@@ -57,7 +57,7 @@ public interface RealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public abstract byte readExecuteByte(RealModeAddress address)
+    public abstract byte readExecuteByte(Address address)
         throws MemoryException;
 
     /**
@@ -68,6 +68,6 @@ public interface RealModeMemory {
      * 
      * @throws MemoryException  on any error. 
      */
-    public abstract short readExecuteWord(RealModeAddress address)
+    public abstract short readExecuteWord(Address address)
         throws MemoryException;	
 }

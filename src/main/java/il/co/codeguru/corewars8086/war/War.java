@@ -3,7 +3,7 @@ package il.co.codeguru.corewars8086.war;
 import il.co.codeguru.corewars8086.hardware.cpu.CpuException;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
-import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemoryImpl;
 import il.co.codeguru.corewars8086.util.Unsigned;
 
@@ -22,7 +22,7 @@ public class War {
     public final static short ARENA_SEGMENT = 0x1000;	
     /** Arena's size in bytes (= size of a single segment) */
     public final static int ARENA_SIZE =
-        RealModeAddress.PARAGRAPHS_IN_SEGMENT * RealModeAddress.PARAGRAPH_SIZE;
+        Address.PARAGRAPHS_IN_SEGMENT * Address.PARAGRAPH_SIZE;
     /** Warrior's private stack size */
     private final static short STACK_SIZE = 2*1024;
     /** Group-shared private memory size */
@@ -67,12 +67,12 @@ public class War {
         m_numWarriors = 0;
         m_numWarriorsAlive = 0;
         m_core = new RealModeMemoryImpl();
-        m_nextFreeAddress = RealModeAddress.PARAGRAPH_SIZE *
-            (ARENA_SEGMENT + RealModeAddress.PARAGRAPHS_IN_SEGMENT);
+        m_nextFreeAddress = Address.PARAGRAPH_SIZE *
+            (ARENA_SEGMENT + Address.PARAGRAPHS_IN_SEGMENT);
 
         // initialize arena
         for (int offset = 0; offset < ARENA_SIZE; ++offset) {
-            RealModeAddress tmp = new RealModeAddress(ARENA_SEGMENT, (short)offset);
+            Address tmp = new Address(ARENA_SEGMENT, (short)offset);
             m_core.writeByte(tmp, ARENA_BYTE);			
         }
 
@@ -205,7 +205,7 @@ public class War {
     private void loadWarriorGroup(WarriorGroup warriorGroup) throws Exception {
         List<WarriorData> warriors = warriorGroup.getWarriors();
 
-        RealModeAddress groupSharedMemory =
+        Address groupSharedMemory =
             allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
 
         for (int i = 0; i < warriors.size(); ++i) {
@@ -217,11 +217,11 @@ public class War {
 
             short loadOffset = getLoadOffset(warriorData.length);
 
-            RealModeAddress loadAddress =
-                    new RealModeAddress(ARENA_SEGMENT, loadOffset); 
-            RealModeAddress stackMemory = allocateCoreMemory(STACK_SIZE);
-            RealModeAddress initialStack =
-                new RealModeAddress(stackMemory.getSegment(), STACK_SIZE);
+            Address loadAddress =
+                    new Address(ARENA_SEGMENT, loadOffset);
+            Address stackMemory = allocateCoreMemory(STACK_SIZE);
+            Address initialStack =
+                new Address(stackMemory.getSegment(), STACK_SIZE);
 
             m_warriors[m_numWarriors++] = new Warrior(
                 warriorName,
@@ -234,7 +234,7 @@ public class War {
 
             // load warrior to arena
             for (int offset = 0; offset < warriorData.length; ++offset) {
-                RealModeAddress tmp = new RealModeAddress(ARENA_SEGMENT, (short)(loadOffset + offset));
+                Address tmp = new Address(ARENA_SEGMENT, (short)(loadOffset + offset));
                 m_core.writeByte(tmp, warriorData[offset]);			
             }
             ++m_numWarriorsAlive;
@@ -253,13 +253,13 @@ public class War {
      *               RealModeAddress.PARAGRAPH_SIZE 
      * @return Pointer to the beginning of the allocated memory block.
      */
-    private RealModeAddress allocateCoreMemory(short size) throws Exception {
-        if ((size % RealModeAddress.PARAGRAPH_SIZE) != 0) {
+    private Address allocateCoreMemory(short size) throws Exception {
+        if ((size % Address.PARAGRAPH_SIZE) != 0) {
             throw new Exception();
         }
 
-        RealModeAddress allocatedMemory =
-            new RealModeAddress(m_nextFreeAddress);
+        Address allocatedMemory =
+            new Address(m_nextFreeAddress);
 
         m_nextFreeAddress += size;
 

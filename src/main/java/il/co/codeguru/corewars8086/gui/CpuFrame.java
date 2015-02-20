@@ -1,6 +1,6 @@
 package il.co.codeguru.corewars8086.gui;
 
-import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.util.Disassembler;
 import il.co.codeguru.corewars8086.war.Competition;
 import il.co.codeguru.corewars8086.war.CompetitionEventListener;
@@ -184,7 +184,7 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 		for (short i = 0; i < 30; i++) {
 			short ip = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getIP();
 			short cs = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getCS();
-			short vs = currentWar.getMemory().readByte(new RealModeAddress(cs, (short) (ip + i)));
+			short vs = currentWar.getMemory().readByte(new Address(cs, (short) (ip + i)));
 			bytes[i] = (byte) vs;
 		}
 		

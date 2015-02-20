@@ -1,7 +1,7 @@
 package il.co.codeguru.corewars8086.hardware.cpu;
 
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
-import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
 
 /**
@@ -26,7 +26,7 @@ public class OpcodeFetcher {
      * @throws MemoryException  on any error.
      */
     public byte nextByte() throws MemoryException {
-        RealModeAddress address = new RealModeAddress(
+        Address address = new Address(
             m_state.getCS(), m_state.getIP());
         m_state.setIP((short)(m_state.getIP() + 1));
         return m_memory.readExecuteByte(address);
@@ -37,7 +37,7 @@ public class OpcodeFetcher {
      * @throws MemoryException  on any error.
      */
     public short nextWord() throws MemoryException {
-        RealModeAddress address = new RealModeAddress(
+        Address address = new Address(
             m_state.getCS(), m_state.getIP());
         m_state.setIP((short)(m_state.getIP() + 2));
         return m_memory.readExecuteWord(address);
