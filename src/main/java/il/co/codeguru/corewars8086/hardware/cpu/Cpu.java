@@ -3,7 +3,7 @@ package il.co.codeguru.corewars8086.hardware.cpu;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
-import il.co.codeguru.corewars8086.utils.Unsigned;
+import il.co.codeguru.corewars8086.util.Unsigned;
 
 
 /**

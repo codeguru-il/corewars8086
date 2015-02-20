@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.utils;
+package il.co.codeguru.corewars8086.util;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;

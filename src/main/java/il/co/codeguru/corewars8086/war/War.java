@@ -5,7 +5,7 @@ import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemoryImpl;
-import il.co.codeguru.corewars8086.utils.Unsigned;
+import il.co.codeguru.corewars8086.util.Unsigned;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -6,7 +6,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 
 import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.utils.Disassembler;
+import il.co.codeguru.corewars8086.util.Disassembler;
 import il.co.codeguru.corewars8086.war.Competition;
 import il.co.codeguru.corewars8086.war.CompetitionEventListener;
 

@@ -1,6 +1,6 @@
 package il.co.codeguru.corewars8086.gui;
 
-import il.co.codeguru.corewars8086.utils.EventMulticaster;
+import il.co.codeguru.corewars8086.util.EventMulticaster;
 
 import java.awt.Color;
 import java.awt.Dimension;
