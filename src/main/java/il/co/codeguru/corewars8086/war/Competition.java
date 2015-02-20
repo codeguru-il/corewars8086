@@ -1,6 +1,6 @@
 package il.co.codeguru.corewars8086.war;
 
-import il.co.codeguru.corewars8086.memory.MemoryEventListener;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.utils.EventMulticaster;
 
 import java.io.IOException;

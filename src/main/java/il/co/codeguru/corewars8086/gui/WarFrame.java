@@ -1,8 +1,7 @@
 package il.co.codeguru.corewars8086.gui;
 
-import il.co.codeguru.corewars8086.memory.MemoryEventListener;
-import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.utils.EventMulticaster;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
+import il.co.codeguru.corewars8086.hardware.memory.RealModeAddress;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 import il.co.codeguru.corewars8086.war.*;
 
