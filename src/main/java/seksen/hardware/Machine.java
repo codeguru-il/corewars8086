@@ -23,12 +23,9 @@ import seksen.hardware.cpu.Cpu80186;
 import seksen.hardware.cpu.Cpu8086;
 import seksen.hardware.cpu.CpuException;
 import seksen.hardware.cpu.CpuState;
-import seksen.hardware.cpu.CpuStateWatcher;
-import seksen.hardware.cpu.CpuVmCompare;
 import seksen.hardware.memory.IOOverMemory;
 import seksen.hardware.memory.MemoryAccessProtection;
 import seksen.hardware.memory.MemoryException;
-import seksen.hardware.memory.MemoryVmCompare;
 import seksen.hardware.memory.RealModeMemory;
 
 /**
@@ -78,24 +75,14 @@ public class Machine {
 			this.address = new Address24(0,0);
 		}
 
-		if( !isTestEnabled() ) {
-			//this.memory = new RealModeMemoryImpl();
-			this.memory = new IOOverMemory();
-			this.state = new CpuState();
+		//this.memory = new RealModeMemoryImpl();
+		this.memory = new IOOverMemory();
+		this.state = new CpuState();
 
-			if( !is186() ) {
-				this.cpu = new Cpu8086();
-			} else {
-				this.cpu = new Cpu80186();
-			}
+		if( !is186() ) {
+			this.cpu = new Cpu8086();
 		} else {
-			if(isExtended()) {
-				throw new IllegalArgumentException(
-						"Can't test Interpreter in extended mode.");
-			}
-			this.memory = new MemoryVmCompare();
-			this.state = new CpuStateWatcher();
-			this.cpu = new CpuVmCompare();
+			this.cpu = new Cpu80186();
 		}
 
 		this.ioHandler = new IOHandler();

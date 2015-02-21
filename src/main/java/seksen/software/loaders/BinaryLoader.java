@@ -25,7 +25,6 @@ import seksen.hardware.Machine;
 import seksen.hardware.cpu.CpuState;
 import seksen.hardware.memory.MemoryAccessProtection;
 import seksen.hardware.memory.MemoryException;
-import seksen.hardware.memory.MemoryVmCompare;
 import seksen.hardware.memory.RealModeMemory;
 
 public class BinaryLoader {
@@ -90,10 +89,6 @@ public class BinaryLoader {
 		Address hstart = sstart.addAddress(slen);
 
 		RealModeMemory memory = machine.memory;
-
-		if (memory instanceof MemoryVmCompare) {
-			((MemoryVmCompare)memory).setCopyWrite();
-		}
 
 		try {
 			memory.writeMemory(tstart, input, tlen);
