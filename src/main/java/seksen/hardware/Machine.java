@@ -48,7 +48,6 @@ public class Machine {
 	public final Address address;
 	public final int addressType;
 
-	private final InterruptHandler intHandler;
 	private final MemoryAccessProtection memoryProtection;
 	private final IOHandler ioHandler;
 	private final Timer timer;
@@ -79,9 +78,6 @@ public class Machine {
 
 		this.ioHandler = new IOHandler();
 
-		this.intHandler = null;
-
-
 		if( isAccessCheckEnabled() ) {
 			this.memoryProtection = new MemoryAccessProtection();
 			memory.addAccessListener(memoryProtection);
@@ -92,8 +88,7 @@ public class Machine {
 		timer = new Timer();
 		serialPort = new IOPort(256, 256);
 
-		devices = new Device[]{cpu, state, memory, intHandler, memoryProtection,
-			ioHandler, timer, serialPort};
+		devices = new Device[]{cpu, state, memory, memoryProtection, ioHandler, timer, serialPort};
 
 		for(Device dev:devices) {
 			if( dev != null ) {
@@ -104,10 +99,6 @@ public class Machine {
 
 	private boolean isExtended() {
 		return (type & ADDR_24) == ADDR_24;
-	}
-
-	private boolean isTestEnabled() {
-		return (type & TEST_INTERPRETER) == TEST_INTERPRETER;
 	}
 
 	private boolean isAccessCheckEnabled() {

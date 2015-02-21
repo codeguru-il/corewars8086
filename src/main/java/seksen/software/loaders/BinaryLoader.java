@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import seksen.hardware.Address;
-import seksen.hardware.InterruptHandler;
 import seksen.hardware.Machine;
 import seksen.hardware.cpu.CpuState;
 import seksen.hardware.memory.MemoryAccessProtection;
@@ -124,8 +123,6 @@ public class BinaryLoader {
 		state.setSP(0);
 
 		state.setFlags(0);
-
-		InterruptHandler ih = (InterruptHandler) machine.getDevice(InterruptHandler.class);
 	}
 
 	public static void loadIntelHex(Machine machine, File file) throws Exception {

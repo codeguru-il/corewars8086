@@ -17,7 +17,6 @@ package seksen.hardware.cpu;
 import seksen.hardware.Address;
 import seksen.hardware.IOHandler;
 import seksen.hardware.InterruptException;
-import seksen.hardware.InterruptHandler;
 import seksen.hardware.Machine;
 import seksen.hardware.memory.MemoryException;
 import seksen.hardware.memory.RealModeMemory;
@@ -34,7 +33,6 @@ public class Cpu8086 extends Cpu {
 	protected Machine m_machine;
 	protected CpuState prevState;
 	protected IOHandler ioHandler;
-	protected InterruptHandler intHandler;
 
 	/**
 	 * Constructor.
@@ -48,7 +46,6 @@ public class Cpu8086 extends Cpu {
 		m_state = machine.state;
 		m_memory = machine.memory;
 		ioHandler = (IOHandler) machine.getDevice(IOHandler.class);
-		intHandler = (InterruptHandler) m_machine.getDevice(InterruptHandler.class);
 
 		m_fetcher = new OpcodeFetcher(m_state, m_memory);
 		m_regs = new RegisterIndexingDecoder(m_state);
@@ -142,19 +139,15 @@ public class Cpu8086 extends Cpu {
 	 * @see corewars.cpu.Cpu#interrupt(int)
 	 */
 	public void interrupt( int intnum ) throws InterruptException, MemoryException {
-		if( intHandler != null ) {
-			intHandler.handleInt( intnum );
-		} else {
-			push(m_state.getFlags());
-			push(m_state.getCS());
-			push(m_state.getIP());
+		push(m_state.getFlags());
+		push(m_state.getCS());
+		push(m_state.getIP());
 
-			Address address = m_machine.newAddress(0,(short)(intnum*4));
-			int offset = m_memory.readWord(address);
-			int segment = m_memory.readWord(address.addOffset(2));
-			m_state.setCS(segment);
-			m_state.setIP(offset);
-		}
+		Address address = m_machine.newAddress(0,(short)(intnum*4));
+		int offset = m_memory.readWord(address);
+		int segment = m_memory.readWord(address.addOffset(2));
+		m_state.setCS(segment);
+		m_state.setIP(offset);
 	}
 
 	protected void out(int port, short data) {
