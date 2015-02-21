@@ -17,14 +17,12 @@ import seksen.util.Hex;
 
 public class IOHandler implements Device {
 	private Machine machine;
-	private Timer timer;
 	private IOPort serialPort;
 
 	private short regA080;
 
 	public void setMachine(Machine machine) {
 		this.machine = machine;
-		timer = (Timer) machine.getDevice(Timer.class);
 		serialPort = (IOPort) machine.getDevice(IOPort.class);
 	}
 
@@ -60,9 +58,6 @@ public class IOHandler implements Device {
 		switch( address ) {
 		case 0xA062:
 		case 0xA066:
-		    if( timer != null ) {
-			timer.io_writew(address, value);
-		    }
 			break;
 		case 0xA080: regA080 = value; break;
 		case 0xA084:

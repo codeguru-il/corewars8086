@@ -50,7 +50,6 @@ public class Machine {
 
 	private final MemoryAccessProtection memoryProtection;
 	private final IOHandler ioHandler;
-	private final Timer timer;
 	private final IOPort serialPort;
 
 	private final Device devices[];
@@ -85,10 +84,9 @@ public class Machine {
 			this.memoryProtection = null;
 		}
 
-		timer = new Timer();
 		serialPort = new IOPort(256, 256);
 
-		devices = new Device[]{cpu, state, memory, memoryProtection, ioHandler, timer, serialPort};
+		devices = new Device[]{cpu, state, memory, memoryProtection, ioHandler, serialPort};
 
 		for(Device dev:devices) {
 			if( dev != null ) {
@@ -196,7 +194,6 @@ public class Machine {
 
 	public void do_cycle() throws CpuException, MemoryException
 	{
-		timer.do_cycle();
 		cpu.nextOpcode();
 	}
 }
