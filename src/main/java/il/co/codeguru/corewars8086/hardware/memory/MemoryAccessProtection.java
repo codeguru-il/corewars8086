@@ -6,7 +6,7 @@ package il.co.codeguru.corewars8086.hardware.memory;
  * 
  * @author DL
  */
-public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
+public class MemoryAccessProtection extends AbstractRealModeMemory {
 
     /**
      * Constructor.
@@ -16,11 +16,11 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
      * @param writeAccessRegions    Writing to these regions is allowed.
      * @param executeAccessRegions  Executing these regions is allowed.
      */
-    public RestrictedAccessRealModeMemory(
-        RealModeMemory memory,
-        RealModeMemoryRegion[] readAccessRegions,
-        RealModeMemoryRegion[] writeAccessRegions,
-        RealModeMemoryRegion[] executeAccessRegions) {
+    public MemoryAccessProtection(
+			RealModeMemory memory,
+			RealModeMemoryRegion[] readAccessRegions,
+			RealModeMemoryRegion[] writeAccessRegions,
+			RealModeMemoryRegion[] executeAccessRegions) {
 
         m_memory = memory;
         m_readAccessRegions = readAccessRegions;

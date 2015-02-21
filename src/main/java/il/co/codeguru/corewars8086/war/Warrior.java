@@ -7,7 +7,7 @@ import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
 import il.co.codeguru.corewars8086.hardware.memory.Address;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemoryRegion;
-import il.co.codeguru.corewars8086.hardware.memory.RestrictedAccessRealModeMemory;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryAccessProtection;
 
 
 /**
@@ -76,7 +76,7 @@ public class Warrior {
                 new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress)
             };
 
-        m_memory = new RestrictedAccessRealModeMemory(
+        m_memory = new MemoryAccessProtection(
             core, readAccessRegions, writeAccessRegions, executeAccessRegions);
 
         m_cpu = new Cpu(m_state, m_memory);
@@ -196,7 +196,7 @@ public class Warrior {
     /** Current state of registers & flags */	
     private CpuState m_state;
     /** Applies restricted access logic on top of the actual core memory */
-    private RestrictedAccessRealModeMemory m_memory;
+    private MemoryAccessProtection m_memory;
     /** CPU instance */
     private Cpu m_cpu;
     /** Whether or not the warrior is still alive */
