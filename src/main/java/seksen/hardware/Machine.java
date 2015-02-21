@@ -19,7 +19,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 import seksen.hardware.cpu.Cpu;
-import seksen.hardware.cpu.Cpu80186;
 import seksen.hardware.cpu.Cpu8086;
 import seksen.hardware.cpu.CpuException;
 import seksen.hardware.cpu.CpuState;
@@ -33,9 +32,6 @@ import seksen.hardware.memory.RealModeMemory;
  *
  */
 public class Machine {
-	public static final int CPU_86			= 0;
-	public static final int CPU_186 		= 1;
-
 	/**Normal addressing*/
 	public static final int ADDR_20 		= 0;
 	/**Extended addressing*/
@@ -79,11 +75,7 @@ public class Machine {
 		this.memory = new IOOverMemory();
 		this.state = new CpuState();
 
-		if( !is186() ) {
-			this.cpu = new Cpu8086();
-		} else {
-			this.cpu = new Cpu80186();
-		}
+		this.cpu = new Cpu8086();
 
 		this.ioHandler = new IOHandler();
 
@@ -108,10 +100,6 @@ public class Machine {
 				dev.setMachine(this);
 			}
 		}
-	}
-
-	private boolean is186() {
-		return (type & CPU_186) == CPU_186;
 	}
 
 	private boolean isExtended() {

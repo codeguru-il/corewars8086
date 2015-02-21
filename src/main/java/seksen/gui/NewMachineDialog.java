@@ -43,7 +43,7 @@ public class NewMachineDialog extends JFrame implements ActionListener {
 		Container cpane = getContentPane();
 		cpane.setLayout(new BoxLayout(cpane, BoxLayout.LINE_AXIS));
 
-		cpucb = new JComboBox(new Object[]{"8086","80186"});
+		cpucb = new JComboBox(new Object[]{"8086"});
 		cpucb.setToolTipText("CPU");
 		cpane.add(cpucb);
 
@@ -84,8 +84,6 @@ public class NewMachineDialog extends JFrame implements ActionListener {
 			testcb.setEnabled(addressingcb.getSelectedIndex() == 0);
 		} else if( e.getActionCommand().equals("Create") ) {
 			int type = 0;
-			type |= cpucb.getSelectedIndex() == 1 ?
-					Machine.CPU_186 : Machine.CPU_86;
 			type |= addressingcb.getSelectedIndex() == 1 ?
 					Machine.ADDR_24 : Machine.ADDR_20;
 			if(accesscheckcb.isSelected()) {
