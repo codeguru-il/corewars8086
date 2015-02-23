@@ -63,6 +63,9 @@ public class WarriorRepository {
      */
     private void readWarriorFiles() throws IOException  {		
         File warriorsDirectory = new File(WARRIOR_DIRECTORY);
+        
+        fixFiles(warriorsDirectory);
+        
         File[] warriorFiles = warriorsDirectory.listFiles();
         if (warriorFiles == null) {
             JOptionPane.showMessageDialog(null,
@@ -106,7 +109,27 @@ public class WarriorRepository {
         readZombies();
     }
 
-    private void readZombies() throws IOException {
+    private void fixFiles(File warriorsDirectory) {
+		if (!warriorsDirectory.exists()) {
+			throw new RuntimeException("Missing directory " + warriorsDirectory.getAbsolutePath());
+		}
+    	File[] files = warriorsDirectory.listFiles();
+    	for (File file : files) {
+			if(file.getName().endsWith(".bin")){
+				File renameTo = new File(file.getPath().replace(".bin", ""));
+				renameTo.delete();
+				file.renameTo(renameTo);
+			}
+		}
+    	
+    	files = warriorsDirectory.listFiles();
+    	for (File file : files) {
+			if(file.getName().contains("."))
+				file.delete();
+		}
+	}
+
+	private void readZombies() throws IOException {
         File zombieDirectory = new File(ZOMBIE_DIRECTORY);
         File[] zombieFiles = zombieDirectory.listFiles();
         if (zombieFiles == null) {

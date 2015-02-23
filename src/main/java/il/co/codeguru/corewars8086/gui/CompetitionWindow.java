@@ -20,7 +20,7 @@ public class CompetitionWindow extends JFrame
     // widgets
     private JButton runWarButton;
     private JLabel warCounterDisplay;
-    private JButton showBattleButton;
+    private JCheckBox showBattleCheckBox;
     private JTextField battlesPerGroupField;
     private JTextField warriorsPerGroupField;
     private WarFrame battleFrame;
@@ -28,13 +28,16 @@ public class CompetitionWindow extends JFrame
     private int warCounter;
     private int totalWars;
     private Thread warThread;
-    private boolean showBattleFrame;
 	private boolean competitionRunning;
+	
+	private JTextField seed;
+
+	private JCheckBox startPausedCheckBox;
 
     public CompetitionWindow() throws IOException {
         super("CodeGuru Extreme - Competition Viewer");
         getContentPane().setLayout(new BorderLayout());
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         competition = new Competition();
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition
@@ -47,15 +50,25 @@ public class CompetitionWindow extends JFrame
         controlArea.setLayout(new BoxLayout(controlArea, BoxLayout.Y_AXIS));
         // -------------- Button Panel
         JPanel buttonPanel = new JPanel();
-        runWarButton = new JButton("<html><font color=red>Start!</font>");
+        runWarButton = new JButton("<html><font color=red>Start!</font></html>");
         runWarButton.addActionListener(this);
         buttonPanel.add(runWarButton);
         warCounterDisplay = new JLabel("");
         buttonPanel.add(warCounterDisplay);
         buttonPanel.add(Box.createHorizontalStrut(30));
-        showBattleButton = new JButton("Show session");
-        showBattleButton.addActionListener(this);
-        buttonPanel.add(showBattleButton);
+        showBattleCheckBox = new JCheckBox("Show session on start");
+        buttonPanel.add(showBattleCheckBox);
+        
+        startPausedCheckBox = new JCheckBox("Start Paused");
+		startPausedCheckBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(startPausedCheckBox.isSelected())
+					showBattleCheckBox.setSelected(true);
+			}
+		});
+		buttonPanel.add(startPausedCheckBox);
+        
         controlArea.add(buttonPanel);
         // -------------
         controlArea.add(new JSeparator(JSeparator.HORIZONTAL));
@@ -71,9 +84,15 @@ public class CompetitionWindow extends JFrame
 		warriorsPerGroupField = new JTextField(String.format("%d", numberOfGropus), 3);
 		controlPanel.add(warriorsPerGroupField);
 		controlPanel.add(new JLabel("Sessions per groups combination:"));
-		battlesPerGroupField = new JTextField("1", 3);
+		battlesPerGroupField = new JTextField("100", 4);
 		controlPanel.add(battlesPerGroupField);
-        controlArea.add(controlPanel);
+		seed = new JTextField(4);
+		seed.setText("guru");
+		controlPanel.add(new JLabel("seed:"));
+		controlPanel.add(seed);
+		
+		controlArea.add(controlPanel);
+        
         // ------------
         getContentPane().add(controlArea, BorderLayout.SOUTH);
 
@@ -99,6 +118,7 @@ public class CompetitionWindow extends JFrame
      */
     public boolean runWar() {
         try {
+        	competition.setSeed(seed.getText().hashCode());
             final int battlesPerGroup = Integer.parseInt(
                 battlesPerGroupField.getText().trim());
             final int warriorsPerGroup = Integer.parseInt(
@@ -114,7 +134,7 @@ public class CompetitionWindow extends JFrame
                 @Override
                 public void run() {
                     try {
-                        competition.runCompetition(battlesPerGroup, warriorsPerGroup);
+                        competition.runCompetition(battlesPerGroup, warriorsPerGroup, startPausedCheckBox.isSelected());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -136,30 +156,26 @@ public class CompetitionWindow extends JFrame
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == runWarButton) {
+        	showBattleFrameIfNeeded();
             if (runWar()) {
             	competitionRunning = true;
 				runWarButton.setEnabled(false);
             }
-        } else if (e.getSource() == showBattleButton) {
-            if (battleFrame == null) {
-                if (warThread == null) {
-                    // war hasn't started yet
-                    showBattleRoom();
-                } else {
-                    // show the battle frame when the next battle starts
-                    showBattleFrame = true;
-                }
-            }
         }
     }
+
 
     public void onWarStart() {
-        if (showBattleFrame == true) {
-            showBattleRoom();
-            showBattleFrame = false;
-        }
+    	showBattleFrameIfNeeded();
     }
 
+    private void showBattleFrameIfNeeded() {
+    	if (showBattleCheckBox.isSelected() && battleFrame == null ) {
+    		showBattleRoom();
+    		showBattleCheckBox.setSelected(false);
+    	}
+    }
+    
     private void showBattleRoom() {
         competition.setSpeed(5);
         battleFrame = new WarFrame(competition);
@@ -238,6 +254,7 @@ public class CompetitionWindow extends JFrame
     public void onCompetitionStart() {
         warCounter = 0;
         totalWars = competition.getTotalNumberOfWars();
+		this.runWarButton.setEnabled(false);
     }
 
     public void onCompetitionEnd() {
@@ -248,7 +265,13 @@ public class CompetitionWindow extends JFrame
             };
         });
         warThread = null;
+		this.runWarButton.setEnabled(true);
         runWarButton.setEnabled(true);
 		competitionRunning = false;
     }
+    
+	@Override
+	public void onEndRound() {
+	}
+	
 }

@@ -49,4 +49,6 @@ public interface CompetitionEventListener extends EventListener  {
     void onCompetitionStart();
 
     void onCompetitionEnd();
+    
+    void onEndRound();
 }

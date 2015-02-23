@@ -12,7 +12,7 @@ public class Competition {
     public final static int MAX_ROUND = 200000;
     private static final String SCORE_FILENAME= "scores.csv";
 
-    private BinomialIterator competitionIterator;
+    private CompetitionIterator competitionIterator;
 
     private EventMulticaster competitionEventCaster, memoryEventCaster;
     private CompetitionEventListener competitionEventListener;
@@ -26,7 +26,9 @@ public class Competition {
 
     private int speed;
     public static final int MAXIMUM_SPEED = -1;
-    private static final long DELAY_UNIT = 10;
+    private static final long DELAY_UNIT = 200;
+    
+    private long seed = 0;
 
     private boolean abort;
 
@@ -41,22 +43,19 @@ public class Competition {
         abort = false;
     }
 
-    public void runCompetition (int warsPerCombination, int warriorsPerGroup) throws Exception {
+    public void runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
         this.warsPerCombination = warsPerCombination;
-        competitionIterator = new BinomialIterator(
+        competitionIterator = new CompetitionIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
 
         // run on every possible combination of warrior groups
         competitionEventListener.onCompetitionStart();
         for (int i = 0; i < warsPerCombination; i++)
         {
-        	competitionIterator.reset();
-        	while (competitionIterator.hasNext()) {
-                runWar(warriorRepository.createGroupList((int[])competitionIterator.next()));
-                if (abort) {
-                    break;
-                }
-            }
+			runWar(1, warriorRepository.createGroupList(competitionIterator.next()), startPaused);
+            if (abort) {
+				break;
+			}
         }
         competitionEventListener.onCompetitionEnd();
         warriorRepository.saveScoresToFile(SCORE_FILENAME);
@@ -66,51 +65,63 @@ public class Competition {
         return (int) competitionIterator.getNumberOfItems() * warsPerCombination;
     }
 
-    public void runWar(WarriorGroup[] warriorGroups) throws Exception {
-        currentWar = new War(memoryEventListener, competitionEventListener);
-        competitionEventListener.onWarStart();
-        currentWar.loadWarriorGroups(warriorGroups);
-            
-        // go go go!
-        int round = 0;
-        while (round < MAX_ROUND) {
-            competitionEventListener.onRound(round);
+    public void runWar(int numberOfRounds, WarriorGroup[] warriorGroups,boolean startPaused) throws Exception {
+        for(int war = 0; war < numberOfRounds; war++) {
+			currentWar = new War(memoryEventListener, competitionEventListener, startPaused);
+			currentWar.setSeed(this.seed + war);
+			competitionEventListener.onWarStart();
+			currentWar.loadWarriorGroups(warriorGroups);
 
-            // apply speed limits
-            if (speed != MAXIMUM_SPEED) {
-                // note: if speed is 1 (meaning game is paused), this will
-                // always happen
-                if (round % speed == 0) {
-                    Thread.sleep(DELAY_UNIT);
-                }
-                    
-                if (speed == 1) { // paused
-                	continue;
-                }
-           }
-                
-          	currentWar.nextRound(round);
-            	
-            if (currentWar.isOver()) {
-                break;
-            }
-                
-            ++round;
-        }
-        competitionEventListener.onRound(round);
+			// go go go!
+			int round = 0;
+			while (round < MAX_ROUND) {
+				competitionEventListener.onRound(round);
 
-        int numAlive = currentWar.getNumRemainingWarriors();
-        String names = currentWar.getRemainingWarriorNames();
+				competitionEventListener.onEndRound();
 
-        if (numAlive == 1) { // we have a single winner!
-            competitionEventListener.onWarEnd(CompetitionEventListener.SINGLE_WINNER, names);
-        } else if (round == MAX_ROUND) { // maximum round reached
-            competitionEventListener.onWarEnd(CompetitionEventListener.MAX_ROUND_REACHED, names);
-        } else { // user abort
-            competitionEventListener.onWarEnd(CompetitionEventListener.ABORTED, names);
-        }
-        currentWar.updateScores(warriorRepository);
-        currentWar = null;
+				// apply speed limits
+				if (speed != MAXIMUM_SPEED) {
+					// note: if speed is 1 (meaning game is paused), this will
+					// always happen
+					if (round % speed == 0) {
+						Thread.sleep(DELAY_UNIT);
+					}
+
+					if (speed == 1) { // paused
+						continue;
+					}
+				}
+
+				//pause
+				while (currentWar.isPaused()) Thread.sleep(DELAY_UNIT);
+
+				//Single step run - stop next time
+				if (currentWar.isSingleRound())
+					currentWar.pause();
+
+				if (currentWar.isOver()) {
+					break;
+				}
+
+				currentWar.nextRound(round);
+
+				++round;
+			}
+			competitionEventListener.onRound(round);
+
+			int numAlive = currentWar.getNumRemainingWarriors();
+			String names = currentWar.getRemainingWarriorNames();
+
+			if (numAlive == 1) { // we have a single winner!
+				competitionEventListener.onWarEnd(CompetitionEventListener.SINGLE_WINNER, names);
+			} else if (round == MAX_ROUND) { // maximum round reached
+				competitionEventListener.onWarEnd(CompetitionEventListener.MAX_ROUND_REACHED, names);
+			} else { // user abort
+				competitionEventListener.onWarEnd(CompetitionEventListener.ABORTED, names);
+			}
+			currentWar.updateScores(warriorRepository);
+			currentWar = null;
+		}
     }
 
     public int getCurrentWarrior() {
@@ -125,10 +136,18 @@ public class Competition {
         competitionEventCaster.add(lis);
     }
 
+    public void removeCompetitionEventListener(CompetitionEventListener lis) {
+    	competitionEventCaster.remove(lis);
+    }
+    
     public void addMemoryEventLister(MemoryEventListener lis) {
         memoryEventCaster.add(lis);
     }
 
+    public void removeMemoryEventLister(MemoryEventListener lis) {
+    	memoryEventCaster.remove(lis);
+    }
+    
     public WarriorRepository getWarriorRepository() {
         return warriorRepository;
     }
@@ -149,4 +168,14 @@ public class Competition {
     public void setAbort() {
         this.abort = true;
     }
+    
+    
+    public War getCurrentWar(){
+    	return currentWar;
+    }
+    
+    public void setSeed(long seed){
+    	this.seed = seed;
+    }
+    
 }

@@ -2,6 +2,7 @@ package il.co.codeguru.corewars8086.gui;
 
 import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.memory.RealModeAddress;
+import il.co.codeguru.corewars8086.utils.EventMulticaster;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 import il.co.codeguru.corewars8086.war.*;
 
@@ -29,7 +30,7 @@ import javax.swing.event.ChangeListener;
  * @author BS
  */
 public class WarFrame extends JFrame
-    implements MemoryEventListener,  CompetitionEventListener{
+    implements MemoryEventListener,  CompetitionEventListener, MouseAddressRequest{
 	private static final long serialVersionUID = 1L;
 
 	/** the canvas which show the core war memory area */
@@ -49,12 +50,22 @@ public class WarFrame extends JFrame
 
     /** A text field showing the current round number */
     private JTextField roundNumber;
+    
+	// Debugger
+	private JLabel addressFiled;
+	private JButton btnCpuState;
+	private CpuFrame cpuframe;
+	private JButton btnPause;
+	private JButton btnSingleRound;
+    
 
     private JSlider speedSlider;
 
     private final Competition competition;
 
-    public WarFrame(Competition competition) {
+	private MemoryFrame memory_frame;
+
+    public WarFrame(final Competition competition) {
         super("CodeGuru Extreme - Session Viewer");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.competition = competition;
@@ -102,16 +113,68 @@ public class WarFrame extends JFrame
         buttonPanel.add(closeButton);
         buttonPanel.add(Box.createHorizontalStrut(20));
         buttonPanel.add(new JLabel("Speed:"));
-        speedSlider = new JSlider(1,50,competition.getSpeed());
+        speedSlider = new JSlider(1,100,competition.getSpeed());
         speedSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                WarFrame.this.competition.setSpeed(speedSlider.getValue());				
+                WarFrame.this.competition.setSpeed((int) Math.pow(1.2, speedSlider.getValue()) ); //exponential speed slider		
             }
         });
         buttonPanel.add(speedSlider);
         nRoundNumber = 0;
         infoZone.add(buttonPanel, BorderLayout.SOUTH);
         infoZone.setBackground(Color.black);
+        
+		// Debugger
+		addressFiled = new JLabel("Click on the arena to see the memory");
+		warCanvas.addListener(this);
+
+		btnCpuState = new JButton("View CPU");
+		btnCpuState.setEnabled(false);
+		btnCpuState.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				cpuframe = new CpuFrame(competition);
+				WarFrame.this.competition.addCompetitionEventListener(cpuframe);
+
+			}
+		});
+
+		competition.addCompetitionEventListener(this);
+		
+		btnPause = new JButton("Pause");
+		btnPause.setEnabled(false);
+		btnPause.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (competition.getCurrentWar().isPaused()) {
+					competition.getCurrentWar().resume();
+					btnPause.setText("Pause");
+					btnSingleRound.setEnabled(false);
+				} else {
+					competition.getCurrentWar().pause();
+					btnPause.setText("Resume");
+					btnSingleRound.setEnabled(true);
+				}
+
+			}
+
+		});
+
+		btnSingleRound = new JButton("Single Round");
+		btnSingleRound.setEnabled(false);
+		btnSingleRound.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				competition.getCurrentWar().runSingleRound();
+			}
+		});
+        
+		buttonPanel.add(btnCpuState);
+		buttonPanel.add(btnPause);
+		buttonPanel.add(btnSingleRound);
+		buttonPanel.add(addressFiled);
 
         // build warrior zone (warrior list + title) 
         JPanel warriorZone = new JPanel(new BorderLayout());
@@ -154,14 +217,13 @@ public class WarFrame extends JFrame
 
     /** @see MemoryEventListener#onMemoryWrite(RealModeAddress) */
     public void onMemoryWrite(RealModeAddress address) {
-        // we are only interested in addresses in the ARENA segment
-        // FIXME: calculate using linear addresses to suport CS+1
-        if (address.getSegment() != War.ARENA_SEGMENT) {
-            return;
+		int ipInsideArena = address.getLinearAddress() - 0x1000 *0x10; // arena * paragraph
+		
+        if ( address.getLinearAddress() >= War.ARENA_SEGMENT*0x10 && address.getLinearAddress() < 2*War.ARENA_SEGMENT*0x10 ) {
+        	warCanvas.paintPixel(
+        			Unsigned.unsignedShort(ipInsideArena),
+        			(byte)competition.getCurrentWarrior());
         }
-        warCanvas.paintPixel(
-            Unsigned.unsignedShort(address.getOffset()),
-            (byte)competition.getCurrentWarrior());
     }
 
     /** @see CompetitionEventListener#onWarStart(int) */
@@ -169,6 +231,10 @@ public class WarFrame extends JFrame
         addMessage("=== Session started ===");
         nameListModel.clear();
         warCanvas.clear();
+        if (competition.getCurrentWar().isPaused()){
+			btnPause.setText("Resume");
+			btnSingleRound.setEnabled(true);
+        }
     }
 
     /** @see CompetitionEventListener#onWarEnd(int, String) */
@@ -201,6 +267,8 @@ public class WarFrame extends JFrame
             roundNumber.setText(Integer.toString(nRoundNumber));
             roundNumber.repaint();
         }
+        btnCpuState.setEnabled(true); //in case we open the window during a match
+        btnPause.setEnabled(true);
     }	
 
     /** @see CompetitionEventListener#onWarriorBirth(String) */
@@ -269,9 +337,13 @@ public class WarFrame extends JFrame
     }
 
     public void onCompetitionStart() {
+    	btnCpuState.setEnabled(true);
+    	btnPause.setEnabled(true);
     }
 
     public void onCompetitionEnd() {
+    	btnCpuState.setEnabled(false);
+    	btnPause.setEnabled(false);
     }	
 
     class WarriorInfo {
@@ -294,4 +366,63 @@ public class WarFrame extends JFrame
                 (((String)obj).equals(name));
         }
     }
+    
+	@Override
+	public void onEndRound() {
+		this.warCanvas.deletePointers();
+		for (int i = 0; i < this.competition.getCurrentWar().getNumWarriors(); i++)
+			if (this.competition.getCurrentWar().getWarrior(i).isAlive()) {
+				short ip = this.competition.getCurrentWar().getWarrior(i).getCpuState().getIP();
+				short cs = this.competition.getCurrentWar().getWarrior(i).getCpuState().getCS();
+				
+				int ipInsideArena = new RealModeAddress(cs, ip).getLinearAddress() - 0x10000;
+				
+				this.warCanvas.paintPointer((char) ipInsideArena,(byte) i);
+			}
+	}
+
+	@Override
+	public void dispose() {
+
+		// bug fix - event casted while window is being disposed FIXME find a
+		// better solution
+		this.competition.getCurrentWar().pause();
+		try {
+			Thread.sleep(300);
+		} catch (Exception e) {
+
+		}
+		this.competition.removeCompetitionEventListener(this);
+		this.competition.removeMemoryEventLister(this);
+		this.competition.getCurrentWar().resume();
+
+		try {
+			this.cpuframe.dispose();
+		} catch (Exception e) {
+		}
+		// restoring maximum speed
+		competition.getCurrentWar().resume();
+		competition.setSpeed(Competition.MAXIMUM_SPEED);
+		super.dispose();
+	}
+
+	@Override
+	public void addressAtMouseLocationRequested(int address) {
+		RealModeAddress tmp = new RealModeAddress(
+				this.competition.getCurrentWar().ARENA_SEGMENT, (short) address);
+		byte data = this.competition.getCurrentWar().getMemory().readByte(tmp);
+
+		// Warrior w = this.competition.getCurrentWar().getNumWarriors()
+
+		this.addressFiled.setText(Integer.toHexString(address).toUpperCase()
+				+ ": " + String.format("%02X", data).toUpperCase());
+		
+		if(memory_frame == null || memory_frame.isVisible() == false){
+			memory_frame = new MemoryFrame(competition, tmp.getLinearAddress());
+			WarFrame.this.competition.addCompetitionEventListener(memory_frame);
+		}
+		else
+			memory_frame.refrash(tmp.getLinearAddress());
+	}
+ 
 }
