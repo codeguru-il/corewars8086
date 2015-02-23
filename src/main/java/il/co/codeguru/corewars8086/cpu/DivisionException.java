@@ -7,4 +7,9 @@ package il.co.codeguru.corewars8086.cpu;
  */
 public class DivisionException extends CpuException {
 	private static final long serialVersionUID = 1L;
+	
+	public DivisionException(String message)
+	{
+		super(message);
+	}
 }

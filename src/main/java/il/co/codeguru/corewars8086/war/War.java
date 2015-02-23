@@ -120,11 +120,11 @@ public class War {
                         warrior.nextOpcode();
                     }
                 } catch (CpuException e) {
-                    m_warListener.onWarriorDeath(warrior.getName(), "CPU exception");
+                    m_warListener.onWarriorDeath(warrior.getName(), "CPU exception: " + e.getMessage());
                     warrior.kill();
                     --m_numWarriorsAlive;
                 } catch (MemoryException e) {
-                    m_warListener.onWarriorDeath(warrior.getName(), "memory exception");
+                    m_warListener.onWarriorDeath(warrior.getName(), "memory exception: " + e.getMessage());
                     warrior.kill();
                     --m_numWarriorsAlive;
                 }

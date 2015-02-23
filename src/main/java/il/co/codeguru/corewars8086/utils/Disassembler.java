@@ -54,4 +54,8 @@ public class Disassembler {
 		return result;
 	}
 	
+	public static String toString(byte b)
+	{
+		return "0x" + Integer.toHexString(b & 0xFF).toUpperCase();
+	}
 }

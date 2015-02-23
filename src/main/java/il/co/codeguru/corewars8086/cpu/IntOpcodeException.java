@@ -7,4 +7,9 @@ package il.co.codeguru.corewars8086.cpu;
  */
 public class IntOpcodeException extends CpuException {
 	private static final long serialVersionUID = 1L;
+	
+	public IntOpcodeException(String message)
+	{
+		super(message);
+	}
 }
