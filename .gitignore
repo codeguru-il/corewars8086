@@ -4,3 +4,10 @@ target/
 survivors
 zombies
 scores.csv
+
+
+/bin/
+
+/lib/
+.classpath
+.project
