@@ -46,11 +46,11 @@ public class Competition {
     }
 
     public void runAndSaveCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
-    	runCompetition(warsPerCombination, warriorsPerGroup, startPaused);
+    	runCompetition(warsPerCombination, warriorsPerGroup, startPaused, "");
     	warriorRepository.saveScoresToFile(SCORE_FILENAME);
     }
     
-    public String runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
+    public String runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused, String groupName) throws Exception {
         this.warsPerCombination = warsPerCombination;
         competitionIterator = new CompetitionIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
@@ -59,7 +59,21 @@ public class Competition {
         competitionEventListener.onCompetitionStart();
         for (int i = 0; i < warsPerCombination; i++)
         {
-			runWar(1, warriorRepository.createGroupList(competitionIterator.next()), startPaused);
+        	WarriorGroup[] curGroups = warriorRepository.createGroupList(competitionIterator.next());
+        	
+        	if (!groupName.equals(""))
+        	{
+        		// only run if groupName is in curGroups
+        		boolean found = false;
+            	for (int j = 0; j < curGroups.length && !found; j++)
+            		if (curGroups[j].getName().equalsIgnoreCase(groupName))
+            			found = true;
+            	
+            	if (!found)
+            		continue;
+        	}
+        	
+			runWar(1, curGroups, startPaused);
             if (abort) {
 				break;
 			}
