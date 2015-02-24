@@ -226,7 +226,7 @@ public class WarFrame extends JFrame
         }
     }
 
-    /** @see CompetitionEventListener#onWarStart(int) */
+    /** @see CompetitionEventListener#onWarStart */
     public void onWarStart() {
         addMessage("=== Session started ===");
         nameListModel.clear();
@@ -277,7 +277,7 @@ public class WarFrame extends JFrame
         nameListModel.addElement(new WarriorInfo(warriorName));
     }
 
-    /** @see CompetitionEventListener#onWarriorDeath(String) */
+    /** @see CompetitionEventListener#onWarriorDeath */
     public void onWarriorDeath(String warriorName, String reason) {
         addMessage(nRoundNumber, warriorName + " died due to " + reason + ".");
         Enumeration namesListElements = nameListModel.elements();
@@ -409,7 +409,7 @@ public class WarFrame extends JFrame
 	@Override
 	public void addressAtMouseLocationRequested(int address) {
 		RealModeAddress tmp = new RealModeAddress(
-				this.competition.getCurrentWar().ARENA_SEGMENT, (short) address);
+                War.ARENA_SEGMENT, (short) address);
 		byte data = this.competition.getCurrentWar().getMemory().readByte(tmp);
 
 		// Warrior w = this.competition.getCurrentWar().getNumWarriors()
@@ -417,7 +417,7 @@ public class WarFrame extends JFrame
 		this.addressFiled.setText(Integer.toHexString(address).toUpperCase()
 				+ ": " + String.format("%02X", data).toUpperCase());
 		
-		if(memory_frame == null || memory_frame.isVisible() == false){
+		if(memory_frame == null || !memory_frame.isVisible()){
 			memory_frame = new MemoryFrame(competition, tmp.getLinearAddress());
 			WarFrame.this.competition.addCompetitionEventListener(memory_frame);
 		}

@@ -84,7 +84,7 @@ public class CompetitionWindow extends JFrame
 		warriorsPerGroupField = new JTextField(String.format("%d", numberOfGropus), 3);
 		controlPanel.add(warriorsPerGroupField);
 		controlPanel.add(new JLabel("Sessions per groups combination:"));
-		battlesPerGroupField = new JTextField("100", 4);
+		battlesPerGroupField = new JTextField("1", 4);
 		controlPanel.add(battlesPerGroupField);
 		seed = new JTextField(4);
 		seed.setText("guru");
