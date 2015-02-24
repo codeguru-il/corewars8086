@@ -38,7 +38,7 @@ public class CompetitionWindow extends JFrame
         super("CodeGuru Extreme - Competition Viewer");
         getContentPane().setLayout(new BorderLayout());
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        competition = new Competition();
+        competition = new Competition(false);
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition
                         .getWarriorRepository();

@@ -31,8 +31,9 @@ public class Competition {
     private long seed = 0;
 
     private boolean abort;
+    private boolean tillEnd;
 
-    public Competition() throws IOException {
+    public Competition(boolean runEndlessly) throws IOException {
         warriorRepository = new WarriorRepository();
 
         competitionEventCaster = new EventMulticaster(CompetitionEventListener.class);
@@ -41,6 +42,7 @@ public class Competition {
         memoryEventListener = (MemoryEventListener) memoryEventCaster.getProxy();
         speed = MAXIMUM_SPEED;
         abort = false;
+        tillEnd = runEndlessly;
     }
 
     public void runAndSaveCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
@@ -104,7 +106,7 @@ public class Competition {
 				if (currentWar.isSingleRound())
 					currentWar.pause();
 
-				if (currentWar.isOver()) {
+				if (!tillEnd && currentWar.isOver()) {
 					break;
 				}
 
