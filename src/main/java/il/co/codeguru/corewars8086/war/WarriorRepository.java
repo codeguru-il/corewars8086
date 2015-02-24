@@ -25,7 +25,8 @@ public class WarriorRepository {
     public WarriorRepository() throws IOException {
         warriorNameToGroup = new HashMap<String,Integer>();
         warriorGroups = new ArrayList<WarriorGroup>();
-        readWarriorFiles();
+        readWarriorFiles(WARRIOR_DIRECTORY);
+        readZombies();
 
         scoreEventsCaster = new EventMulticaster(ScoreEventListener.class);
         scoreListener = (ScoreEventListener) scoreEventsCaster.getProxy();
@@ -56,13 +57,13 @@ public class WarriorRepository {
         }
         return names.toArray(new String[0]);
     }
-
+    
     /**
-     * Reads all warrior data files from the warriors' directory.
+     * Reads all warrior data files from the directory given.
      * @throws IOException 
      */
-    private void readWarriorFiles() throws IOException  {		
-        File warriorsDirectory = new File(WARRIOR_DIRECTORY);
+    public void readWarriorFiles(String warriorDirectory) throws IOException  {		
+        File warriorsDirectory = new File(warriorDirectory);
         
         fixFiles(warriorsDirectory);
         
@@ -70,7 +71,7 @@ public class WarriorRepository {
         if (warriorFiles == null) {
             JOptionPane.showMessageDialog(null,
                 "Error - survivors directory (\"" +
-                WARRIOR_DIRECTORY + "\") not found");
+                warriorDirectory + "\") not found");
             System.exit(1);
         }
 
@@ -106,7 +107,6 @@ public class WarriorRepository {
                 currentGroup = null;
             }
         }
-        readZombies();
     }
 
     private void fixFiles(File warriorsDirectory) {
