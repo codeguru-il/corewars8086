@@ -32,7 +32,6 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 		comp = c;
 		
 		setAlwaysOnTop(true);
-		setSize(800,800);
 		setVisible(true);
 		
 		JPanel l = new JPanel(new GridLayout(0,9));
@@ -64,7 +63,7 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 		add(top);
 		
 		refrash(address);
-		
+		pack();
 	}
 
 	
