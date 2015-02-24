@@ -42,6 +42,8 @@ public class War {
     private int m_numWarriors;
     /** Number of warriors still alive */
     private int m_numWarriorsAlive;
+    /** Number of groups still alive */
+    private int m_numGroupsAlive;
     /**
      * Addresses equal or larger than this are still unused.
      * An address can be 'used' either by the Arena, or by the private stacks.
@@ -66,6 +68,7 @@ public class War {
         m_warriors = new Warrior[MAX_WARRIORS];
         m_numWarriors = 0;
         m_numWarriorsAlive = 0;
+        m_numGroupsAlive = 0;
         m_core = new RealModeMemoryImpl();
         m_nextFreeAddress = RealModeAddress.PARAGRAPH_SIZE *
             (ARENA_SEGMENT + RealModeAddress.PARAGRAPHS_IN_SEGMENT);
@@ -106,6 +109,8 @@ public class War {
      * @param round The current round number.
      */
     public void nextRound(int round) {
+    	String lastGroup = "";
+    	m_numGroupsAlive = 0;
         for (int i = 0; i < m_numWarriors; ++i) {
             Warrior warrior = m_warriors[i];
             m_currentWarrior = i;
@@ -118,6 +123,12 @@ public class War {
                     updateWarriorEnergy(warrior, round);
                     if (shouldRunExtraOpcode(warrior)) {
                         warrior.nextOpcode();
+                    }
+                    
+                    if (warrior.getGroupName() != lastGroup)
+                    {
+                    	lastGroup = warrior.getGroupName();
+                    	m_numGroupsAlive++;
                     }
                 } catch (CpuException e) {
                     m_warListener.onWarriorDeath(warrior.getName(), "CPU exception: " + e.getMessage());
@@ -136,7 +147,7 @@ public class War {
      * @return whether or not the War is over.
      */
     public boolean isOver() {
-        return (m_numWarriorsAlive < 2);
+    	return m_numGroupsAlive < 2;
     }
 	
     /**
@@ -225,6 +236,7 @@ public class War {
 
             m_warriors[m_numWarriors++] = new Warrior(
                 warriorName,
+                warriorGroup.getName(),
                 warriorData.length,
                 m_core,
                 loadAddress,
@@ -243,6 +255,7 @@ public class War {
             // notify listener
             m_warListener.onWarriorBirth(warriorName);		
         }
+        ++m_numGroupsAlive;
     }
 
     /**
