@@ -43,7 +43,12 @@ public class Competition {
         abort = false;
     }
 
-    public void runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
+    public void runAndSaveCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
+    	runCompetition(warsPerCombination, warriorsPerGroup, startPaused);
+    	warriorRepository.saveScoresToFile(SCORE_FILENAME);
+    }
+    
+    public String runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
         this.warsPerCombination = warsPerCombination;
         competitionIterator = new CompetitionIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
@@ -58,7 +63,7 @@ public class Competition {
 			}
         }
         competitionEventListener.onCompetitionEnd();
-        warriorRepository.saveScoresToFile(SCORE_FILENAME);
+        return warriorRepository.getScores();
     }
 
     public int getTotalNumberOfWars() {

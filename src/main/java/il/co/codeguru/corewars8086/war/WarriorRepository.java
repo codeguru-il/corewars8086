@@ -191,26 +191,36 @@ public class WarriorRepository {
         return groups;
     }
 
+    public String getScores()
+    {
+    	String str = "";
+    	for (WarriorGroup group: warriorGroups) {
+            List<Float> scores  = group.getScores();
+            List<WarriorData> data = group.getWarriors();
+            str += group.getName() + "," + group.getGroupScore();
+            for (int i = 0; i < scores.size(); i++) {
+                str += "," + data.get(i).getName() + "," + scores.get(i);
+            }
+            str += "\n";
+        }
+    	return str;
+    }
+    
     public void saveScoresToFile(String filename) {
-        try {
+    	String results = getScores();
+    	try
+    	{
             FileOutputStream fos = new FileOutputStream(filename);
             PrintStream ps = new PrintStream(fos);
-            ps.print("Groups:\n");
-            for (WarriorGroup group: warriorGroups) {
-                ps.print(group.getName()+ "," + group.getGroupScore()+"\n");
-            }
-            ps.print("\nWarriors:\n");
-            for (WarriorGroup group: warriorGroups) {
-                List<Float> scores  = group.getScores();
-                List<WarriorData> data = group.getWarriors();
-                for (int i = 0; i < scores.size(); i++) {
-                    ps.print(data.get(i).getName() + "," + scores.get(i)+"\n");
-                }
-            }
+            ps.print(results);
             fos.close();
-        } catch (FileNotFoundException e) {
+        }
+    	catch (FileNotFoundException e)
+    	{
             e.printStackTrace();
-        } catch (IOException e) {
+        }
+    	catch (IOException e)
+    	{
             e.printStackTrace();
         }
     }

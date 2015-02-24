@@ -134,7 +134,7 @@ public class CompetitionWindow extends JFrame
                 @Override
                 public void run() {
                     try {
-                        competition.runCompetition(battlesPerGroup, warriorsPerGroup, startPausedCheckBox.isSelected());
+                        competition.runAndSaveCompetition(battlesPerGroup, warriorsPerGroup, startPausedCheckBox.isSelected());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
