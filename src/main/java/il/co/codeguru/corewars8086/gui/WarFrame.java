@@ -383,7 +383,6 @@ public class WarFrame extends JFrame
 
 	@Override
 	public void dispose() {
-
 		// bug fix - event casted while window is being disposed FIXME find a
 		// better solution
 		this.competition.getCurrentWar().pause();
