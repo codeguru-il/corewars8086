@@ -129,6 +129,11 @@ public class Warrior {
         return m_codeSize;
     }
 
+    public boolean isFirst()
+    {
+    	return !m_name.endsWith("2");
+    }
+    
     /**
      * Accessors for the warrior's Energy value (used to calculate
      * the warrior's speed).

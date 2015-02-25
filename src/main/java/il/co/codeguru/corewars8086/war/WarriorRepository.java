@@ -58,6 +58,22 @@ public class WarriorRepository {
         return names.toArray(new String[0]);
     }
     
+    public int getGroupOrZombieIndicie(Warrior warrior)
+    {
+    	for (int i = 0; i < warriorGroups.size(); i++)
+    		if (warriorGroups.get(i).getName().equals(warrior.getGroupName()))
+    			return i;
+    	for (int i = 0; i < zombieGroup.getWarriors().size(); i++)
+    		if (zombieGroup.getWarriors().get(i).getName().equals(warrior.getName()))
+    			return i + warriorGroups.size();
+    	return -1;
+    }
+    
+    public int getNumberOfZombies()
+    {
+    	return zombieGroup.getWarriors().size();
+    }
+
     /**
      * Reads all warrior data files from the directory given.
      * @throws IOException 

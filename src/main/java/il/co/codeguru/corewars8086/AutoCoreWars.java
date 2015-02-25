@@ -1,7 +1,6 @@
 package il.co.codeguru.corewars8086;
 
 import il.co.codeguru.corewars8086.war.Competition;
-import il.co.codeguru.corewars8086.war.CompetitionIterator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +62,7 @@ public class AutoCoreWars
 			c = new Competition(runEndlessly);
 			for (String directory : extraWarriorDirectories)
 				c.getWarriorRepository().readWarriorFiles(directory);
-			System.out.println(c.runCompetition(warsPerCombination, warriorsPerGroup, false, groupName));
+			System.out.println(c.runCompetition(warsPerCombination, warriorsPerGroup, groupName));
 		}
 		input.close();
 	}

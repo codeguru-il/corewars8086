@@ -44,6 +44,8 @@ public class War {
     private int m_numWarriorsAlive;
     /** Number of groups still alive */
     private int m_numGroupsAlive;
+    /** Flags used to control the pause and single round features*/
+    private boolean pausedFlag, singleRoundFlag;
     /**
      * Addresses equal or larger than this are still unused.
      * An address can be 'used' either by the Arena, or by the private stacks.
@@ -62,13 +64,14 @@ public class War {
      * Constructor.
      * Fills the Arena with its initial data. 
      */
-    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener, boolean startPaused) {
-    	isPaused = startPaused;
+    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener) {
         m_warListener = warListener;
         m_warriors = new Warrior[MAX_WARRIORS];
         m_numWarriors = 0;
         m_numWarriorsAlive = 0;
         m_numGroupsAlive = 0;
+        singleRoundFlag = false;
+        pausedFlag = false;
         m_core = new RealModeMemoryImpl();
         m_nextFreeAddress = RealModeAddress.PARAGRAPH_SIZE *
             (ARENA_SEGMENT + RealModeAddress.PARAGRAPHS_IN_SEGMENT);
@@ -79,8 +82,6 @@ public class War {
             m_core.writeByte(tmp, ARENA_BYTE);			
         }
 
-        isSingleRound = false;
-        
         // set the memory listener (we only do this now, to skip initialization)
         m_core.setListener(memoryListener);
     }
@@ -343,7 +344,7 @@ public class War {
         return m_warriors[index];
     }
 
-    /** @return the numebr of warriors fighting in this match. */
+    /** @return the number of warriors fighting in this match. */
     public int getNumWarriors() {
         return m_numWarriors;
     }
@@ -384,40 +385,39 @@ public class War {
     	}
     }
     
-    private Random rand = new Random();
-    
-    private boolean isSingleRound;
-    private boolean isPaused;
-    
-    public void setSeed(long seed){
+    /**
+     * Sets the seed for the Random
+     * @param seed
+     */
+    public void setSeed(long seed)
+    {
     	rand.setSeed(seed);
     }
     
-    public void pause(){
-    	isPaused = true;
+    /**	Gets or sets the paused flag */
+    public void setPausedFlag(boolean paused)
+    {
+    	pausedFlag = paused;
+    }
+    public boolean getPausedFlag()
+    {
+    	return pausedFlag;
     }
     
-    public boolean isPaused(){
-    	return isPaused;
+    /**	Gets or sets the single round flag */
+    public void setSingleRoundFlag(boolean singleRound)
+    {
+    	singleRoundFlag = singleRound;
+    }
+    public boolean getSingleRoundFlag()
+    {
+    	return singleRoundFlag;
     }
     
-    public void resume(){
-    	isPaused = false;
-    	isSingleRound = false;
-    }
-    
-    public void runSingleRound(){
-    	this.resume();
-    	isSingleRound = true;
-    }
-    
-    public boolean isSingleRound(){
-    	return this.isSingleRound;
-    }
-    
-    public RealModeMemoryImpl getMemory(){
+    public RealModeMemoryImpl getMemory()
+    {
     	return m_core;
     }
     
-    
+    private Random rand = new Random();
 }
