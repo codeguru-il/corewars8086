@@ -94,7 +94,7 @@ public class Competition {
     }
 
     public int getTotalNumberOfWars() {
-        return (int) competitionIterator.getNumberOfItems() * warsPerCombination;
+        return (int) warsPerCombination;
     }
 
     public void runWar(WarriorGroup[] warriorGroups) throws Exception {
