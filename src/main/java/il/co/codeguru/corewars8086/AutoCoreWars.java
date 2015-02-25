@@ -13,11 +13,11 @@ public class AutoCoreWars
 	{
 		System.out.println("Availble options:");
 		System.out.println("Syntax\t\tDescription\t\tDefault");
-		System.out.println("-wars [num]\tWars per Combination\t1");
+		System.out.println("-wars [num]\tWars\t\t\t1");
 		System.out.println("-warriors [num]\tWarriors per Group\t4");
-		System.out.println("-endless\tRun Endlessly\tfalse");
+		System.out.println("-endless\tRun Endlessly\t\tfalse");
 		System.out.println("-group [name]\tOnly with Group");
-		System.out.println("-add [directory]\tAdd Warriors Directory");
+		System.out.println("-add [directory]Add Warriors Directory");
 		System.out.println("");
 		System.out.println("Enter \"exit\" to exit engine");
 		

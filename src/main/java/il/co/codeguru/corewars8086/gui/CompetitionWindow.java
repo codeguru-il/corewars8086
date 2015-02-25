@@ -82,7 +82,7 @@ public class CompetitionWindow extends JFrame
         // ------------ Control panel
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout());
-        controlPanel.add(new JLabel("Survivor groups per session:"));
+        controlPanel.add(new JLabel("Survivor group size:"));
         
         // If total number of teams is more then four, make it the default number
 		int numberOfGropus = Math.min(4,
@@ -90,7 +90,7 @@ public class CompetitionWindow extends JFrame
 		
 		warriorsPerGroupField = new JTextField(String.format("%d", numberOfGropus), 3);
 		controlPanel.add(warriorsPerGroupField);
-		controlPanel.add(new JLabel("Sessions per groups combination:"));
+		controlPanel.add(new JLabel("Sessions:"));
 		battlesPerGroupField = new JTextField("10", 4);
 		controlPanel.add(battlesPerGroupField);
         controlArea.add(controlPanel);
