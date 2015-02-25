@@ -201,6 +201,9 @@ public class DisassemblerPanel extends JPanel implements CompetitionEventListene
 	{
 		type.setSelectedIndex(index);
 		
+		offset.setText("0000");
+		offsetS = "0000";
+		
 		if (index == 0)
 		{
 			subType.setVisible(false);
