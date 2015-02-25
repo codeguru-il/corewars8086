@@ -191,6 +191,7 @@ public class DisassemblerPanel extends JPanel implements CompetitionEventListene
 	{
 		segment.setText("1000");
 		segmentS = "1000";
+		setType(0);
 		offset.setText(address + "");
 		offsetS = address + "";
 		updateDisassembler();

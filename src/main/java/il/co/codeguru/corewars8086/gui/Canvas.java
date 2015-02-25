@@ -21,7 +21,8 @@ public class Canvas extends JComponent implements MouseInputListener {
     public static final int DOT_SIZE = 3;
     public static final byte EMPTY = -1;
 
-    private  byte[][] data;
+    private byte[][] data;
+    private boolean[][] darker;
     
     private boolean[][] pointer; 
        
@@ -50,15 +51,16 @@ public class Canvas extends JComponent implements MouseInputListener {
         return getMinimumSize();
     }
 
-    public void paintPixel(int number, byte color) {
-        paintPixel(number % BOARD_SIZE, number / BOARD_SIZE, color);
+    public void paintPixel(int number, byte color, boolean darker) {
+        paintPixel(number % BOARD_SIZE, number / BOARD_SIZE, color, darker);
     }
 
-    public void paintPixel(int x, int y, byte color) {
+    public void paintPixel(int x, int y, byte color, boolean darker) {
         data[x][y] = color;
+        this.darker[x][y] = darker;
         Graphics g = getGraphics();
         if (g != null) {
-            g.setColor(ColorHolder.getInstance().getColor(color,false));
+            g.setColor(ColorHolder.getInstance().getColor(color, darker));
             g.fillRect(x * DOT_SIZE, y * DOT_SIZE, DOT_SIZE, DOT_SIZE);
         }
     }
@@ -66,8 +68,8 @@ public class Canvas extends JComponent implements MouseInputListener {
     /** 
      * Get the color of warrior <code>id</code>
      */
-    public Color getColorForWarrior(int id) {
-        return ColorHolder.getInstance().getColor(id,false);
+    public Color getColorForWarrior(int id, boolean isSecond) {
+        return ColorHolder.getInstance().getColor(id, isSecond);
     }
     
     
@@ -93,10 +95,12 @@ public class Canvas extends JComponent implements MouseInputListener {
      */
     public void clear() {
 		data = new byte[BOARD_SIZE][BOARD_SIZE];
+		darker = new boolean[BOARD_SIZE][BOARD_SIZE];
 		pointer = new boolean[BOARD_SIZE][BOARD_SIZE];
 		for (int i = 0; i < BOARD_SIZE; i++)
 			for (int j = 0; j < BOARD_SIZE; j++) {
 				data[i][j] = EMPTY;
+				darker[i][j] = false;
 				pointer[i][j] = false;
 			}
 		repaint();
@@ -116,7 +120,7 @@ public class Canvas extends JComponent implements MouseInputListener {
                     continue;
                 }
 
-                g.setColor(ColorHolder.getInstance().getColor(cellVal,false));
+                g.setColor(ColorHolder.getInstance().getColor(cellVal, darker[x][y]));
                 g.fillRect(x*DOT_SIZE, y*DOT_SIZE, DOT_SIZE, DOT_SIZE);
             }
         }
@@ -147,7 +151,7 @@ public class Canvas extends JComponent implements MouseInputListener {
 	private void clearMousePointer(Graphics g) {
 		try {
 			g.setColor(ColorHolder.getInstance()
-					.getColor(data[MouseX][MouseY],false));
+					.getColor(data[MouseX][MouseY], darker[MouseX][MouseY]));
 		} catch (Exception ex) {
 			// TODO the true variable of the color
 			g.setColor(new Color(51, 51, 51)); 
@@ -174,7 +178,7 @@ public class Canvas extends JComponent implements MouseInputListener {
 			for (int j = 0; j < BOARD_SIZE; j++) {
 				if (pointer[i][j] == true && data[i][j] != EMPTY) {
 					pointer[i][j] = false;
-					paintPixel(i, j, data[i][j]);
+					paintPixel(i, j, data[i][j], darker[i][j]);
 				}
 			}
 	}

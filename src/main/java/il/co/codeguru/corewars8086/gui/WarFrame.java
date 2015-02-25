@@ -302,7 +302,8 @@ public class WarFrame extends JFrame
     		warCanvas.paintPixel(
     				Unsigned.unsignedShort(ipInsideArena),
     				(byte) competition.getWarriorRepository().getGroupOrZombieIndicie(
-    						competition.getCurrentWar().getWarrior(competition.getCurrentWarrior())));
+    						competition.getCurrentWar().getWarrior(competition.getCurrentWarrior())),
+    				!competition.getCurrentWar().getWarrior(competition.getCurrentWarrior()).isFirst());
     	}
     }
 
@@ -426,7 +427,8 @@ public class WarFrame extends JFrame
             }
             setText(text);
             setForeground(warCanvas.getColorForWarrior((byte) competition.getWarriorRepository().getGroupOrZombieIndicie(
-					competition.getCurrentWar().getWarrior(index))));
+					competition.getCurrentWar().getWarrior(index)),
+					!competition.getCurrentWar().getWarrior(index).isFirst()));
             setToolTipText(info.alive + "");
             return this;
         }
