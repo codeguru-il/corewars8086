@@ -472,7 +472,6 @@ public class WarFrame extends JFrame
     
     @Override
 	public void addressAtMouseLocationRequested(int address) {
-    	System.out.println("Clicked!");
     	disassemblerPanel.onArenaClick(address);
 	}
 }

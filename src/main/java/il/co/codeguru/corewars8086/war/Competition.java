@@ -47,8 +47,8 @@ public class Competition {
         pauseFlag = false;
     }
 
-    public void runAndSaveCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {
-    	runCompetition(warsPerCombination, warriorsPerGroup, "");
+    public void runAndSaveCompetition (int warsPerCombination, int warriorsPerGroup, String groupName) throws Exception {
+    	runCompetition(warsPerCombination, warriorsPerGroup, groupName);
     	warriorRepository.saveScoresToFile(SCORE_FILENAME);
     }
 
