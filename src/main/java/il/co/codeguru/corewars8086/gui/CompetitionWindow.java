@@ -29,6 +29,7 @@ public class CompetitionWindow extends JFrame
     // advanced panel
     private JPanel advancedPanel;
     private JCheckBox tillEndCheckbox;
+    private JCheckBox randomRunCheckbox;
     private JSlider speedSlider;
     private JTextField groupToRunField;
     private JTextField seedField;
@@ -105,6 +106,10 @@ public class CompetitionWindow extends JFrame
         tillEndCheckbox.setAlignmentX(Component.CENTER_ALIGNMENT);
         advancedPanel.add(tillEndCheckbox);
         
+        randomRunCheckbox = new JCheckBox("Run random surivor groups", false);
+        randomRunCheckbox.setAlignmentX(Component.CENTER_ALIGNMENT);
+        advancedPanel.add(randomRunCheckbox);
+        
         JPanel speedPanel = new JPanel();
         speedPanel.add(new JLabel("Default speed:"));
         speedSlider = new JSlider(1, Competition.MAXIMUM_SPEED, Competition.MAXIMUM_SPEED * 9 / 10);
@@ -175,7 +180,7 @@ public class CompetitionWindow extends JFrame
                 public void run() {
                     try {
                     	if (!seedField.getText().equals("")) competition.setSeed(Long.parseLong(seedField.getText()));
-                        competition.runAndSaveCompetition(battlesPerGroup, warriorsPerGroup, groupToRunField.getText().trim());
+                        competition.runAndSaveCompetition(battlesPerGroup, warriorsPerGroup, groupToRunField.getText().trim(), !randomRunCheckbox.isSelected());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

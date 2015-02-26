@@ -47,16 +47,21 @@ public class Competition {
         pauseFlag = false;
     }
 
-    public void runAndSaveCompetition (int warsPerCombination, int warriorsPerGroup, String groupName) throws Exception {
-    	runCompetition(warsPerCombination, warriorsPerGroup, groupName);
+    public void runAndSaveCompetition (int warsPerCombination, int warriorsPerGroup, String groupName, boolean binomicalRun) throws Exception {
+    	runCompetition(warsPerCombination, warriorsPerGroup, groupName, binomicalRun);
     	warriorRepository.saveScoresToFile(SCORE_FILENAME);
     }
 
-    public String runCompetition (int warsPerCombination, int warriorsPerGroup, String groupName) throws Exception {
+    public String runCompetition (int warsPerCombination, int warriorsPerGroup, String groupName, boolean binomicalRun) throws Exception {
     	abort = false;
         this.warsPerCombination = warsPerCombination;
-        competitionIterator = new CompetitionIterator(
-            warriorRepository.getNumberOfGroups(), warriorsPerGroup);
+        
+        if (binomicalRun)
+        	competitionIterator = new BinomialIterator(
+        			warriorRepository.getNumberOfGroups(), warriorsPerGroup);
+        else
+        	competitionIterator = new RandomIterator(
+        			warriorRepository.getNumberOfGroups(), warriorsPerGroup);
         
         specificGroup = !groupName.equals("");
         
@@ -64,28 +69,37 @@ public class Competition {
         competitionEventListener.onCompetitionStart();
         for (int i = 0; i < warsPerCombination; i++)
         {
-        	if (hasCustomSeed)
-        		seed++;
-        	else
-        		seed = Math.abs(rand.nextLong());
+        	competitionIterator.reset();
         	
-        	WarriorGroup[] curGroups = warriorRepository.createGroupList((int[])competitionIterator.next());
+        	while (competitionIterator.hasNext())
+        	{
+        		if (hasCustomSeed)
+            		seed++;
+            	else
+            		seed = Math.abs(rand.nextLong());
             	
-            if (specificGroup)
-            {
-            	boolean found = false;
-                for (int j = 0; j < curGroups.length && !found; j++)
-                	if (curGroups[j].getName().equalsIgnoreCase(groupName))
-                		found = true;
+            	WarriorGroup[] curGroups = warriorRepository.createGroupList(competitionIterator.next());
                 	
-                if (!found)
-                	continue;
-            }
-            
-            runWar(curGroups);
-            if (abort) {
-            	break;
-    		}
+                if (specificGroup)
+                {
+                	boolean found = false;
+                    for (int j = 0; j < curGroups.length && !found; j++)
+                    	if (curGroups[j].getName().equalsIgnoreCase(groupName))
+                    		found = true;
+                    	
+                    if (!found)
+                    	continue;
+                }
+                
+                runWar(curGroups);
+                if (abort) {
+                	break;
+        		}
+        	}
+        	
+        	if (abort) {
+        		break;
+        	}
         }
         
         competitionEventListener.onCompetitionEnd();
@@ -94,7 +108,7 @@ public class Competition {
     }
 
     public int getTotalNumberOfWars() {
-        return (int) warsPerCombination;
+        return (int) (warsPerCombination * competitionIterator.getNumberOfItems(specificGroup ? 1 : 0));
     }
 
     public void runWar(WarriorGroup[] warriorGroups) throws Exception {

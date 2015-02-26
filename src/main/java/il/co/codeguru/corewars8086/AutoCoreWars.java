@@ -18,6 +18,7 @@ public class AutoCoreWars
 		System.out.println("-endless\tRun Endlessly\t\tfalse");
 		System.out.println("-group [name]\tOnly with Group");
 		System.out.println("-add [directory]Add Warriors Directory");
+		System.out.println("-random\t\tRun Random Groups\tfalse");
 		System.out.println("");
 		System.out.println("Enter \"exit\" to exit engine");
 		
@@ -28,7 +29,7 @@ public class AutoCoreWars
 		{
 			int warsPerCombination = 1;
 			int warriorsPerGroup = 4;
-			boolean runEndlessly = false;
+			boolean runEndlessly = false, runBinomical = true;
 			String groupName = "";
 			ArrayList<String> extraWarriorDirectories = new ArrayList<String>();
 			
@@ -56,13 +57,16 @@ public class AutoCoreWars
 					case "-add":
 						extraWarriorDirectories.add(cmdArgs.remove(0));
 						break;
+					case "-random":
+						runBinomical = false;
+						break;
 				}
 			}
 			
 			c = new Competition(runEndlessly);
 			for (String directory : extraWarriorDirectories)
 				c.getWarriorRepository().readWarriorFiles(directory);
-			System.out.println(c.runCompetition(warsPerCombination, warriorsPerGroup, groupName));
+			System.out.println(c.runCompetition(warsPerCombination, warriorsPerGroup, groupName, runBinomical));
 		}
 		input.close();
 	}
