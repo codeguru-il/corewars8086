@@ -66,7 +66,11 @@ public class AutoCoreWars
 			c = new Competition(runEndlessly);
 			for (String directory : extraWarriorDirectories)
 				c.getWarriorRepository().readWarriorFiles(directory);
-			System.out.println(c.runCompetition(warsPerCombination, warriorsPerGroup, groupName, runBinomical));
+			
+			if (c.getWarriorRepository().getNumberOfGroups() < warriorsPerGroup)
+				System.out.println("Not enough survivors to run " + warriorsPerGroup + " survivors!");
+			else
+				System.out.println(c.runCompetition(warsPerCombination, warriorsPerGroup, groupName, runBinomical));
 		}
 		input.close();
 	}
