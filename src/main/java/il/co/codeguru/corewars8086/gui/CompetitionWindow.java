@@ -277,7 +277,7 @@ public class CompetitionWindow extends JFrame
         competition.addMemoryEventLister(battleFrame);
         competition.addCompetitionEventListener(battleFrame);
         
-        Rectangle battleFrameRect = new Rectangle(0, getY(), 754, 725);
+        Rectangle battleFrameRect = new Rectangle(0, getY(), 244 + Canvas.getCanvasSize().width, 222 + Canvas.getCanvasSize().height);
         Rectangle screen = getGraphicsConfiguration().getBounds(); //for multiple monitors
         
         if (getX() + getWidth() <= screen.getX() + screen.getWidth()

@@ -41,6 +41,11 @@ public class Canvas extends JComponent implements MouseInputListener {
         clear();
     }
 
+    public static Dimension getCanvasSize()
+    {
+    	return new Dimension(BOARD_SIZE * DOT_SIZE, BOARD_SIZE * DOT_SIZE);
+    }
+    
     @Override
     public Dimension getMinimumSize() {
         return new Dimension(BOARD_SIZE * DOT_SIZE, BOARD_SIZE * DOT_SIZE);
