@@ -18,7 +18,7 @@ public class Canvas extends JComponent implements MouseInputListener {
 	private static final long serialVersionUID = 1L;
 	
 	public static final int BOARD_SIZE = 256;
-    public static final int DOT_SIZE = 3;
+    public static final int DOT_SIZE = 2;
     public static final byte EMPTY = -1;
 
     private byte[][] data;
