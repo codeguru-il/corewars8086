@@ -25,7 +25,8 @@ public class WarriorRepository {
     public WarriorRepository() throws IOException {
         warriorNameToGroup = new HashMap<String,Integer>();
         warriorGroups = new ArrayList<WarriorGroup>();
-        readWarriorFiles();
+        readWarriorFiles(WARRIOR_DIRECTORY);
+        readZombies();
 
         scoreEventsCaster = new EventMulticaster(ScoreEventListener.class);
         scoreListener = (ScoreEventListener) scoreEventsCaster.getProxy();
@@ -56,13 +57,29 @@ public class WarriorRepository {
         }
         return names.toArray(new String[0]);
     }
+    
+    public int getGroupOrZombieIndicie(Warrior warrior)
+    {
+    	for (int i = 0; i < warriorGroups.size(); i++)
+    		if (warriorGroups.get(i).getName().equals(warrior.getGroupName()))
+    			return i;
+    	for (int i = 0; i < zombieGroup.getWarriors().size(); i++)
+    		if (zombieGroup.getWarriors().get(i).getName().equals(warrior.getName()))
+    			return i + warriorGroups.size();
+    	return -1;
+    }
+    
+    public int getNumberOfZombies()
+    {
+    	return zombieGroup.getWarriors().size();
+    }
 
     /**
-     * Reads all warrior data files from the warriors' directory.
+     * Reads all warrior data files from the directory given.
      * @throws IOException 
      */
-    private void readWarriorFiles() throws IOException  {		
-        File warriorsDirectory = new File(WARRIOR_DIRECTORY);
+    public void readWarriorFiles(String warriorDirectory) throws IOException  {		
+        File warriorsDirectory = new File(warriorDirectory);
         
         fixFiles(warriorsDirectory);
         
@@ -70,7 +87,7 @@ public class WarriorRepository {
         if (warriorFiles == null) {
             JOptionPane.showMessageDialog(null,
                 "Error - survivors directory (\"" +
-                WARRIOR_DIRECTORY + "\") not found");
+                warriorDirectory + "\") not found");
             System.exit(1);
         }
 
@@ -106,7 +123,6 @@ public class WarriorRepository {
                 currentGroup = null;
             }
         }
-        readZombies();
     }
 
     private void fixFiles(File warriorsDirectory) {
@@ -191,26 +207,36 @@ public class WarriorRepository {
         return groups;
     }
 
+    public String getScores()
+    {
+    	String str = "";
+    	for (WarriorGroup group: warriorGroups) {
+            List<Float> scores  = group.getScores();
+            List<WarriorData> data = group.getWarriors();
+            str += group.getName() + "," + group.getGroupScore();
+            for (int i = 0; i < scores.size(); i++) {
+                str += "," + data.get(i).getName() + "," + scores.get(i);
+            }
+            str += "\n";
+        }
+    	return str;
+    }
+    
     public void saveScoresToFile(String filename) {
-        try {
+    	String results = getScores();
+    	try
+    	{
             FileOutputStream fos = new FileOutputStream(filename);
             PrintStream ps = new PrintStream(fos);
-            ps.print("Groups:\n");
-            for (WarriorGroup group: warriorGroups) {
-                ps.print(group.getName()+ "," + group.getGroupScore()+"\n");
-            }
-            ps.print("\nWarriors:\n");
-            for (WarriorGroup group: warriorGroups) {
-                List<Float> scores  = group.getScores();
-                List<WarriorData> data = group.getWarriors();
-                for (int i = 0; i < scores.size(); i++) {
-                    ps.print(data.get(i).getName() + "," + scores.get(i)+"\n");
-                }
-            }
+            ps.print(results);
             fos.close();
-        } catch (FileNotFoundException e) {
+        }
+    	catch (FileNotFoundException e)
+    	{
             e.printStackTrace();
-        } catch (IOException e) {
+        }
+    	catch (IOException e)
+    	{
             e.printStackTrace();
         }
     }

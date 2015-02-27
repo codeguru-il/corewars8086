@@ -3,6 +3,7 @@ package il.co.codeguru.corewars8086.cpu;
 import il.co.codeguru.corewars8086.memory.MemoryException;
 import il.co.codeguru.corewars8086.memory.RealModeAddress;
 import il.co.codeguru.corewars8086.memory.RealModeMemory;
+import il.co.codeguru.corewars8086.utils.Disassembler;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 
 
@@ -26,7 +27,7 @@ public class Cpu {
         m_regs = new RegisterIndexingDecoder(m_state);
         m_indirect = new IndirectAddressingDecoder(m_state, m_memory, m_fetcher);
     }
-
+	
     /**
      * Performs the next single opcode.
      * 
@@ -86,7 +87,7 @@ public class Cpu {
                 break;
         }
     }
-
+	
     private void opcode0X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {
             case (byte)0x00: // ADD [X], reg8
@@ -144,7 +145,7 @@ public class Cpu {
                 break;
             case (byte)0x0F:
                 // 0x0F - invalid opcode
-                throw new InvalidOpcodeException();
+                throw new InvalidOpcodeException("0x0F");
             default:
                 throw new RuntimeException();
         }		
@@ -212,7 +213,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcode2X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {			
             case (byte)0x20: // AND [X], reg8
@@ -238,8 +239,9 @@ public class Cpu {
                 m_state.setAX(and16(m_state.getAX(), m_fetcher.nextWord()));
                 break;			
             case (byte)0x26: // TODO: 'ES:' prefix
+            	throw new UnimplementedOpcodeException("'ES:' prefix - 0x26");
             case (byte)0x27: // TODO: DAA
-                throw new UnimplementedOpcodeException();
+                throw new UnimplementedOpcodeException("DAA - 0x27");
             case (byte)0x28: // SUB [X], reg8
                 m_indirect.reset();
                 m_indirect.setMem8(sub8(m_indirect.getMem8(), m_indirect.getReg8()));
@@ -263,13 +265,14 @@ public class Cpu {
                 m_state.setAX(sub16(m_state.getAX(), m_fetcher.nextWord()));
                 break;	
             case (byte)0x2E: // TODO: 'CS:' prefix
+            	throw new UnimplementedOpcodeException("'CS:' prefix - 0x2E");
             case (byte)0x2F: // TODO: DAS
-                throw new UnimplementedOpcodeException();
+                throw new UnimplementedOpcodeException("DAS - 0x2F");
             default:
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcode3X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {			
             case (byte)0x30: // XOR [X], reg8
@@ -295,8 +298,9 @@ public class Cpu {
                 m_state.setAX(xor16(m_state.getAX(), m_fetcher.nextWord()));
                 break;			
             case (byte)0x36: // TODO: 'SS:' prefix
+            	throw new UnimplementedOpcodeException("'SS:' prefix - 0x36");
             case (byte)0x37: // TODO: AAA
-                throw new UnimplementedOpcodeException();
+                throw new UnimplementedOpcodeException("AAA - 0x37");
             case (byte)0x38: // CMP [X], reg8
                 m_indirect.reset();
                 sub8(m_indirect.getMem8(), m_indirect.getReg8());
@@ -320,13 +324,14 @@ public class Cpu {
                 sub16(m_state.getAX(), m_fetcher.nextWord());
                 break;
             case (byte)0x3E: // TODO: 'DS:' prefix
+            	throw new UnimplementedOpcodeException("'DS:' prefix - 0x3E");
             case (byte)0x3F: // TODO: AAS
-                throw new UnimplementedOpcodeException();
+                throw new UnimplementedOpcodeException("AAS - 0x3F");
             default:
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcode4X(byte opcode) {
         byte index = (byte)(opcode & 0x07);
         switch (opcode) {
@@ -354,7 +359,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcode5X(byte opcode) throws MemoryException {
         byte index = (byte)(opcode & 0x07);
         switch (opcode) {
@@ -382,10 +387,10 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcode6X(byte opcode) throws CpuException {
         // 0x60.. 0x6F - invalid opcodes
-        throw new InvalidOpcodeException();		
+        throw new InvalidOpcodeException(Disassembler.toString(opcode));		
     }
 
     private void opcode7X(byte opcode) throws MemoryException {
@@ -410,16 +415,16 @@ public class Cpu {
                 branch = !m_state.getZeroFlag();
                 break;
             case (byte)0x76: // JBE,JNA
-                branch = (m_state.getCarryFlag() || m_state.getZeroFlag());				
+                branch = (m_state.getCarryFlag() || m_state.getZeroFlag());
                 break;
             case (byte)0x77: // JNBE,JA
-                branch = (!m_state.getCarryFlag() && !m_state.getZeroFlag());				
+                branch = (!m_state.getCarryFlag() && !m_state.getZeroFlag());
                 break;
             case (byte)0x78: // JS
-                branch = m_state.getSignFlag();			
+                branch = m_state.getSignFlag();
                 break;
             case (byte)0x79: // JNS
-                branch = !m_state.getSignFlag();			
+                branch = !m_state.getSignFlag();
                 break;
             case (byte)0x7A: // JP,JPE
                 branch = m_state.getParityFlag();
@@ -610,7 +615,7 @@ public class Cpu {
                 RealModeAddress address = m_indirect.getMemAddress();
                 if (address == null) {
                     // "LEA reg16, reg16" is an invalid opcode
-                    throw new InvalidOpcodeException();
+                    throw new InvalidOpcodeException("LEA reg16, reg16");
                 }
                 m_indirect.setReg16(address.getOffset());
                 break;
@@ -628,7 +633,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcode9X(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {
             case (byte)0x90: // XCHG reg16, AX
@@ -667,7 +672,7 @@ public class Cpu {
                 // The virtual NRG opcode is made up of 4 consecutive WAIT opcodes
                 for (int i = 0; i < 3; ++i) {
                     if (m_fetcher.nextByte() != (byte)0x9B) {
-                        throw new UnsupportedOpcodeException();
+                        throw new UnsupportedOpcodeException("less that 4 WAITs");
                     }
                 }
                 int energy = Unsigned.unsignedShort(m_state.getEnergy());
@@ -681,7 +686,7 @@ public class Cpu {
             case (byte)0x9D: // POPF
                 m_state.setFlags(pop());
                 break;
-            case (byte)0x9E:
+            case (byte)0x9E: // SAHF
                 // TODO: handle reserved bits (1,3,5)
                 short flags = m_state.getFlags();
                 flags &= 0xFF00;
@@ -695,7 +700,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcodeAX(byte opcode) throws MemoryException {
         RealModeAddress address = null;
         switch (opcode) {
@@ -755,7 +760,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcodeBX(byte opcode) throws MemoryException {
         byte index = (byte)(opcode & 0x07);
         switch (opcode) {
@@ -783,7 +788,7 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }	
-
+	
     private void opcodeCX(byte opcode) throws CpuException, MemoryException {
         short sizeToPop;
         RealModeAddress address1 = null;
@@ -792,7 +797,7 @@ public class Cpu {
             case (byte)0xC0:
             case (byte)0xC1:
                 // 0xC0.. 0xC1 - invalid opcodes
-                throw new InvalidOpcodeException();
+                throw new InvalidOpcodeException(Disassembler.toString(opcode));
             case (byte)0xC2: // RETN [imm16]
                 sizeToPop = m_fetcher.nextWord();
                 m_state.setIP(pop());				
@@ -806,7 +811,7 @@ public class Cpu {
                 address1 = m_indirect.getMemAddress();
                 if (address1 == null) {
                     // "LES reg16, reg16" is an invalid opcode
-                    throw new InvalidOpcodeException();					
+                    throw new InvalidOpcodeException("LES reg16, reg16");					
                 }
                 address2 = new RealModeAddress(
                     address1.getSegment(), (short)(address1.getOffset() + 2));
@@ -819,7 +824,7 @@ public class Cpu {
                 address1 = m_indirect.getMemAddress();
                 if (address1 == null) {
                     // "LDS reg16, reg16" is an invalid opcode
-                    throw new InvalidOpcodeException();					
+                    throw new InvalidOpcodeException("LDS reg16, reg16");					
                 }
                 address2 = new RealModeAddress(
                     address1.getSegment(), (short)(address1.getOffset() + 2));
@@ -842,7 +847,7 @@ public class Cpu {
             case (byte)0xC8:
             case (byte)0xC9:
                 // 0xC8.. 0xC9 - invalid opcodes
-                throw new InvalidOpcodeException();
+                throw new InvalidOpcodeException(Disassembler.toString(opcode));
             case (byte)0xCA: // RETF [imm16]
                 sizeToPop = m_fetcher.nextWord();
                 m_state.setIP(pop());				
@@ -854,7 +859,7 @@ public class Cpu {
                 m_state.setCS(pop());
                 break;
             case (byte)0xCC: // INT3
-                throw new IntOpcodeException();
+                throw new IntOpcodeException("INT3 - 0xCC");
             case (byte)0xCD: // INT [imm8]
                 {
                     byte opcodeId = m_fetcher.nextByte();
@@ -863,12 +868,12 @@ public class Cpu {
                     } else if (opcodeId == (byte)0x87) {
                         int87();
                     } else {
-                        throw new IntOpcodeException();
+                        throw new IntOpcodeException("INT" + opcodeId + Disassembler.toString(opcodeId));
                     }
                 }
                 break;
             case (byte)0xCE: // INTO
-                throw new IntOpcodeException();
+                throw new IntOpcodeException("INTO - 0xCE");
             case (byte)0xCF: // IRET
                 m_state.setIP(pop());
                 m_state.setCS(pop());
@@ -878,7 +883,7 @@ public class Cpu {
                 throw new RuntimeException();
         }		
     }
-
+	
     private void opcodeDX(byte opcode) throws CpuException, MemoryException {
         switch (opcode) {
             case (byte)0xD0: // <?> byte ptr [X], 1
@@ -903,7 +908,7 @@ public class Cpu {
                         shr8(1);
                         break;
                     case (byte)0x06: // invalid opcode
-                        throw new InvalidOpcodeException();
+                        throw new InvalidOpcodeException("0xD0, 6b");
                     case (byte)0x07: // SAR
                         sar8(1);
                         break;
@@ -933,7 +938,7 @@ public class Cpu {
                         shr16(1);
                         break;
                     case (byte)0x06: // invalid opcode
-                        throw new InvalidOpcodeException();
+                        throw new InvalidOpcodeException("0xD1, 6b");
                     case (byte)0x07: // SAR
                         sar16(1);
                         break;
@@ -963,7 +968,7 @@ public class Cpu {
                         shr8(m_state.getCL());
                         break;
                     case (byte)0x06: // invalid opcode
-                        throw new InvalidOpcodeException();
+                        throw new InvalidOpcodeException("0xD2, 6b");
                     case (byte)0x07: // SAR
                         sar8(m_state.getCL());
                         break;
@@ -993,7 +998,7 @@ public class Cpu {
                         shr16(m_state.getCL());
                         break;
                     case (byte)0x06: // invalid opcode
-                        throw new InvalidOpcodeException();
+                        throw new InvalidOpcodeException("0xD3, 6b");
                     case (byte)0x07: // SAR
                         sar16(m_state.getCL());
                         break;
@@ -1002,30 +1007,38 @@ public class Cpu {
                 }
                 break;
             case (byte)0xD4: // TODO: AAM
+            	throw new UnimplementedOpcodeException("AAM - 0xD4");
             case (byte)0xD5: // TODO: AAD
-                throw new UnimplementedOpcodeException();
+                throw new UnimplementedOpcodeException("AAD - 0xD5");
             case (byte)0xD6:
                 // 0xD6 - invalid opcode
-                throw new InvalidOpcodeException();
+                throw new InvalidOpcodeException(Disassembler.toString(opcode));
             case (byte)0xD7: // XLAT, XLATB
                 RealModeAddress address = new RealModeAddress(m_state.getDS(),
                     (short)(m_state.getBX() + Unsigned.unsignedByte(m_state.getAL())));
                 m_state.setAL(m_memory.readByte(address));
                 break;
             case (byte)0xD8: // FADD dword
+            	throw new UnsupportedOpcodeException("FADD dword - 0xD8");
             case (byte)0xD9: // FLD dword
+            	throw new UnsupportedOpcodeException("FLD dword - 0xD9");
             case (byte)0xDA: // FIADD dword
+            	throw new UnsupportedOpcodeException("FIADD dword - 0xDA");
             case (byte)0xDB: // FILD dword
+            	throw new UnsupportedOpcodeException("FILD dword - 0xDB");
             case (byte)0xDC: // FADD qword
+            	throw new UnsupportedOpcodeException("FADD qword - 0xDC");
             case (byte)0xDD: // FLD qword
+            	throw new UnsupportedOpcodeException("FLD qword - 0xDD");
             case (byte)0xDE: // FIADD word
+            	throw new UnsupportedOpcodeException("FIADD word - 0xDE");
             case (byte)0xDF: // FILD word
-                throw new UnsupportedOpcodeException();
+                throw new UnsupportedOpcodeException("FILD word - 0XDF");
             default:
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcodeEX(byte opcode) throws CpuException, MemoryException {
         byte offset8;
         short offset16;
@@ -1064,10 +1077,13 @@ public class Cpu {
                 }
                 break;
             case (byte)0xE4: // IN AL, imm8
+            	throw new UnsupportedOpcodeException("IN AL, imm8 - 0xE4");
             case (byte)0xE5: // IN AX, imm8
+            	throw new UnsupportedOpcodeException("IN AX, imm8 - 0xE5");
             case (byte)0xE6: // OUT imm8, AL
+            	throw new UnsupportedOpcodeException("OUT imm8, AL");
             case (byte)0xE7: // OUT imm8, AX				
-                throw new UnsupportedOpcodeException();
+                throw new UnsupportedOpcodeException("OUT imm8, AX");
             case (byte)0xE8: // CALL near imm16
                 offset16 = m_fetcher.nextWord();
                 callNear((short)(m_state.getIP() + offset16));
@@ -1087,24 +1103,27 @@ public class Cpu {
                 m_state.setIP((short)(m_state.getIP() + offset8));
                 break;			
             case (byte)0xEC: // IN AL, DX
+            	throw new UnsupportedOpcodeException("IN AL, DX - 0xEC");
             case (byte)0xED: // IN AX, DX
+            	throw new UnsupportedOpcodeException("IN AX, DX - 0xED");
             case (byte)0xEE: // OUT DX, AL
+            	throw new UnsupportedOpcodeException("OUT DX, AL - 0xEE");
             case (byte)0xEF: // OUT DX, AX
-                throw new UnsupportedOpcodeException();
+                throw new UnsupportedOpcodeException("OUT DX, AX - 0xEF");
             default:
                 throw new RuntimeException();
         }
     }
-
+	
     private void opcodeFX(byte opcode) throws CpuException, MemoryException {
         byte nextOpcode;
         boolean doneLooping;
         switch (opcode) {
             case (byte)0xF0: // LOCK
-                throw new UnsupportedOpcodeException();
+                throw new UnsupportedOpcodeException("LOCK - 0xF0");
             case (byte)0xF1:
                 // 0xF1 - invalid opcode
-                throw new InvalidOpcodeException();
+                throw new InvalidOpcodeException(Disassembler.toString(opcode));
             case (byte)0xF2: // REPNZ
                 nextOpcode = m_fetcher.nextByte();
                 doneLooping = true;
@@ -1138,7 +1157,7 @@ public class Cpu {
                         }
                         break;
                     default:
-                        throw new InvalidOpcodeException();							
+                        throw new InvalidOpcodeException("REPNZ ? - 0xF2, " + nextOpcode);							
                 }				
                 // loop if needed
                 if (!doneLooping) {
@@ -1208,7 +1227,7 @@ public class Cpu {
                         }
                         break;
                     default:
-                        throw new InvalidOpcodeException();
+                        throw new InvalidOpcodeException("REPZ ? - 0xF3, " + nextOpcode);
                 }				
                 // loop if needed
                 if (!doneLooping) {
@@ -1216,7 +1235,7 @@ public class Cpu {
                 }
                 break;
             case (byte)0xF4: // HLT
-                throw new UnsupportedOpcodeException();
+                throw new UnsupportedOpcodeException("HLT - 0xF4");
             case (byte)0xF5: // CMC
                 m_state.setCarryFlag(!m_state.getCarryFlag());
                 break;
@@ -1227,7 +1246,7 @@ public class Cpu {
                         and8(m_indirect.getMem8(), m_fetcher.nextByte());
                         break;
                     case 1:
-                        throw new InvalidOpcodeException();							
+                        throw new InvalidOpcodeException("0xF6, 1b");							
                     case 2: // NOT						
                         m_indirect.setMem8((byte)(m_indirect.getMem8() ^ 0xFF));
                         break;
@@ -1252,22 +1271,22 @@ public class Cpu {
                         }
                         break;
                     case 5: // TODO: IMUL
-                        throw new UnimplementedOpcodeException();
+                        throw new UnimplementedOpcodeException("IMUL - 0xF6, 0x5");
                     case 6: // DIV
                         int tmp = Unsigned.unsignedShort(m_state.getAX());
                         short divisor = Unsigned.unsignedByte(m_indirect.getMem8());
                         if (divisor == 0) { // divide by zero ?
-                            throw new DivisionException();
+                            throw new DivisionException("devision by zero using DIV");
                         }
                         short quotient = (short)(tmp / divisor);
                         if (quotient > 0xFF) { // divide overflow ?
-                            throw new DivisionException();
+                            throw new DivisionException("devision overflow using DIV");
                         }
                         m_state.setAL((byte)quotient);
                         m_state.setAH((byte)(tmp % divisor));
                         break;
                     case 7: // TODO: IDIV
-                        throw new UnimplementedOpcodeException();
+                        throw new UnimplementedOpcodeException("IDIV - 0xF6, 0x7");
                     default:
                         throw new RuntimeException();
                 }
@@ -1279,7 +1298,7 @@ public class Cpu {
                         and16(m_indirect.getMem16(), m_fetcher.nextWord());
                         break;
                     case 1:
-                        throw new InvalidOpcodeException();							
+                        throw new InvalidOpcodeException("0xF7, 1b");							
                     case 2: // NOT						
                         m_indirect.setMem16((short)(m_indirect.getMem16() ^ 0xFFFF));
                         break;
@@ -1304,24 +1323,24 @@ public class Cpu {
                         }
                         break;
                     case 5: // TODO: IMUL
-                        throw new UnimplementedOpcodeException();
+                        throw new UnimplementedOpcodeException("IMUL - 0xF7, 0x5");
                     case 6: // DIV
                         long tmp = Unsigned.unsignedInt(
                             (Unsigned.unsignedShort(m_state.getDX()) << 16) +
                             Unsigned.unsignedShort(m_state.getAX()));
                         int divisor = Unsigned.unsignedShort(m_indirect.getMem16());
                         if (divisor == 0) { // divide by zero ?
-                            throw new DivisionException();
+                            throw new DivisionException("devision by zero using DIV");
                         }
                         int quotient = (int)(tmp / divisor);
                         if (quotient > 0xFFFF) { // divide overflow ?
-                            throw new DivisionException();
+                            throw new DivisionException("devision overflow using DIV");
                         }
                         m_state.setAX((short)quotient);
                         m_state.setDX((short)(tmp % divisor));
                         break;
                     case 7: // TODO: IDIV
-                        throw new UnimplementedOpcodeException();
+                        throw new UnimplementedOpcodeException("IDIV - 0xF7, 0x7");
                     default:
                         throw new RuntimeException();
                 }
@@ -1354,13 +1373,18 @@ public class Cpu {
                         m_indirect.setMem8(dec8(m_indirect.getMem8()));
                         break;
                     case 2:
+                    	throw new InvalidOpcodeException("0xFE, 2b");
                     case 3:
+                    	throw new InvalidOpcodeException("0xFE, 3b");
                     case 4:
+                    	throw new InvalidOpcodeException("0xFE, 4b");
                     case 5:
+                    	throw new InvalidOpcodeException("0xFE, 5b");
                     case 6:
+                    	throw new InvalidOpcodeException("0xFE, 6b");
                     case 7:
                         // invalid opcodes
-                        throw new InvalidOpcodeException();
+                        throw new InvalidOpcodeException("0xFE, 7b");
                     default:
                         throw new RuntimeException();
                 }
@@ -1381,7 +1405,7 @@ public class Cpu {
                         {
                             RealModeAddress address = m_indirect.getMemAddress();
                             if (address == null) {
-                                throw new InvalidOpcodeException();
+                                throw new InvalidOpcodeException("0xFF, 3b ?");
                             }
 
                             short newIP = m_memory.readWord(address);
@@ -1399,7 +1423,7 @@ public class Cpu {
                         {
                             RealModeAddress address = m_indirect.getMemAddress();
                             if (address == null) {
-                                throw new InvalidOpcodeException();
+                                throw new InvalidOpcodeException("0xFF, 5b ?");
                             }
 
                             short newIP = m_memory.readWord(address);
@@ -1414,7 +1438,7 @@ public class Cpu {
                         push(m_indirect.getMem16());
                         break;
                     case 7: // invalid opcode
-                        throw new InvalidOpcodeException();
+                        throw new InvalidOpcodeException("0xFF, 7b");
                     default:
                         throw new RuntimeException();
                 }
@@ -1423,14 +1447,14 @@ public class Cpu {
                 throw new RuntimeException();
         }
     }
-
+	
     private void push(short value) throws MemoryException {
         m_state.setSP((short)(m_state.getSP() - 2));
         RealModeAddress stackPtr = new RealModeAddress(
             m_state.getSS(), m_state.getSP());
         m_memory.writeWord(stackPtr, value);
     }
-
+	
     private short pop() throws MemoryException {
         RealModeAddress stackPtr = new RealModeAddress(
             m_state.getSS(), m_state.getSP());
@@ -1438,7 +1462,7 @@ public class Cpu {
         m_state.setSP((short)(m_state.getSP() + 2));
         return value;
     }	
-
+	
     /**
      * Updates the CPU flags register after an 8bit operation.
      * @param value  Result of an 8bit operation.
@@ -1458,7 +1482,7 @@ public class Cpu {
         // TODO: update overflow flag
         updateFlagsNoCarryOverflow16((short)value);
     }
-
+	
     /**
      * Updates the CPU flags register after an 8bit operation, except for the
      * Carry and Overflow flags.
@@ -1483,7 +1507,7 @@ public class Cpu {
         m_state.setSignFlag((value & 0x8000) != 0);
         m_state.setZeroFlag(value == 0);
     }	
-
+	
     /**
      * Adds two 8bit values, updates the flags and returns the result.
      */
@@ -1505,7 +1529,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-
+	
     /**
      * Increments an 8bit value, updates the flags and returns the result.
      * Note: does not modify the carry flag.
@@ -1527,7 +1551,7 @@ public class Cpu {
         m_state.setCarryFlag(oldCarry);
         return result;		
     }
-
+	
     /**
      * Decrements an 8bit value, updates the flags and returns the result.
      * Note: does not modify the carry flag.
@@ -1549,7 +1573,7 @@ public class Cpu {
         m_state.setCarryFlag(oldCarry);
         return result;		
     }
-
+	
     /**
      * ORs two 8bit values, updates the flags and returns the result.
      */
@@ -1571,7 +1595,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-
+	
     /**
      * Adds two 8bit values with the carry flag, updates the flags and returns
      * the result.
@@ -1631,7 +1655,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-
+	
     /**
      * ANDs two 8bit values, updates the flags and returns the result.
      */
@@ -1653,7 +1677,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }	
-
+	
     /**
      * Subtracts two 8bit values, updates the flags and returns the result.
      */
@@ -1675,7 +1699,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-
+	
     /**
      * XORs two 8bit values, updates the flags and returns the result.
      */
@@ -1697,7 +1721,7 @@ public class Cpu {
         updateFlags16(result32);
         return result16;
     }
-
+	
     /**
      * Implements a near call opcode.
      * @param offset    New value for IP (CS stays the same).
@@ -1707,7 +1731,7 @@ public class Cpu {
         push(m_state.getIP());
         m_state.setIP(offset);
     }
-
+	
     /**
      * Implements a far call opcode.
      * @param segment   New value for CS.
@@ -1719,7 +1743,7 @@ public class Cpu {
         m_state.setCS(segment);
         callNear(offset);
     }
-
+	
     /**
      * Implements the 'movsb' opcode.
      * @throws MemoryException
@@ -1751,7 +1775,7 @@ public class Cpu {
         m_state.setSI((short)(m_state.getSI() + diff));
         m_state.setDI((short)(m_state.getDI() + diff));		
     }
-
+	
     /**
      * Implements the 'cmpsb' opcode.
      * @throws MemoryException
@@ -1795,7 +1819,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-1 : (byte)1); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-
+	
     /**
      * Implements the 'stosw' opcode.
      * @throws MemoryException
@@ -1807,7 +1831,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-2 : (byte)2); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-
+	
     /**
      * Implements the virtual 'stosdw' opcode.
      * @throws MemoryException
@@ -1824,7 +1848,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-4 : (byte)4); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-
+	
     /**
      * Implements the 'lodsb' opcode.
      * @throws MemoryException
@@ -1836,7 +1860,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-1 : (byte)1); 
         m_state.setSI((short)(m_state.getSI() + diff));		
     }
-
+	
     /**
      * Implements the 'lodsw' opcode.
      * @throws MemoryException
@@ -1848,7 +1872,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-2 : (byte)2); 
         m_state.setSI((short)(m_state.getSI() + diff));
     }
-
+	
     /**
      * Implements the 'scasb' opcode.
      * @throws MemoryException
@@ -1872,7 +1896,7 @@ public class Cpu {
         byte diff = (m_state.getDirectionFlag() ? (byte)-2 : (byte)2); 
         m_state.setDI((short)(m_state.getDI() + diff));
     }
-
+	
     private void rol8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1888,7 +1912,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-
+	
     private void ror8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1906,7 +1930,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-
+	
     private void rcl8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1923,7 +1947,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-
+	
     private void rcr8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1942,7 +1966,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-
+	
     private void shl8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1959,7 +1983,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow8(val);
         }
     }
-
+	
     private void shr8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1978,7 +2002,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow8(val);
         }
     }
-
+	
     private void sar8(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -1997,7 +2021,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow8(val);
         }
     }
-
+	
     private void rol16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2014,7 +2038,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow16(val);
         }
     }
-
+	
     private void ror16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2033,7 +2057,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow16(val);
         }
     }
-
+	
     private void rcl16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2051,7 +2075,7 @@ public class Cpu {
             updateFlagsNoCarryOverflow16(val);
         }
     }
-
+	
     private void rcr16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2070,7 +2094,7 @@ public class Cpu {
             m_state.setOverflowFlag(msb1 != msb2);
         }
     }
-
+	
     private void shl16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2106,7 +2130,7 @@ public class Cpu {
             m_state.setZeroFlag(val == 0);
         }
     }
-
+	
     private void sar16(int count) throws MemoryException {
         count &= 0x1F; // restrict count to 0-31
 
@@ -2125,8 +2149,8 @@ public class Cpu {
             m_state.setZeroFlag(val == 0);
         }
     }
-
-
+	
+	
     /**
      * Implements the virtual INT 0x86 opcode.
      * If enough bombs are left, calls the stosdw virtual
@@ -2144,7 +2168,7 @@ public class Cpu {
             }
         }
     }
-
+	
     /**
      * Implements the virtual INT 0x87 opcode.
      * If enough bombs are left, searches for a given 4 bytes and replaces
@@ -2177,7 +2201,7 @@ public class Cpu {
             }
         }
     }
-
+	
     /**
      * Returns true iff the given byte's bit parity is EVEN.
      * @param value  Value for which bit parity will be tested.
@@ -2186,7 +2210,7 @@ public class Cpu {
     private boolean getParity(byte value) {
         return PARITY_TABLE[Unsigned.unsignedByte(value)];
     }
-
+	
     /**
      * Parity table implementation.
      * An array memeber of 'true' means the bit parity for the given index is EVEN.
@@ -2225,7 +2249,7 @@ public class Cpu {
         true, false, false, true, false, true, true, false,
         false, true, true, false, true, false, false, true
     };
-
+	
     /** Current state of registers & flags */
     private final CpuState m_state;
 

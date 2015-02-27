@@ -21,6 +21,7 @@ public class Warrior {
      * Constructor.
      * 
      * @param name	            Warrior's name.
+     * @param groupName			Warrior's group name.
      * @param codeSize          Warrior's code size.
      * @param core              Real mode memory used as core.
      * @param loadAddress       Warrior's load address in the core (initial CS:IP).
@@ -30,6 +31,7 @@ public class Warrior {
      */
     public Warrior(
         String name,
+        String groupName,
         int codeSize,
         RealModeMemory core,
         RealModeAddress loadAddress,
@@ -38,6 +40,7 @@ public class Warrior {
         short groupSharedMemorySize) {
 
         m_name = name;
+        m_groupName = groupName;
         m_codeSize = codeSize;
         m_loadAddress = loadAddress;
 
@@ -104,6 +107,13 @@ public class Warrior {
     public String getName() {
         return m_name;
     }
+    
+    /**
+     * @return the warrior's group name.
+     */
+    public String getGroupName() {
+        return m_groupName;
+    }
 
     /**
      * @return the warrior's load offset.
@@ -119,6 +129,11 @@ public class Warrior {
         return m_codeSize;
     }
 
+    public boolean isFirst()
+    {
+    	return !m_name.endsWith("2");
+    }
+    
     /**
      * Accessors for the warrior's Energy value (used to calculate
      * the warrior's speed).
@@ -188,7 +203,9 @@ public class Warrior {
     }
 
     /** Warrior's name */
-    private final String m_name;	
+    private final String m_name;
+    /** Warrior's group name */
+    private final String m_groupName;
     /** Warrior's initial code size */	
     private final int m_codeSize;
     /** Warrior's initial load address */	

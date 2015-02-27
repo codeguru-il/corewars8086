@@ -39,7 +39,7 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
     public byte readByte(RealModeAddress address) throws MemoryException {
         // is reading allowed from this address ?
         if (!isAddressInRegions(m_readAccessRegions, address)) {
-            throw new MemoryException();			
+            throw new MemoryException("reading from 0x" + Integer.toHexString(address.getLinearAddress()).toUpperCase() + " is not allowed");			
         }
 
         return m_memory.readByte(address);		
@@ -56,7 +56,7 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
     public void writeByte(RealModeAddress address, byte value) throws MemoryException {
         // is writing allowed to this address ?
         if (!isAddressInRegions(m_writeAccessRegions, address)) {
-            throw new MemoryException();			
+            throw new MemoryException("writing to 0x" + Integer.toHexString(address.getLinearAddress()).toUpperCase() + " is not allowed");			
         }
 
         m_memory.writeByte(address, value);
@@ -73,7 +73,7 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
     public byte readExecuteByte(RealModeAddress address) throws MemoryException {
         // is reading allowed from this address ?
         if (!isAddressInRegions(m_executeAccessRegions, address)) {
-            throw new MemoryException();			
+            throw new MemoryException("executing from 0x" + Integer.toHexString(address.getLinearAddress()).toUpperCase() + " is not allowed");			
         }
 
         return m_memory.readExecuteByte(address);		
