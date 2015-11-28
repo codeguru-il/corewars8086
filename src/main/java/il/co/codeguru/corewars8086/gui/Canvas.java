@@ -1,6 +1,7 @@
 package il.co.codeguru.corewars8086.gui;
 
-import il.co.codeguru.corewars8086.utils.EventMulticaster;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
+import il.co.codeguru.corewars8086.util.EventMulticaster;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -157,7 +158,11 @@ public class Canvas extends JComponent implements MouseInputListener {
 	
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		eventHandler.addressAtMouseLocationRequested(this.MouseX + BOARD_SIZE* this.MouseY);
+		try {
+			eventHandler.addressAtMouseLocationRequested(this.MouseX + BOARD_SIZE* this.MouseY);
+		} catch (MemoryException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
