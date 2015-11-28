@@ -76,11 +76,7 @@ public class BinaryLoader {
 		}
 
 		Address tstart;
-		if(machine.addressType == Address.ADR20){
-			tstart = machine.newAddress(0x1000, 0x0000);
-		} else {
-			tstart = machine.newAddress(0x4900, 0x0000);
-		}
+		tstart = machine.newAddress(0x1000, 0x0000);
 		Address dstart = tstart.addAddress(tlen);
 		Address bstart = dstart.addAddress(dlen);
 		Address sstart = bstart.addAddress(blen).normalize();

@@ -1,5 +1,5 @@
 /*
- * InterruptHandler.java
+ * Storable.java
  *
  * Copyright (C) 2006 - 2008 Erdem Güven <zuencap@users.sourceforge.net>.
  *
@@ -11,11 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package seksen.hardware;
+package il.co.codeguru.corewars8086.hardware;
 
-public abstract class InterruptHandler implements Device {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-	public abstract void handleInt(int b) throws InterruptException;
+public interface Storable {
 
-	public abstract void reset();
+	/**
+	 * Stores memory to output stream.
+	 * @param output
+	 * @throws java.io.IOException
+	 */
+	public void save(OutputStream output) throws IOException;
+
+	public void load(InputStream input) throws IOException;
 }

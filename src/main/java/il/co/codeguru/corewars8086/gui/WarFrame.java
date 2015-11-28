@@ -1,7 +1,9 @@
 package il.co.codeguru.corewars8086.gui;
 
-import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
-import il.co.codeguru.corewars8086.hardware.memory.Address;
+import il.co.codeguru.corewars8086.hardware.Address;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryAccessListener;
+import il.co.codeguru.corewars8086.hardware.AbstractAddress;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
 import il.co.codeguru.corewars8086.util.Unsigned;
 import il.co.codeguru.corewars8086.war.*;
 
@@ -29,7 +31,7 @@ import javax.swing.event.ChangeListener;
  * @author BS
  */
 public class WarFrame extends JFrame
-    implements MemoryEventListener,  CompetitionEventListener, MouseAddressRequest{
+    implements MemoryAccessListener, CompetitionEventListener, MouseAddressRequest{
 	private static final long serialVersionUID = 1L;
 
 	/** the canvas which show the core war memory area */
@@ -214,8 +216,7 @@ public class WarFrame extends JFrame
         addMessage("[" + round + "] "+ message);
     }	
 
-    /** @see MemoryEventListener#onMemoryWrite(il.co.codeguru.corewars8086.hardware.memory.Address) */
-    public void onMemoryWrite(Address address) {
+	public void writeMemory(AbstractAddress address, int size) throws MemoryException {
 		int ipInsideArena = address.getLinearAddress() - 0x1000 *0x10; // arena * paragraph
 		
         if ( address.getLinearAddress() >= War.ARENA_SEGMENT*0x10 && address.getLinearAddress() < 2*War.ARENA_SEGMENT*0x10 ) {
@@ -294,9 +295,19 @@ public class WarFrame extends JFrame
                 nameList.repaint();
             }
         });
-    }	
+    }
 
-    /**
+	@Override
+	public void readMemory(AbstractAddress address, int size) throws MemoryException {
+
+	}
+
+	@Override
+	public void readExecuteMemory(AbstractAddress address, int size) throws MemoryException {
+
+	}
+
+	/**
      * A renderer for the names on the warrior list. 
      * Paints each warrior with its color and uses <S>strikeout</S> to show
      * dead warriors.
@@ -371,8 +382,8 @@ public class WarFrame extends JFrame
 		this.warCanvas.deletePointers();
 		for (int i = 0; i < this.competition.getCurrentWar().getNumWarriors(); i++)
 			if (this.competition.getCurrentWar().getWarrior(i).isAlive()) {
-				short ip = this.competition.getCurrentWar().getWarrior(i).getCpuState().getIP();
-				short cs = this.competition.getCurrentWar().getWarrior(i).getCpuState().getCS();
+				int ip = this.competition.getCurrentWar().getWarrior(i).getCpuState().getIP();
+				int cs = this.competition.getCurrentWar().getWarrior(i).getCpuState().getCS();
 				
 				int ipInsideArena = new Address(cs, ip).getLinearAddress() - 0x10000;
 				
@@ -406,8 +417,8 @@ public class WarFrame extends JFrame
 	}
 
 	@Override
-	public void addressAtMouseLocationRequested(int address) {
-		Address tmp = new Address(
+	public void addressAtMouseLocationRequested(int address) throws MemoryException {
+		AbstractAddress tmp = new Address(
 				this.competition.getCurrentWar().ARENA_SEGMENT, (short) address);
 		byte data = this.competition.getCurrentWar().getMemory().readByte(tmp);
 

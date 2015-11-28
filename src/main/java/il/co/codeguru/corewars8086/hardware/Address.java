@@ -1,23 +1,15 @@
-/*
- * Address24.java
+package il.co.codeguru.corewars8086.hardware;
+
+import il.co.codeguru.corewars8086.util.Hex;
+import il.co.codeguru.corewars8086.util.Unsigned;
+
+/**
+ * Wrapper class for a Real-Mode segment:offset address.
  *
- * Copyright (C) 2006 - 2008 Erdem Güven <zuencap@users.sourceforge.net>.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @author DL
+ * @author Erdem Guven
  */
-
-package seksen.hardware;
-
-import seksen.util.Hex;
-import seksen.util.Unsigned;
-
-public class Address24 extends Address {
+public class Address extends AbstractAddress {
 
 	/** 16bit Real-Mode segment. */
 	protected final int m_segment;
@@ -30,9 +22,9 @@ public class Address24 extends Address {
 	 * @param segment    16bit Real-mode segment.
 	 * @param offset     16bit Real-mode offset.
 	 */
-	protected Address24(int segment, int offset) {
-		m_segment = segment & 0xffff;
-		m_offset = offset & 0xffff;
+	public Address(int segment, int offset) {
+		m_segment = segment;
+		m_offset = offset;
 	}
 
 	/**
@@ -43,7 +35,7 @@ public class Address24 extends Address {
 	 *
 	 * @param linearAddress    32bit linear address.
 	 */
-	public Address24(int linearAddress) {
+	public Address(int linearAddress) {
 		linearAddress %= MEMORY_SIZE;
 
 		int unsignedSegment = Unsigned.unsignedShort(linearAddress / PARAGRAPH_SIZE);
@@ -79,49 +71,45 @@ public class Address24 extends Address {
 		return linearAddress % MEMORY_SIZE;
 	}
 
-	public Address addOffset(int off){
-		return new Address24(m_segment,m_offset+off);
+	public AbstractAddress addOffset(int off){
+		return new Address(m_segment,m_offset+off);
 	}
 
-	public Address addAddress(int off){
+	public AbstractAddress addAddress(int off){
 		int adr = (getLinearAddress()+off);
 		off = (off+m_offset)&0xffff;
 		int seg;
 		if(off<adr) {
-			seg = (adr-off)/PARAGRAPH_SIZE;
+			seg = (adr-off)>>4;
 		} else {
 			seg = 0;
 			off = adr;
 		}
-		return new Address24(seg,off);
+		return new Address(seg,off);
 	}
 
 	/** Various real-mode memory constants. */
 	public static final int NUM_PARAGRAPHS = 64 * 1024;
-	public static final int PARAGRAPH_SIZE = 0x100;
+	public static final int PARAGRAPH_SIZE = 0x10;
 	public static final int MEMORY_SIZE = NUM_PARAGRAPHS * PARAGRAPH_SIZE;
 
 	public String toString() {
-		return Hex.toHexString(getSegment(),4)+":"+Hex.toHexString(getOffset(),4);
+		return Hex.toHexString(getSegment(), 4)+":"+Hex.toHexString(getOffset(),4);
 	}
 
 	public int getMaxAddr() {
 		return MEMORY_SIZE;
 	}
 
-	public Address newAddress(int seg, int off) {
-		return new Address24(seg,off);
+	public AbstractAddress newAddress(int seg, int off) {
+		return new Address(seg,off);
 	}
 
-	public Address newAddress(int i) {
-		return new Address24(i);
+	public AbstractAddress newAddress(int i) {
+		return new Address(i);
 	}
 
 	public int getSegmentSize() {
 		return 0x10000;
-	}
-
-	public Address parseAddress(String address) {
-		return parseAddress(ADR24, address);
 	}
 }

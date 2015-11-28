@@ -1,6 +1,8 @@
 package il.co.codeguru.corewars8086.gui;
 
-import il.co.codeguru.corewars8086.hardware.memory.Address;
+import il.co.codeguru.corewars8086.hardware.AbstractAddress;
+import il.co.codeguru.corewars8086.hardware.Address;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
 import il.co.codeguru.corewars8086.util.Disassembler;
 import il.co.codeguru.corewars8086.war.Competition;
 import il.co.codeguru.corewars8086.war.CompetitionEventListener;
@@ -100,7 +102,11 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				updateFileds();
+				try {
+					updateFileds();
+				} catch (MemoryException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		
@@ -109,8 +115,12 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				updateFileds();
-				
+				try {
+					updateFileds();
+				} catch (MemoryException e1) {
+					e1.printStackTrace();
+				}
+
 			}
 		});
 		
@@ -129,9 +139,13 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 		instructionArea.setSize(50, 100);
 		instructionArea.setLineWrap(true);
 		instructionArea.setWrapStyleWord(true);
-		
-		this.updateFileds();
-		
+
+		try {
+			this.updateFileds();
+		} catch (MemoryException e) {
+			e.printStackTrace();
+		}
+
 		menuPanel.add(dropMenu);
 		menuPanel.add(btnRefrash);
 		menuPanel.add(btnSave);
@@ -153,7 +167,7 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 				
 	}
 	
-	public void updateFileds(){
+	public void updateFileds() throws MemoryException {
 		regAX.setValue( currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getAX());
 		regBX.setValue( currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getBX());
 		regCX.setValue( currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getCX());
@@ -182,9 +196,9 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 		byte[] bytes = new byte[30];
 		
 		for (short i = 0; i < 30; i++) {
-			short ip = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getIP();
-			short cs = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getCS();
-			short vs = currentWar.getMemory().readByte(new Address(cs, (short) (ip + i)));
+			int ip = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getIP();
+			int cs = currentWar.getWarrior(dropMenu.getSelectedIndex()).getCpuState().getCS();
+			int vs = currentWar.getMemory().readByte(new Address(cs, (short) (ip + i)));
 			bytes[i] = (byte) vs;
 		}
 		
@@ -272,7 +286,11 @@ public class CpuFrame extends JFrame implements CompetitionEventListener {
 	@Override
 	public void onEndRound() {
 		// TODO Auto-generated method stub
-		this.updateFileds();
+		try {
+			this.updateFileds();
+		} catch (MemoryException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

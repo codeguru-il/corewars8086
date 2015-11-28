@@ -22,12 +22,12 @@ public class RegisterField extends JPanel {
 		super.add(textField, BorderLayout.LINE_START);
 	}
 
-	public void setValue(short value) {
+	public void setValue(int value) {
 		textField.setText(String.format("%04X", value).toUpperCase());
 	}
 
 	public short getValue() throws Exception {
-		return (short) Integer.parseInt(textField.getText(), 16);
+		return Short.parseShort(textField.getText(), 16);
 	}
 
 }

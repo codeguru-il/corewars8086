@@ -5,7 +5,9 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
-import il.co.codeguru.corewars8086.hardware.memory.Address;
+import il.co.codeguru.corewars8086.hardware.AbstractAddress;
+import il.co.codeguru.corewars8086.hardware.Address;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
 import il.co.codeguru.corewars8086.util.Disassembler;
 import il.co.codeguru.corewars8086.war.Competition;
 import il.co.codeguru.corewars8086.war.CompetitionEventListener;
@@ -62,13 +64,17 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 		top.add(instructionArea);
 		
 		add(top);
-		
-		refrash(address);
-		
+
+		try {
+			refrash(address);
+		} catch (MemoryException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	
-	public void refrash(int address) {
+	public void refrash(int address) throws MemoryException {
 		last = address;
 		int i = 0;
 		for (JLabel la : labels) {
@@ -99,7 +105,11 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 	
 	@Override
 	public void onEndRound() {
-		refrash(last);
+		try {
+			refrash(last);
+		} catch (MemoryException e) {
+			e.printStackTrace();
+		}
 	}
 
 

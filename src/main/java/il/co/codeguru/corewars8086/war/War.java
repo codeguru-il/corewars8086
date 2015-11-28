@@ -1,9 +1,13 @@
 package il.co.codeguru.corewars8086.war;
 
+import il.co.codeguru.corewars8086.hardware.Address;
+import il.co.codeguru.corewars8086.hardware.InterruptException;
+import il.co.codeguru.corewars8086.hardware.Machine;
 import il.co.codeguru.corewars8086.hardware.cpu.CpuException;
-import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryAccessListener;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
-import il.co.codeguru.corewars8086.hardware.memory.Address;
+import il.co.codeguru.corewars8086.hardware.AbstractAddress;
+import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemoryImpl;
 import il.co.codeguru.corewars8086.util.Unsigned;
 
@@ -21,8 +25,7 @@ public class War {
     /** Arena's code segment */
     public final static short ARENA_SEGMENT = 0x1000;	
     /** Arena's size in bytes (= size of a single segment) */
-    public final static int ARENA_SIZE =
-        Address.PARAGRAPHS_IN_SEGMENT * Address.PARAGRAPH_SIZE;
+    public final static int ARENA_SIZE = Address.NUM_PARAGRAPHS * Address.PARAGRAPH_SIZE;
     /** Warrior's private stack size */
     private final static short STACK_SIZE = 2*1024;
     /** Group-shared private memory size */
@@ -35,8 +38,9 @@ public class War {
     private final static int MAX_LOADING_TRIES = 100;
     /** Minimum initial space (in bytes) between loaded warriors */
     private final static int MIN_GAP = 1024;
+	private final Machine m_machine;
 
-    /** Warriors in the fight */
+	/** Warriors in the fight */
     private Warrior[] m_warriors;
     /** Number of loaded warriors */
     private int m_numWarriors;
@@ -47,8 +51,6 @@ public class War {
      * An address can be 'used' either by the Arena, or by the private stacks.
      */
     private int m_nextFreeAddress;
-    /** The 'physical' memory core */
-    private RealModeMemoryImpl m_core;
 
     /** The number of the current warrior */
     private int m_currentWarrior;
@@ -60,26 +62,26 @@ public class War {
      * Constructor.
      * Fills the Arena with its initial data. 
      */
-    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener, boolean startPaused) {
+    public War(MemoryAccessListener memoryListener, CompetitionEventListener warListener, boolean startPaused) throws MemoryException {
     	isPaused = startPaused;
         m_warListener = warListener;
         m_warriors = new Warrior[MAX_WARRIORS];
         m_numWarriors = 0;
         m_numWarriorsAlive = 0;
-        m_core = new RealModeMemoryImpl();
+		m_machine = new Machine();
         m_nextFreeAddress = Address.PARAGRAPH_SIZE *
-            (ARENA_SEGMENT + Address.PARAGRAPHS_IN_SEGMENT);
+            (ARENA_SEGMENT + Address.NUM_PARAGRAPHS);
 
         // initialize arena
         for (int offset = 0; offset < ARENA_SIZE; ++offset) {
-            Address tmp = new Address(ARENA_SEGMENT, (short)offset);
-            m_core.writeByte(tmp, ARENA_BYTE);			
+            AbstractAddress tmp = new Address(ARENA_SEGMENT, (short)offset);
+			m_machine.memory.writeByte(tmp, ARENA_BYTE);
         }
 
         isSingleRound = false;
         
         // set the memory listener (we only do this now, to skip initialization)
-        m_core.setListener(memoryListener);
+		m_machine.memory.addAccessListener(memoryListener);
     }
 
     /**
@@ -127,8 +129,12 @@ public class War {
                     m_warListener.onWarriorDeath(warrior.getName(), "memory exception");
                     warrior.kill();
                     --m_numWarriorsAlive;
-                }
-            }
+                } catch (InterruptException e) {
+					m_warListener.onWarriorDeath(warrior.getName(), "interrupt exception");
+					warrior.kill();
+					--m_numWarriorsAlive;
+				}
+			}
         }
     }
 
@@ -205,7 +211,7 @@ public class War {
     private void loadWarriorGroup(WarriorGroup warriorGroup) throws Exception {
         List<WarriorData> warriors = warriorGroup.getWarriors();
 
-        Address groupSharedMemory =
+        AbstractAddress groupSharedMemory =
             allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
 
         for (int i = 0; i < warriors.size(); ++i) {
@@ -217,16 +223,14 @@ public class War {
 
             short loadOffset = getLoadOffset(warriorData.length);
 
-            Address loadAddress =
-                    new Address(ARENA_SEGMENT, loadOffset);
-            Address stackMemory = allocateCoreMemory(STACK_SIZE);
-            Address initialStack =
-                new Address(stackMemory.getSegment(), STACK_SIZE);
+            AbstractAddress loadAddress = new Address(ARENA_SEGMENT, loadOffset);
+            AbstractAddress stackMemory = allocateCoreMemory(STACK_SIZE);
+            AbstractAddress initialStack = new Address(stackMemory.getSegment(), STACK_SIZE);
 
             m_warriors[m_numWarriors++] = new Warrior(
                 warriorName,
                 warriorData.length,
-                m_core,
+				m_machine,
                 loadAddress,
                 initialStack,
                 groupSharedMemory,
@@ -234,8 +238,8 @@ public class War {
 
             // load warrior to arena
             for (int offset = 0; offset < warriorData.length; ++offset) {
-                Address tmp = new Address(ARENA_SEGMENT, (short)(loadOffset + offset));
-                m_core.writeByte(tmp, warriorData[offset]);			
+                AbstractAddress tmp = new Address(ARENA_SEGMENT, (short)(loadOffset + offset));
+				m_machine.memory.writeByte(tmp, warriorData[offset]);
             }
             ++m_numWarriorsAlive;
 			++m_currentWarrior;
@@ -253,12 +257,12 @@ public class War {
      *               RealModeAddress.PARAGRAPH_SIZE 
      * @return Pointer to the beginning of the allocated memory block.
      */
-    private Address allocateCoreMemory(short size) throws Exception {
+    private AbstractAddress allocateCoreMemory(short size) throws Exception {
         if ((size % Address.PARAGRAPH_SIZE) != 0) {
             throw new Exception();
         }
 
-        Address allocatedMemory =
+        AbstractAddress allocatedMemory =
             new Address(m_nextFreeAddress);
 
         m_nextFreeAddress += size;
@@ -402,8 +406,8 @@ public class War {
     	return this.isSingleRound;
     }
     
-    public RealModeMemoryImpl getMemory(){
-    	return m_core;
+    public RealModeMemory getMemory(){
+    	return m_machine.memory;
     }
     
     

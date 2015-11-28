@@ -1,48 +1,31 @@
-/*
- * Machine.java
- *
- * Copyright (C) 2006 - 2008 Erdem Güven <zuencap@users.sourceforge.net>.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package seksen.hardware;
+package il.co.codeguru.corewars8086.hardware;
+
+import il.co.codeguru.corewars8086.hardware.cpu.Cpu;
+import il.co.codeguru.corewars8086.hardware.cpu.CpuException;
+import il.co.codeguru.corewars8086.hardware.cpu.CpuState;
+import il.co.codeguru.corewars8086.hardware.memory.IOOverMemory;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryAccessProtection;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
+import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import seksen.hardware.cpu.Cpu;
-import seksen.hardware.cpu.Cpu8086;
-import seksen.hardware.cpu.CpuException;
-import seksen.hardware.cpu.CpuState;
-import seksen.hardware.memory.IOOverMemory;
-import seksen.hardware.memory.MemoryAccessProtection;
-import seksen.hardware.memory.MemoryException;
-import seksen.hardware.memory.RealModeMemory;
-
 /**
  * @author Erdem Güven
  *
  */
 public class Machine {
-	public static final int ACCESS_CHECK	= 4;
-	public static final int TEST_INTERPRETER= 8;
-
 	public final Cpu cpu;
 	public final CpuState state;
 	public final RealModeMemory memory;
-	public final Address address;
+	public final AbstractAddress address;
 
-	private final MemoryAccessProtection memoryProtection;
-	private final IOHandler ioHandler;
-	private final IOPort serialPort;
+	public final MemoryAccessProtection memoryProtection;
+	public final IOHandler ioHandler;
+	public final IOPort serialPort;
 
 	private final Device devices[];
 
@@ -51,13 +34,13 @@ public class Machine {
 
 	public Machine()
 	{
-		this.address =  new Address20(0,0);
+		this.address =  new Address(0,0);
 
 		//this.memory = new RealModeMemoryImpl();
 		this.memory = new IOOverMemory();
 		this.state = new CpuState();
 
-		this.cpu = new Cpu8086();
+		this.cpu = new Cpu();
 
 		this.ioHandler = new IOHandler();
 
@@ -84,11 +67,11 @@ public class Machine {
 		return null;
 	}
 
-	public Address newAddress(int seg, int off) {
+	public AbstractAddress newAddress(int seg, int off) {
 		return address.newAddress(seg,off);
 	}
 
-	public Address newAddress(int i) {
+	public AbstractAddress newAddress(int i) {
 		return address.newAddress(i);
 	}
 
@@ -153,8 +136,7 @@ public class Machine {
 		}
 	}
 
-	public void do_cycle() throws CpuException, MemoryException
-	{
+	public void do_cycle() throws CpuException, MemoryException, InterruptException {
 		cpu.nextOpcode();
 	}
 }

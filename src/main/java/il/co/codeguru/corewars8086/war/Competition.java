@@ -1,6 +1,6 @@
 package il.co.codeguru.corewars8086.war;
 
-import il.co.codeguru.corewars8086.hardware.memory.MemoryEventListener;
+import il.co.codeguru.corewars8086.hardware.memory.MemoryAccessListener;
 import il.co.codeguru.corewars8086.util.EventMulticaster;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class Competition {
 
     private EventMulticaster competitionEventCaster, memoryEventCaster;
     private CompetitionEventListener competitionEventListener;
-    private MemoryEventListener memoryEventListener;
+    private MemoryAccessListener memoryEventListener;
 
     private WarriorRepository warriorRepository;
 
@@ -37,8 +37,8 @@ public class Competition {
 
         competitionEventCaster = new EventMulticaster(CompetitionEventListener.class);
         competitionEventListener = (CompetitionEventListener) competitionEventCaster.getProxy();
-        memoryEventCaster = new EventMulticaster(MemoryEventListener.class);
-        memoryEventListener = (MemoryEventListener) memoryEventCaster.getProxy();
+        memoryEventCaster = new EventMulticaster(MemoryAccessListener.class);
+        memoryEventListener = (MemoryAccessListener) memoryEventCaster.getProxy();
         speed = MAXIMUM_SPEED;
         abort = false;
     }
@@ -140,11 +140,11 @@ public class Competition {
     	competitionEventCaster.remove(lis);
     }
     
-    public void addMemoryEventLister(MemoryEventListener lis) {
+    public void addMemoryEventLister(MemoryAccessListener lis) {
         memoryEventCaster.add(lis);
     }
 
-    public void removeMemoryEventLister(MemoryEventListener lis) {
+    public void removeMemoryEventLister(MemoryAccessListener lis) {
     	memoryEventCaster.remove(lis);
     }
     

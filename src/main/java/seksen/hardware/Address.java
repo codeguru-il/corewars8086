@@ -15,13 +15,10 @@ package seksen.hardware;
 
 public abstract class Address implements Comparable {
 	public static final int ADR20 = 0;
-	public static final int ADR24 = 1;
 
 	public static Address newAddress(int type, int seg, int off){
 		if(type == ADR20){
 			return new Address20(seg,off);
-		} else if(type == ADR24){
-			return new Address24(seg,off);
 		}
 		return null;
 	}

@@ -1,10 +1,13 @@
 package il.co.codeguru.corewars8086.war;
 
+import il.co.codeguru.corewars8086.hardware.Address;
+import il.co.codeguru.corewars8086.hardware.InterruptException;
+import il.co.codeguru.corewars8086.hardware.Machine;
 import il.co.codeguru.corewars8086.hardware.cpu.Cpu;
 import il.co.codeguru.corewars8086.hardware.cpu.CpuException;
 import il.co.codeguru.corewars8086.hardware.cpu.CpuState;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryException;
-import il.co.codeguru.corewars8086.hardware.memory.Address;
+import il.co.codeguru.corewars8086.hardware.AbstractAddress;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemory;
 import il.co.codeguru.corewars8086.hardware.memory.RealModeMemoryRegion;
 import il.co.codeguru.corewars8086.hardware.memory.MemoryAccessProtection;
@@ -31,55 +34,47 @@ public class Warrior {
     public Warrior(
         String name,
         int codeSize,
-        RealModeMemory core,
-        Address loadAddress,
-        Address initialStack,
-        Address groupSharedMemory,
+        Machine machine,
+        AbstractAddress loadAddress,
+        AbstractAddress initialStack,
+        AbstractAddress groupSharedMemory,
         short groupSharedMemorySize) {
 
         m_name = name;
         m_codeSize = codeSize;
         m_loadAddress = loadAddress;
 
-        m_state = new CpuState();
+		m_machine = machine;
+
         initializeCpuState(loadAddress, initialStack, groupSharedMemory);
 
         // initialize read-access regions
-        Address lowestStackAddress =
-            new Address(initialStack.getSegment(), (short)0);
-        Address lowestCoreAddress =
-            new Address(loadAddress.getSegment(), (short)0);
-        Address highestCoreAddress =
-            new Address(loadAddress.getSegment(), (short)-1);
-        Address highestGroupSharedMemoryAddress =
-            new Address(groupSharedMemory.getSegment(),
-            (short)(groupSharedMemorySize-1));
+        AbstractAddress lowestStackAddress = new Address(initialStack.getSegment(), (short)0);
+        AbstractAddress lowestCoreAddress = new Address(loadAddress.getSegment(), (short)0);
+        AbstractAddress highestCoreAddress = new Address(loadAddress.getSegment(), (short)-1);
+        AbstractAddress highestGroupSharedMemoryAddress = new Address(groupSharedMemory.getSegment(), (short)(groupSharedMemorySize-1));
 
-        RealModeMemoryRegion[] readAccessRegions =
-            new RealModeMemoryRegion[] {
+        RealModeMemoryRegion[] readAccessRegions = new RealModeMemoryRegion[] {
                 new RealModeMemoryRegion(lowestStackAddress, initialStack),
                 new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
                 new RealModeMemoryRegion(groupSharedMemory, highestGroupSharedMemoryAddress)
             };
 
         // initialize write-access regions
-        RealModeMemoryRegion[] writeAccessRegions =
-            new RealModeMemoryRegion[] {
+        RealModeMemoryRegion[] writeAccessRegions = new RealModeMemoryRegion[] {
                 new RealModeMemoryRegion(lowestStackAddress, initialStack),
                 new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
                 new RealModeMemoryRegion(groupSharedMemory, highestGroupSharedMemoryAddress)
             };
 
         // initialize execute-access regions
-        RealModeMemoryRegion[] executeAccessRegions =
-            new RealModeMemoryRegion[] {
+        RealModeMemoryRegion[] executeAccessRegions = new RealModeMemoryRegion[] {
                 new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress)
             };
 
-        m_memory = new MemoryAccessProtection(
-            core, readAccessRegions, writeAccessRegions, executeAccessRegions);
-
-        m_cpu = new Cpu(m_state, m_memory);
+		machine.memoryProtection.setProtection(lowestStackAddress, initialStack.getLinearAddress() - lowestStackAddress.getLinearAddress(), MemoryAccessProtection.PROT_READ_WRITE);
+		machine.memoryProtection.setProtection(lowestCoreAddress, highestCoreAddress.getLinearAddress() - lowestCoreAddress.getLinearAddress(), MemoryAccessProtection.PROT_READ_WRITE | MemoryAccessProtection.PROT_EXEC);
+		machine.memoryProtection.setProtection(groupSharedMemory, highestGroupSharedMemoryAddress.getLinearAddress() - groupSharedMemory.getLinearAddress(), MemoryAccessProtection.PROT_READ_WRITE);
 
         m_isAlive = true;		
     }
@@ -108,7 +103,7 @@ public class Warrior {
     /**
      * @return the warrior's load offset.
      */
-    public short getLoadOffset() {
+    public int getLoadOffset() {
         return m_loadAddress.getOffset();
     }	
 
@@ -123,11 +118,11 @@ public class Warrior {
      * Accessors for the warrior's Energy value (used to calculate
      * the warrior's speed).
      */
-    public short getEnergy() {
-        return m_state.getEnergy();
+    public int getEnergy() {
+        return m_machine.state.getEnergy();
     }
-    public void setEnergy(short value) {
-        m_state.setEnergy(value);
+    public void setEnergy(int value) {
+        m_machine.state.setEnergy(value);
     }
 
     /**
@@ -135,8 +130,8 @@ public class Warrior {
      * @throws CpuException     on any CPU error.
      * @throws MemoryException  on any Memory error.
      */
-    public void nextOpcode() throws CpuException, MemoryException {
-        m_cpu.nextOpcode();
+    public void nextOpcode() throws CpuException, MemoryException, InterruptException {
+        m_machine.cpu.nextOpcode();
     }
 
     /**
@@ -153,38 +148,38 @@ public class Warrior {
      * @param groupSharedMemory The warrior's group shared memory.
      */
     private void initializeCpuState(
-        Address loadAddress, Address initialStack,
-        Address groupSharedMemory) {
+        AbstractAddress loadAddress, AbstractAddress initialStack,
+        AbstractAddress groupSharedMemory) {
 
         // initialize registers
-        m_state.setAX(loadAddress.getOffset());
-        m_state.setBX((short)0);
-        m_state.setCX((short)0);
-        m_state.setDX((short)0);
+		m_machine.state.setAX((short)loadAddress.getOffset());
+		m_machine.state.setBX((short)0);
+		m_machine.state.setCX((short)0);
+		m_machine.state.setDX((short)0);
 
-        m_state.setDS(loadAddress.getSegment());
-        m_state.setES(groupSharedMemory.getSegment());
-        m_state.setSI((short)0);
-        m_state.setDI((short)0);
+		m_machine.state.setDS((short)loadAddress.getSegment());
+		m_machine.state.setES((short)groupSharedMemory.getSegment());
+		m_machine.state.setSI((short)0);
+		m_machine.state.setDI((short)0);
 
-        m_state.setSS(initialStack.getSegment());
-        m_state.setBP((short)0);
-        m_state.setSP(initialStack.getOffset());
+		m_machine.state.setSS((short)initialStack.getSegment());
+		m_machine.state.setBP((short)0);
+		m_machine.state.setSP((short)initialStack.getOffset());
 
-        m_state.setCS(loadAddress.getSegment());
-        m_state.setIP(loadAddress.getOffset());
-        m_state.setFlags((short)0);
+		m_machine.state.setCS((short)loadAddress.getSegment());
+		m_machine.state.setIP((short)loadAddress.getOffset());
+		m_machine.state.setFlags((short)0);
 
         // initialize Energy
-        m_state.setEnergy((short)0);
+		m_machine.state.setEnergy((short)0);
 
         // initialize bombs
-        m_state.setBomb1Count((byte)2);
-        m_state.setBomb2Count((byte)1);
+		m_machine.state.setBomb1Count((byte)2);
+		m_machine.state.setBomb2Count((byte)1);
     }
     
     public CpuState getCpuState(){
-    	return m_state;
+    	return m_machine.state;
     }
 
     /** Warrior's name */
@@ -192,13 +187,9 @@ public class Warrior {
     /** Warrior's initial code size */	
     private final int m_codeSize;
     /** Warrior's initial load address */	
-    private final Address m_loadAddress;
-    /** Current state of registers & flags */	
-    private CpuState m_state;
-    /** Applies restricted access logic on top of the actual core memory */
-    private MemoryAccessProtection m_memory;
-    /** CPU instance */
-    private Cpu m_cpu;
+    private final AbstractAddress m_loadAddress;
     /** Whether or not the warrior is still alive */
     private boolean m_isAlive;
+
+	private Machine m_machine;
 }

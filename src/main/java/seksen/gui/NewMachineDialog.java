@@ -47,8 +47,7 @@ public class NewMachineDialog extends JFrame implements ActionListener {
 		cpucb.setToolTipText("CPU");
 		cpane.add(cpucb);
 
-		addressingcb = new JComboBox(
-				new Object[]{"Normal (20 bits)","Extended (24 bits)"});
+		addressingcb = new JComboBox(new Object[]{"Normal (20 bits)"});
 		addressingcb.setToolTipText("Memory addressing");
 		addressingcb.addActionListener(this);
 		cpane.add(addressingcb);
@@ -84,8 +83,6 @@ public class NewMachineDialog extends JFrame implements ActionListener {
 			testcb.setEnabled(addressingcb.getSelectedIndex() == 0);
 		} else if( e.getActionCommand().equals("Create") ) {
 			int type = 0;
-			type |= addressingcb.getSelectedIndex() == 1 ?
-					Machine.ADDR_24 : Machine.ADDR_20;
 			if(accesscheckcb.isSelected()) {
 				type |= Machine.ACCESS_CHECK;
 			}
@@ -93,7 +90,7 @@ public class NewMachineDialog extends JFrame implements ActionListener {
 				type |= Machine.TEST_INTERPRETER;
 			}
 			dispose();
-			new CpuFrame(new Machine(type));
+			new CpuFrame(new Machine());
 		} else if( e.getActionCommand().equals("Load") ) {
 			fileDialog.setDialogTitle("Load Machine file");
 	        //fileDialog.setFileFilter(SFileFilter.FF_MAC);
