@@ -664,11 +664,9 @@ public class Cpu {
                 callFar(newCS, newIP);
                 break;
             case (byte)0x9B: // original: WAIT, modified: virtual opcode NRG
-                // The virtual NRG opcode is made up of 4 consecutive WAIT opcodes
-                for (int i = 0; i < 3; ++i) {
-                    if (m_fetcher.nextByte() != (byte)0x9B) {
-                        throw new UnsupportedOpcodeException();
-                    }
+                // The virtual NRG opcode is made up of 2 consecutive WAIT opcodes
+                if (m_fetcher.nextByte() != (byte)0x9B) {
+                    throw new UnsupportedOpcodeException();
                 }
                 int energy = Unsigned.unsignedShort(m_state.getEnergy());
                 if (energy < 0xFFFF) {
