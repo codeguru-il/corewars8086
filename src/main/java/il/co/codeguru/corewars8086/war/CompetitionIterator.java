@@ -25,7 +25,7 @@ public class CompetitionIterator implements Iterator<int[]> {
      */
     public int[] next()
     {
-		return rnd.nextPermutation(numItems, groupSize);
+		return rnd.nextPermutation(numItems, groupSize > numItems ? numItems : groupSize);
     }
 
 	public boolean hasNext() {
