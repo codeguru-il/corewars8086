@@ -33,7 +33,11 @@ public class Competition {
     private boolean abort;
 
     public Competition() throws IOException {
-        warriorRepository = new WarriorRepository();
+        this(true);
+    }
+
+    public Competition(boolean shouldReadWarriorsFile) throws IOException {
+        warriorRepository = new WarriorRepository(shouldReadWarriorsFile);
 
         competitionEventCaster = new EventMulticaster(CompetitionEventListener.class);
         competitionEventListener = (CompetitionEventListener) competitionEventCaster.getProxy();
