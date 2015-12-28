@@ -11,7 +11,6 @@ public interface CompetitionEventListener extends EventListener  {
 	
     /**
      * Called when a new War is started.
-     * @param warId  0-based war counter.
      */
     void onWarStart();
 
