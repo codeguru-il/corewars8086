@@ -144,9 +144,11 @@ public class WarriorRepository {
 				file.delete();
 		}
 	}
-
-	private void readZombies() throws IOException {
-        File zombieDirectory = new File(ZOMBIE_DIRECTORY);
+	public void readZombies() throws IOException {
+		readZombies(ZOMBIE_DIRECTORY)
+	}
+	public void readZombies(String zombiesDirectory) throws IOException {
+        File zombieDirectory = new File(zombiesDirectory);
         File[] zombieFiles = zombieDirectory.listFiles();
         if (zombieFiles == null) {
             // no zombies!
