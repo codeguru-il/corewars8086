@@ -22,7 +22,7 @@ public class Competition {
 
     private War currentWar;
 
-    private int warsPerCombination= 20;
+    private int warsAmount;
 
     private int speed;
     public static final int MAXIMUM_SPEED = -1;
@@ -48,7 +48,7 @@ public class Competition {
     }
 
     public void runCompetition (int wars, int warriorsPerGroup, boolean startPaused) throws Exception {
-        this.warsPerCombination = wars;
+        this.warsAmount = wars;
         competitionIterator = new CompetitionIterator(
             warriorRepository.getNumberOfGroups(), warriorsPerGroup);
 
@@ -67,8 +67,8 @@ public class Competition {
         warriorRepository.saveScoresToFile(SCORE_FILENAME);
     }
 
-    public int getTotalNumberOfWars() {
-        return (int) competitionIterator.getNumberOfItems() * warsPerCombination;
+    public int getWarsAmount() {
+        return warsAmount;
     }
 
     public void runWar(WarriorGroup[] warriorGroups,boolean startPaused) throws Exception {
@@ -181,6 +181,10 @@ public class Competition {
     public void setSeed(long seed){
         System.out.println("Setting seed to: " + seed);
     	this.seed = seed;
+    }
+
+    public long getSeed(){
+        return seed;
     }
     
 }

@@ -92,11 +92,12 @@ public class War {
         ArrayList<WarriorGroup> groupsLeftToLoad = new ArrayList<WarriorGroup>();
         for (int i = 0; i < warriorGroups.length; ++i)
         	groupsLeftToLoad.add(warriorGroups[i]);
-               
+
         while (groupsLeftToLoad.size() > 0)
         {
         	int randomInt = rand.nextInt(groupsLeftToLoad.size());
         	loadWarriorGroup(groupsLeftToLoad.get(randomInt));
+            System.out.println("loading "+ groupsLeftToLoad.get(randomInt).getName() + "(randomInt: " + randomInt + ")");
         	groupsLeftToLoad.remove(randomInt);
         }
     }
@@ -215,6 +216,7 @@ public class War {
             String warriorName = warrior.getName();
             byte[] warriorData = warrior.getCode();
 
+            System.out.println("Trying to load: " + warriorName);
             short loadOffset = getLoadOffset(warriorData.length);
 
             RealModeAddress loadAddress =
@@ -377,7 +379,8 @@ public class War {
     private boolean isPaused;
     
     public void setSeed(long seed){
-    	rand.setSeed(seed);
+    	System.out.println("setting in round seed to: " + seed);
+        rand.setSeed(seed);
     }
     
     public void pause(){

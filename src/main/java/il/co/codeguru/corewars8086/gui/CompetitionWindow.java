@@ -13,7 +13,7 @@ import javax.swing.*;
 public class CompetitionWindow extends JFrame
     implements ScoreEventListener, ActionListener, CompetitionEventListener {
 	private static final long serialVersionUID = 1L;
-	
+
 	private Competition competition;
     private ColumnGraph columnGraph;
 
@@ -29,8 +29,10 @@ public class CompetitionWindow extends JFrame
     private int totalWars;
     private Thread warThread;
 	private boolean competitionRunning;
-	
-	private JTextField seed;
+
+
+    private static final String SEED_PREFIX = "SEED!@#=";
+    private JTextField seed;
 
 	private JCheckBox startPausedCheckBox;
 
@@ -56,7 +58,7 @@ public class CompetitionWindow extends JFrame
         warCounterDisplay = new JLabel("");
         buttonPanel.add(warCounterDisplay);
         buttonPanel.add(Box.createHorizontalStrut(30));
-        showBattleCheckBox = new JCheckBox("Show session on start");
+        showBattleCheckBox = new JCheckBox("Show war on start");
         buttonPanel.add(showBattleCheckBox);
         
         startPausedCheckBox = new JCheckBox("Start Paused");
@@ -75,7 +77,7 @@ public class CompetitionWindow extends JFrame
         // ------------ Control panel
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout());
-        controlPanel.add(new JLabel("Survivor groups per session:"));
+        controlPanel.add(new JLabel("Survivor groups per war:"));
         
         // If total number of teams is less then four, make it the defauld number
 		int numberOfGropus = Math.min(4,
@@ -83,10 +85,10 @@ public class CompetitionWindow extends JFrame
 		
 		warriorsPerGroupField = new JTextField(String.format("%d", numberOfGropus), 3);
 		controlPanel.add(warriorsPerGroupField);
-		controlPanel.add(new JLabel("Sessions per groups combination:"));
+		controlPanel.add(new JLabel("Wars to run:"));
 		battlesPerGroupField = new JTextField("100", 4);
 		controlPanel.add(battlesPerGroupField);
-		seed = new JTextField(4);
+		seed = new JTextField(15);
 		seed.setText("guru");
 		controlPanel.add(new JLabel("seed:"));
 		controlPanel.add(seed);
@@ -118,7 +120,16 @@ public class CompetitionWindow extends JFrame
      */
     public boolean runWar() {
         try {
-        	competition.setSeed(seed.getText().hashCode());
+            long seedValue;
+            if (seed.getText().startsWith(SEED_PREFIX)){
+                seedValue = Long.parseLong(seed.getText().substring(SEED_PREFIX.length()));
+            }
+            else {
+                seedValue = seed.getText().hashCode();
+            }
+            System.out.println("Seed is: " + seed);
+        	competition.setSeed(seedValue);
+
             final int battlesPerGroup = Integer.parseInt(
                 battlesPerGroupField.getText().trim());
             final int warriorsPerGroup = Integer.parseInt(
@@ -234,9 +245,11 @@ public class CompetitionWindow extends JFrame
 
     public void onWarEnd(int reason, String winners) {
         warCounter++;
+        seed.setText(SEED_PREFIX + competition.getSeed());
+        ;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                warCounterDisplay.setText("Sessions so far:" + warCounter +
+                warCounterDisplay.setText("Wars so far:" + warCounter +
                     " (out of " + totalWars + ")");
             };
         });
@@ -253,7 +266,7 @@ public class CompetitionWindow extends JFrame
 
     public void onCompetitionStart() {
         warCounter = 0;
-        totalWars = competition.getTotalNumberOfWars();
+        totalWars = competition.getWarsAmount();
 		this.runWarButton.setEnabled(false);
     }
 
@@ -261,7 +274,7 @@ public class CompetitionWindow extends JFrame
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 warCounterDisplay.setText("The competition is over. " +
-                    warCounter + " sessions were run.");
+                    warCounter + " Wars were run.");
             };
         });
         warThread = null;
