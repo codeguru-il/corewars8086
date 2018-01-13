@@ -29,8 +29,9 @@ public class CompetitionWindow extends JFrame
     private int totalWars;
     private Thread warThread;
 	private boolean competitionRunning;
-	
-	private JTextField seed;
+
+    private static final String SEED_PREFIX = "SEED!@#=";
+    private JTextField seed;
 
 	private JCheckBox startPausedCheckBox;
 
@@ -56,7 +57,7 @@ public class CompetitionWindow extends JFrame
         warCounterDisplay = new JLabel("");
         buttonPanel.add(warCounterDisplay);
         buttonPanel.add(Box.createHorizontalStrut(30));
-        showBattleCheckBox = new JCheckBox("Show session on start");
+        showBattleCheckBox = new JCheckBox("Show war on start");
         buttonPanel.add(showBattleCheckBox);
         
         startPausedCheckBox = new JCheckBox("Start Paused");
@@ -75,7 +76,7 @@ public class CompetitionWindow extends JFrame
         // ------------ Control panel
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout());
-        controlPanel.add(new JLabel("Survivor groups per session:"));
+        controlPanel.add(new JLabel("Survivor groups per war:"));
         
         // If total number of teams is less then four, make it the defauld number
 		int numberOfGropus = Math.min(4,
@@ -83,10 +84,10 @@ public class CompetitionWindow extends JFrame
 		
 		warriorsPerGroupField = new JTextField(String.format("%d", numberOfGropus), 3);
 		controlPanel.add(warriorsPerGroupField);
-		controlPanel.add(new JLabel("Sessions per groups combination:"));
+		controlPanel.add(new JLabel("Wars per groups combination:"));
 		battlesPerGroupField = new JTextField("100", 4);
 		controlPanel.add(battlesPerGroupField);
-		seed = new JTextField(4);
+		seed = new JTextField(15);
 		seed.setText("guru");
 		controlPanel.add(new JLabel("seed:"));
 		controlPanel.add(seed);
@@ -100,7 +101,7 @@ public class CompetitionWindow extends JFrame
             public void windowOpened(WindowEvent e) {}
             public void windowClosing(WindowEvent e) {
                 if (warThread!= null) {
-                    competition.setAbort();
+                    competition.setAbort(true);
                 }
             }
 
@@ -118,7 +119,14 @@ public class CompetitionWindow extends JFrame
      */
     public boolean runWar() {
         try {
-        	competition.setSeed(seed.getText().hashCode());
+            long seedValue;
+            if (seed.getText().startsWith(SEED_PREFIX)){
+                seedValue = Long.parseLong(seed.getText().substring(SEED_PREFIX.length()));
+            }
+            else {
+                seedValue = seed.getText().hashCode();
+            }
+            competition.setSeed(seedValue);
             final int battlesPerGroup = Integer.parseInt(
                 battlesPerGroupField.getText().trim());
             final int warriorsPerGroup = Integer.parseInt(
@@ -157,9 +165,18 @@ public class CompetitionWindow extends JFrame
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == runWarButton) {
         	showBattleFrameIfNeeded();
-            if (runWar()) {
-            	competitionRunning = true;
-				runWarButton.setEnabled(false);
+        	switch (runWarButton.getText().trim()){
+                case "<html><font color=red>Start!</font></html>":
+                    if (runWar()) {
+                        competitionRunning = true;
+                    }
+                    break;
+                case ("<html><font color=red>Stop!</font></html>"):
+                    competition.setAbort(true);
+                    competitionRunning = false;
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -234,9 +251,10 @@ public class CompetitionWindow extends JFrame
 
     public void onWarEnd(int reason, String winners) {
         warCounter++;
+        seed.setText(SEED_PREFIX + competition.getSeed());
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                warCounterDisplay.setText("Sessions so far:" + warCounter +
+                warCounterDisplay.setText("Wars so far:" + warCounter +
                     " (out of " + totalWars + ")");
             };
         });
@@ -254,19 +272,19 @@ public class CompetitionWindow extends JFrame
     public void onCompetitionStart() {
         warCounter = 0;
         totalWars = competition.getTotalNumberOfWars();
-		this.runWarButton.setEnabled(false);
+        competition.setAbort(false);
+        runWarButton.setText("<html><font color=red>Stop!</font></html>");
     }
 
     public void onCompetitionEnd() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 warCounterDisplay.setText("The competition is over. " +
-                    warCounter + " sessions were run.");
+                    warCounter + " wars were run.");
             };
         });
         warThread = null;
-		this.runWarButton.setEnabled(true);
-        runWarButton.setEnabled(true);
+        runWarButton.setText("<html><font color=red>Start!</font></html>");
 		competitionRunning = false;
     }
     
