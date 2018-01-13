@@ -127,7 +127,6 @@ public class CompetitionWindow extends JFrame
             else {
                 seedValue = seed.getText().hashCode();
             }
-            System.out.println("Seed is: " + seed);
         	competition.setSeed(seedValue);
 
             final int battlesPerGroup = Integer.parseInt(
