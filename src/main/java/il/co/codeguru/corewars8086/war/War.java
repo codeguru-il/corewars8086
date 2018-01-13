@@ -92,7 +92,7 @@ public class War {
         ArrayList<WarriorGroup> groupsLeftToLoad = new ArrayList<WarriorGroup>();
         for (int i = 0; i < warriorGroups.length; ++i)
         	groupsLeftToLoad.add(warriorGroups[i]);
-               
+
         while (groupsLeftToLoad.size() > 0)
         {
         	int randomInt = rand.nextInt(groupsLeftToLoad.size());
@@ -377,7 +377,7 @@ public class War {
     private boolean isPaused;
     
     public void setSeed(long seed){
-    	rand.setSeed(seed);
+        rand.setSeed(seed);
     }
     
     public void pause(){
