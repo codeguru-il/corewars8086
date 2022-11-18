@@ -8,6 +8,9 @@ import il.co.codeguru.corewars8086.war.WarriorRepository;
 
 import java.io.IOException;
 
+/**
+ * @author RM
+ */
 public class HeadlessCompetitionRunner implements ScoreEventListener, CompetitionEventListener {
   private final Options options;
   

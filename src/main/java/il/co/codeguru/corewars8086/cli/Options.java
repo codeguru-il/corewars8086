@@ -3,6 +3,9 @@ package il.co.codeguru.corewars8086.cli;
 import com.google.devtools.common.options.Option;
 import com.google.devtools.common.options.OptionsBase;
 
+/**
+ * @author RM
+ */
 public class Options extends OptionsBase {
   @Option(
       name = "headless",
