@@ -142,8 +142,8 @@ public class ColumnGraph extends JComponent {
             // See this stackoverflow question - https://graphicdesign.stackexchange.com/questions/4035/what-does-the-size-of-the-font-translate-to-exactly
             // We treat as approximately the max height of a character
             // wild guess - The width of the common character will be around the same
-            int teamInitialsFontSize = (int)Math.min(width/2, 100);
-            g.setFont(new Font("Default", Font.BOLD, teamInitialsFontSize));
+            int teamInitialsFontSize = Math.min(width/2, 100);
+            g.setFont(new Font(Font.MONOSPACED, Font.BOLD, teamInitialsFontSize));
             g.drawString(teamInitials, col*width, boxTopY - 25);
 
            
@@ -153,7 +153,7 @@ public class ColumnGraph extends JComponent {
             g.setColor(gold);
             // Draw the rating (e.g "1") on top of the box, in gold
             int ratingFontSize = (int)Math.min(width*1.3, 180);
-            g.setFont(new Font("Default", Font.BOLD, ratingFontSize));
+            g.setFont(new Font(Font.MONOSPACED, Font.BOLD, ratingFontSize));
             g.drawString(String.valueOf(getTeamRating(col)), (int)((col + 0.1)*(width)), boxTopY - teamInitialsFontSize - 35);
             g.setColor(bakColor);
 

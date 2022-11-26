@@ -15,7 +15,7 @@ public class TeamColorHolder {
 		return team.substring(0, Math.min(this.teamInitialsLength, team.length())).toUpperCase();
 	}
 
-    public TeamColorHolder(String[] teamNames, int teamInitialsLength) {
+	public TeamColorHolder(String[] teamNames, int teamInitialsLength) {
 		// see http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 		teamToColor = new Hashtable<String, Color>();
 		this.teamInitialsLength = teamInitialsLength;
@@ -30,14 +30,14 @@ public class TeamColorHolder {
 
 			}
 		}
-    }
+  }
 
-    public Color getColor(String team, boolean darker) {
+	public Color getColor(String team, boolean darker) {
 		String teamInitials = getTeamInitials(team);
 		if (darker) {
 			return teamToColor.get(teamInitials).darker();
 		} else {
 			return teamToColor.get(teamInitials);
 		}
-    }
+	}
 }
