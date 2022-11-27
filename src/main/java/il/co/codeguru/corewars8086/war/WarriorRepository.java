@@ -1,5 +1,6 @@
 package il.co.codeguru.corewars8086.war;
 
+import il.co.codeguru.corewars8086.cli.Options;
 import il.co.codeguru.corewars8086.utils.EventMulticaster;
 
 import java.io.*;
@@ -14,8 +15,6 @@ public class WarriorRepository {
      * Maximum initial code size of a single warrior
      */
     private final static int MAX_WARRIOR_SIZE = 512;
-    private static final String WARRIOR_DIRECTORY = "survivors";
-    private static final String ZOMBIE_DIRECTORY = "zombies";
 
     private List<WarriorGroup> warriorGroups;
     private WarriorGroup zombieGroup;
@@ -23,11 +22,14 @@ public class WarriorRepository {
 
     private EventMulticaster scoreEventsCaster;
     private ScoreEventListener scoreListener;
+    
+    private final Options options;
 
-    public WarriorRepository() throws IOException {
-        this(true);
+    public WarriorRepository(Options options) throws IOException {
+        this(true, options);
     }
-    public WarriorRepository(boolean shouldReadWarriorsFile) throws IOException {
+    public WarriorRepository(boolean shouldReadWarriorsFile, Options options) throws IOException {
+      this.options = options;
         warriorNameToGroup = new HashMap<>();
         warriorGroups = new ArrayList<>();
         if (shouldReadWarriorsFile)
@@ -56,11 +58,11 @@ public class WarriorRepository {
     }
 
     public String[] getGroupNames() {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (WarriorGroup group : warriorGroups) {
             names.add(group.getName());
         }
-        return names.toArray(new String[names.size()]);
+        return names.toArray(new String[0]);
     }
 
     /**
@@ -69,12 +71,12 @@ public class WarriorRepository {
      * @throws IOException
      */
     private void readWarriorFiles() throws IOException {
-        readWarriorsFileFromPath(WARRIOR_DIRECTORY);
+        readWarriorsFileFromPath(options.warriorsDir);
         readZombiesFiles();
     }
 
     private void readZombiesFiles() throws IOException {
-        readZombiesFileFromPath(ZOMBIE_DIRECTORY);
+        readZombiesFileFromPath(options.zombiesDir);
     }
 
     public void readZombiesFileFromPath(String path) throws IOException {
@@ -104,17 +106,13 @@ public class WarriorRepository {
         if (warriorFiles == null) {
             JOptionPane.showMessageDialog(null,
                     "Error - survivors directory (\"" +
-                            WARRIOR_DIRECTORY + "\") not found");
+                            options.warriorsDir + "\") not found");
             System.exit(1);
         }
 
         WarriorGroup currentGroup = null;
         // sort by filename
-        Arrays.sort(warriorFiles, new Comparator<File>() {
-            public int compare(File o1, File o2) {
-                return o1.getName().compareToIgnoreCase(o2.getName());
-            }
-        });
+        Arrays.sort(warriorFiles, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
         for (File file : warriorFiles) {
             if (file.isDirectory()) {
@@ -192,8 +190,8 @@ public class WarriorRepository {
         ArrayList<WarriorGroup> groupsList = new ArrayList<WarriorGroup>();
 
         // add requested warrior groups
-        for (int i = 0; i < groupIndices.length; ++i) {
-            groupsList.add(warriorGroups.get(groupIndices[i]));
+        for (int groupIndex : groupIndices) {
+          groupsList.add(warriorGroups.get(groupIndex));
         }
 
         // add zombies (if exist)
@@ -223,8 +221,6 @@ public class WarriorRepository {
                 }
             }
             fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -233,12 +229,7 @@ public class WarriorRepository {
     public String getScores() {
         String str = "";
         List<WarriorGroup> sorted = new ArrayList<>(warriorGroups);
-        Collections.sort(sorted, new Comparator<WarriorGroup>() {
-            @Override
-            public int compare(WarriorGroup o1, WarriorGroup o2) {
-                return (int) (o2.getGroupScore() - o1.getGroupScore());
-            }
-        });
+        sorted.sort((o1, o2) -> (int) (o2.getGroupScore() - o1.getGroupScore()));
         for (WarriorGroup group : sorted) {
             List<Float> scores = group.getScores();
             List<WarriorData> data = group.getWarriors();

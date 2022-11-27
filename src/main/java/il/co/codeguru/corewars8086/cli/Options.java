@@ -23,13 +23,13 @@ public class Options extends OptionsBase {
   public int combinationSize;
   
   @Option(
-      name = "warsPerCombo",
-      abbrev = 'w',
-      help = "Wars per group combination",
+      name = "battlesPerCombo",
+      abbrev = 'b',
+      help = "Battles per group combination",
       category = "headless",
       defaultValue = "100"
   )
-  public int warsPerCombo;
+  public int battlesPerCombo;
   
   @Option(
       name = "seed",
@@ -39,4 +39,31 @@ public class Options extends OptionsBase {
       defaultValue = "guru"
   )
   public String seed;
+  
+  @Option(
+      name = "warriorsDir",
+      abbrev = 'w',
+      help = "Directory for warrior files",
+      category = "data",
+      defaultValue = "warriors"
+  )
+  public String warriorsDir;
+  
+  @Option(
+      name = "zombiesDir",
+      abbrev = 'z',
+      help = "Directory for zombie files",
+      category = "data",
+      defaultValue = "zombies"
+  )
+  public String zombiesDir;
+  
+  @Option(
+      name = "outputFile",
+      abbrev = 'o',
+      help = "Path to scores output file",
+      category = "data",
+      defaultValue = "scores.csv"
+  )
+  public String outputFile;
 }

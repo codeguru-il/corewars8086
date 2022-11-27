@@ -16,7 +16,7 @@ public class CoreWarsEngine {
     if (options.headless) {
       HeadlessCompetitionRunner r = new HeadlessCompetitionRunner(options);
     } else {
-      CompetitionWindow c = new CompetitionWindow();
+      CompetitionWindow c = new CompetitionWindow(options);
       c.setVisible(true);
       c.pack();
     }
