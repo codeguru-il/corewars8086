@@ -61,13 +61,10 @@ public class CompetitionWindow extends JFrame
         buttonPanel.add(showBattleCheckBox);
         
         startPausedCheckBox = new JCheckBox("Start Paused");
-		startPausedCheckBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
+		startPausedCheckBox.addActionListener(event -> {
 				if(startPausedCheckBox.isSelected())
 					showBattleCheckBox.setSelected(true);
-			}
-		});
+			});
 		buttonPanel.add(startPausedCheckBox);
         
         controlArea.add(buttonPanel);
