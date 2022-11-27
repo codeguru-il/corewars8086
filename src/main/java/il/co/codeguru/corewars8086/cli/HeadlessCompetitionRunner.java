@@ -5,8 +5,12 @@ import il.co.codeguru.corewars8086.war.Competition;
 import il.co.codeguru.corewars8086.war.CompetitionEventListener;
 import il.co.codeguru.corewars8086.war.ScoreEventListener;
 import il.co.codeguru.corewars8086.war.WarriorRepository;
+import me.tongfei.progressbar.ProgressBar;
+import me.tongfei.progressbar.ProgressBarBuilder;
+import me.tongfei.progressbar.ProgressBarStyle;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author RM
@@ -22,11 +26,16 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   
   private Thread warThread;
   
+  private ProgressBar progressBar;
+  
   public HeadlessCompetitionRunner(Options options) throws IOException {
     this.options = options;
+    System.out.println("CoreWars8086 - headless mode\n");
+    
     this.competition = new Competition(options);
     this.competition.addCompetitionEventListener(this);
     WarriorRepository repository = competition.getWarriorRepository();
+    System.out.printf("Loaded warriors: %s%n", Arrays.toString(repository.getGroupNames()));
     repository.addScoreEventListener(this);
   
     if (Longs.tryParse(options.seed) != null) this.seed = Long.parseLong(options.seed);
@@ -76,9 +85,7 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   @Override
   public void onWarEnd(int reason, String winners) {
     warCounter++;
-    if (warCounter % 10 == 0) {
-      System.out.printf("Wars so far: (%d out of %d)%n", warCounter, totalWars);
-    }
+    progressBar.stepTo(warCounter);
   }
   
   @Override
@@ -101,12 +108,19 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
     warCounter = 0;
     totalWars = competition.getTotalNumberOfWars();
     competition.setAbort(false);
-    System.out.println("Starting competition.");
+    System.out.printf("Starting competition (%d wars)%s.%n", totalWars, options.parallel ? " in parallel" : "");
+    progressBar = new ProgressBarBuilder()
+        .setTaskName("Running wars")
+        .setStyle(ProgressBarStyle.ASCII)
+        .setInitialMax(totalWars)
+        .showSpeed()
+        .build();
   }
   
   @Override
   public void onCompetitionEnd() {
-    System.out.println("Competition is over.");
+    progressBar.close();
+    System.out.printf("Competition is over. Ran %d wars%n", warCounter);
     warThread = null;
   }
   

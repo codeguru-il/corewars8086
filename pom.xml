@@ -35,6 +35,11 @@
             <artifactId>google-options</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>me.tongfei</groupId>
+            <artifactId>progressbar</artifactId>
+            <version>0.9.5</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -58,6 +63,13 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>
+                                il.co.codeguru.corewars8086.CoreWarsEngine
+                            </mainClass>
+                        </manifest>
+                    </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>

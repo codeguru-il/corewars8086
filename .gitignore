@@ -1,6 +1,6 @@
 target/
 *.iml
 .idea/**
-survivors
-zombies
-scores.csv
+survivors/
+zombies/
+*.csv

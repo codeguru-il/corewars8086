@@ -48,7 +48,7 @@ public class Options extends OptionsBase {
       abbrev = 'p',
       help = "Run multiple battles concurrently (only in headless mode)",
       category = "Headless",
-      defaultValue = "true"
+      defaultValue = "false"
   )
   public boolean parallel;
   
