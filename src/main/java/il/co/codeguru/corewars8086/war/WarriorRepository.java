@@ -229,7 +229,7 @@ public class WarriorRepository {
     public String getScores() {
         String str = "";
         List<WarriorGroup> sorted = new ArrayList<>(warriorGroups);
-        sorted.sort((o1, o2) -> (int) (o2.getGroupScore() - o1.getGroupScore()));
+        sorted.sort((o1, o2) -> Float.compare(o2.getGroupScore(), o1.getGroupScore()));
         for (WarriorGroup group : sorted) {
             List<Float> scores = group.getScores();
             List<WarriorData> data = group.getWarriors();

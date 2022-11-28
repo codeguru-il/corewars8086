@@ -180,7 +180,7 @@ public class CompetitionWindow extends JFrame
     }
     
     public void scoreChanged(String name, float addedValue, int groupIndex, int subIndex) {
-        columnGraph.addToValue(groupIndex, subIndex, addedValue);
+        SwingUtilities.invokeLater(() -> columnGraph.addToValue(groupIndex, subIndex, addedValue));
     }
     
     public void actionPerformed(ActionEvent e) {
@@ -203,7 +203,9 @@ public class CompetitionWindow extends JFrame
     }
     
     
-    public void onWarStart() {
+    @Override
+    public void onWarStart(long seed) {
+        SwingUtilities.invokeLater(() -> this.seed.setText(SEED_PREFIX + seed));
         showBattleFrameIfNeeded();
     }
     

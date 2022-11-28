@@ -78,7 +78,7 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   }
   
   @Override
-  public void onWarStart() {
+  public void onWarStart(long seed) {
   
   }
   
