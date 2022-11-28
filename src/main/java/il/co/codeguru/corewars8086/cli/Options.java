@@ -46,9 +46,9 @@ public class Options extends OptionsBase {
   @Option(
       name = "parallel",
       abbrev = 'p',
-      help = "Run multiple battles concurrently (only in headless mode)",
+      help = "Run multiple battles concurrently - cancel for (pre-)cgx2022 result emulation",
       category = "Headless",
-      defaultValue = "false"
+      defaultValue = "true"
   )
   public boolean parallel;
   
