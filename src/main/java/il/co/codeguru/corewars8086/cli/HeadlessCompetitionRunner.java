@@ -46,7 +46,11 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
         @Override
         public void run() {
           try {
-            competition.runCompetition(options.battlesPerCombo, options.combinationSize, false);
+            if (options.parallel) {
+              competition.runCompetitionInParallel(options.battlesPerCombo, options.combinationSize, options.threads);
+            } else {
+              competition.runCompetition(options.battlesPerCombo, options.combinationSize, false);
+            }
           } catch (Exception e) {
             e.printStackTrace();
           }

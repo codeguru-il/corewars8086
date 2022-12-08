@@ -205,8 +205,9 @@ public class WarriorRepository {
     }
 
     public void saveScoresToFile(String filename) {
-        try {
-            FileOutputStream fos = new FileOutputStream(filename);
+        System.out.printf("Writing scores to file %s%n", filename);
+        
+        try (FileOutputStream fos = new FileOutputStream(filename)) {
             PrintStream ps = new PrintStream(fos);
             ps.print("Groups:\n");
             for (WarriorGroup group : warriorGroups) {
@@ -220,7 +221,6 @@ public class WarriorRepository {
                     ps.print(data.get(i).getName() + "," + scores.get(i) + "\n");
                 }
             }
-            fos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
