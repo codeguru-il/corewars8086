@@ -1,9 +1,11 @@
 package il.co.codeguru.corewars8086.war;
 
+import il.co.codeguru.corewars8086.cli.Options;
 import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.utils.EventMulticaster;
 
 import java.io.IOException;
+import java.util.Optional;
 
 
 public class Competition {
@@ -31,13 +33,15 @@ public class Competition {
     private long seed = 0;
 
     private boolean abort;
+    
+    private final Options options;
 
-    public Competition() throws IOException {
-        this(true);
+    public Competition(Options options) throws IOException {
+        this(true, options);
     }
 
-    public Competition(boolean shouldReadWarriorsFile) throws IOException {
-        warriorRepository = new WarriorRepository(shouldReadWarriorsFile);
+    public Competition(boolean shouldReadWarriorsFile, Options options) throws IOException {
+        warriorRepository = new WarriorRepository(shouldReadWarriorsFile, options);
 
         competitionEventCaster = new EventMulticaster(CompetitionEventListener.class);
         competitionEventListener = (CompetitionEventListener) competitionEventCaster.getProxy();
@@ -45,6 +49,8 @@ public class Competition {
         memoryEventListener = (MemoryEventListener) memoryEventCaster.getProxy();
         speed = MAXIMUM_SPEED;
         abort = false;
+        
+        this.options = options;
     }
 
     public void runCompetition (int warsPerCombination, int warriorsPerGroup, boolean startPaused) throws Exception {

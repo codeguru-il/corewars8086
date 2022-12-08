@@ -1,6 +1,10 @@
 package il.co.codeguru.corewars8086.gui;
 
-import il.co.codeguru.corewars8086.war.*;
+import il.co.codeguru.corewars8086.cli.Options;
+import il.co.codeguru.corewars8086.war.Competition;
+import il.co.codeguru.corewars8086.war.CompetitionEventListener;
+import il.co.codeguru.corewars8086.war.ScoreEventListener;
+import il.co.codeguru.corewars8086.war.WarriorRepository;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -35,11 +39,11 @@ public class CompetitionWindow extends JFrame
 
 	private JCheckBox startPausedCheckBox;
 
-    public CompetitionWindow() throws IOException {
+    public CompetitionWindow(Options options) throws IOException {
         super("CodeGuru Extreme - Competition Viewer");
         getContentPane().setLayout(new BorderLayout());
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        competition = new Competition();
+        competition = new Competition(options);
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition
                         .getWarriorRepository();
@@ -61,13 +65,10 @@ public class CompetitionWindow extends JFrame
         buttonPanel.add(showBattleCheckBox);
         
         startPausedCheckBox = new JCheckBox("Start Paused");
-		startPausedCheckBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
+		startPausedCheckBox.addActionListener(event -> {
 				if(startPausedCheckBox.isSelected())
 					showBattleCheckBox.setSelected(true);
-			}
-		});
+			});
 		buttonPanel.add(startPausedCheckBox);
         
         controlArea.add(buttonPanel);

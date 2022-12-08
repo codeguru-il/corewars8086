@@ -11,13 +11,13 @@ public class WarriorGroup {
 
     public WarriorGroup(String name) {
         this.name = name;
-        warriorData = new ArrayList<WarriorData>();
-        scores = new ArrayList<Float>();
+        warriorData = new ArrayList<>();
+        scores = new ArrayList<>();
     }
 
     public void addWarrior(WarriorData data) {
         warriorData.add(data);
-        scores.add(new Float(0));
+        scores.add(0f);
     }
 
     public List<WarriorData> getWarriors() {
