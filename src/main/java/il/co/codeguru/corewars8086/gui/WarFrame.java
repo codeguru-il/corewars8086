@@ -6,8 +6,6 @@ import il.co.codeguru.corewars8086.utils.Unsigned;
 import il.co.codeguru.corewars8086.war.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Enumeration;
 
 import javax.swing.*;
@@ -60,7 +58,7 @@ public class WarFrame extends JFrame
 
     private final Competition competition;
 
-	private MemoryFrame memory_frame;
+	private MemoryFrame memoryFrame;
 
     public WarFrame(final Competition competition) {
         super("CodeGuru Extreme - Session Viewer");
@@ -384,8 +382,7 @@ public class WarFrame extends JFrame
 
 	@Override
 	public void addressAtMouseLocationRequested(int address) {
-		RealModeAddress tmp = new RealModeAddress(
-				this.competition.getCurrentWar().ARENA_SEGMENT, (short) address);
+		RealModeAddress tmp = new RealModeAddress(War.ARENA_SEGMENT, (short) address);
 		byte data = this.competition.getCurrentWar().getMemory().readByte(tmp);
 
 		// Warrior w = this.competition.getCurrentWar().getNumWarriors()
@@ -393,12 +390,12 @@ public class WarFrame extends JFrame
 		this.addressFiled.setText(Integer.toHexString(address).toUpperCase()
 				+ ": " + String.format("%02X", data).toUpperCase());
 		
-		if(memory_frame == null || memory_frame.isVisible() == false){
-			memory_frame = new MemoryFrame(competition, tmp.getLinearAddress());
-			WarFrame.this.competition.addCompetitionEventListener(memory_frame);
+		if (memoryFrame == null || !memoryFrame.isVisible()) {
+			memoryFrame = new MemoryFrame(competition, tmp.getLinearAddress());
+			this.competition.addCompetitionEventListener(memoryFrame);
 		}
 		else
-			memory_frame.refrash(tmp.getLinearAddress());
+			memoryFrame.refresh(tmp.getLinearAddress());
 	}
  
 }

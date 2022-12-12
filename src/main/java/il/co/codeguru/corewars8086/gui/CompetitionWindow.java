@@ -70,6 +70,7 @@ public class CompetitionWindow extends JFrame
         buttonPanel.add(showBattleCheckBox);
         
         startPausedCheckBox = new JCheckBox("Start Paused");
+        startPausedCheckBox.setEnabled(!options.parallel); // TODO enable functionality in 5.0.1
         startPausedCheckBox.addActionListener(event -> {
             if (startPausedCheckBox.isSelected())
                 showBattleCheckBox.setSelected(true);
@@ -190,6 +191,10 @@ public class CompetitionWindow extends JFrame
                 case "<html><font color=red>Start!</font></html>":
                     if (runWar()) {
                         competitionRunning = true;
+                        
+                        if (options.parallel) {
+                            showBattleCheckBox.setEnabled(false); // TODO enable functionality in 5.0.1
+                        }
                     }
                     break;
                 case ("<html><font color=red>Stop!</font></html>"):
@@ -205,14 +210,20 @@ public class CompetitionWindow extends JFrame
     
     @Override
     public void onWarStart(long seed) {
-        SwingUtilities.invokeLater(() -> this.seed.setText(SEED_PREFIX + seed));
-        showBattleFrameIfNeeded();
+        SwingUtilities.invokeLater(() -> {
+            this.seed.setText(SEED_PREFIX + seed);
+            showBattleFrameIfNeeded();
+        });
     }
     
     private void showBattleFrameIfNeeded() {
         if (showBattleCheckBox.isSelected() && battleFrame == null) {
             showBattleRoom();
             showBattleCheckBox.setSelected(false);
+            
+            if (options.parallel) {
+                showBattleCheckBox.setEnabled(false);
+            }
         }
     }
     
@@ -292,11 +303,12 @@ public class CompetitionWindow extends JFrame
     }
     
     public void onCompetitionEnd() {
-        SwingUtilities.invokeLater(
-                () -> warCounterDisplay.setText("The competition is over. " + warCounter + " wars were run.")
-        );
+        SwingUtilities.invokeLater(() -> {
+            warCounterDisplay.setText(String.format("The competition is over. %d wars were run.", warCounter));
+            runWarButton.setText("<html><font color=red>Start!</font></html>");
+            showBattleCheckBox.setEnabled(true);
+        });
         warThread = null;
-        runWarButton.setText("<html><font color=red>Start!</font></html>");
         competitionRunning = false;
     }
     

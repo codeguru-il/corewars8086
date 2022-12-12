@@ -173,6 +173,16 @@ public class Competition {
   public void runWarInParallel(WarriorGroup[] warriorGroups, long seed, int id) throws Exception {
     War war = new War(memoryEventListener, competitionEventListener, false);
     war.setSeed(seed);
+    boolean selectedAsCurrent = false;
+    
+    // Set current war as a
+    synchronized (this) {
+      if (this.currentWar == null) {
+        this.currentWar = war;
+        selectedAsCurrent = true;
+      }
+    }
+  
     competitionEventListener.onWarStart(seed);
     war.loadWarriorGroups(warriorGroups);
     
@@ -181,7 +191,15 @@ public class Competition {
       competitionEventListener.onRound(round);
       competitionEventListener.onEndRound();
       
-      if (war.isOver()) break;
+     if (selectedAsCurrent && speed != MAXIMUM_SPEED) {
+       if (round % speed == 0) {
+         Thread.sleep(DELAY_UNIT);
+       }
+     }
+      
+      if (war.isOver()) {
+        break;
+      }
       
       war.nextRound(round);
       ++round;
@@ -199,7 +217,13 @@ public class Competition {
     } else { // user abort
       competitionEventListener.onWarEnd(CompetitionEventListener.ABORTED, names);
     }
-  
+    
+    if (selectedAsCurrent) {
+      synchronized (this) {
+        this.currentWar = null;
+      }
+    }
+    
     synchronized (warriorRepository) {
       war.updateScores(warriorRepository);
     }
