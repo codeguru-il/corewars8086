@@ -20,7 +20,7 @@ public class Options extends OptionsBase {
       name = "comboSize",
       abbrev = 'c',
       help = "The size of each group combination",
-      category = "Headless",
+      category = "Gameplay",
       defaultValue = "4"
   )
   public int combinationSize;
@@ -29,7 +29,7 @@ public class Options extends OptionsBase {
       name = "battlesPerCombo",
       abbrev = 'b',
       help = "Battles per group combination",
-      category = "Headless",
+      category = "Gameplay",
       defaultValue = "100"
   )
   public int battlesPerCombo;
@@ -38,16 +38,24 @@ public class Options extends OptionsBase {
       name = "seed",
       abbrev = 's',
       help = "Starting seed for the game",
-      category = "Headless",
+      category = "Gameplay",
       defaultValue = "guru"
   )
   public String seed;
+
+  @Option(
+      name = "zombieSpeed",
+      help = "Number of turns zombies play per round",
+      category = "Gameplay",
+      defaultValue = "5"
+  )
+  public int zombieSpeed;
   
   @Option(
       name = "parallel",
       abbrev = 'p',
       help = "Run multiple battles concurrently - cancel for (pre-)cgx2022 result emulation",
-      category = "Headless",
+      category = "Concurrency",
       defaultValue = "true"
   )
   public boolean parallel;
@@ -56,7 +64,7 @@ public class Options extends OptionsBase {
       name = "threads",
       abbrev = 't',
       help = "Number of threads for parallel mode",
-      category = "Headless",
+      category = "Concurrency",
       defaultValue = "4"
   )
   public int threads;

@@ -35,8 +35,10 @@ public class Warrior {
         RealModeAddress loadAddress,
         RealModeAddress initialStack,
         RealModeAddress groupSharedMemory,
-        short groupSharedMemorySize) {
+        short groupSharedMemorySize,
+        WarriorType type) {
 
+        this.type = type;
         m_name = name;
         m_codeSize = codeSize;
         m_loadAddress = loadAddress;
@@ -96,7 +98,15 @@ public class Warrior {
      */
     public void kill() {
         m_isAlive = false;
-    }	
+    }
+
+    public boolean isZombie() {
+        return type == WarriorType.ZOMBIE || type == WarriorType.ZOMBIE_H;
+    }
+
+    public WarriorType getType() {
+        return type;
+    }
 
     /**
      * @return the warrior's name.
@@ -201,4 +211,6 @@ public class Warrior {
     private Cpu m_cpu;
     /** Whether or not the warrior is still alive */
     private boolean m_isAlive;
+
+    private final WarriorType type;
 }

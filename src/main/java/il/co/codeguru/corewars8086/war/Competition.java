@@ -114,7 +114,7 @@ public class Competition {
     }
 
     public void runWar(WarriorGroup[] warriorGroups,boolean startPaused) throws Exception {
-        currentWar = new War(memoryEventListener, competitionEventListener, startPaused);
+        currentWar = new War(memoryEventListener, competitionEventListener, startPaused, options);
         currentWar.setSeed(this.seed);
         competitionEventListener.onWarStart(seed);
         currentWar.loadWarriorGroups(warriorGroups);
@@ -171,7 +171,7 @@ public class Competition {
     }
   
   public void runWarInParallel(WarriorGroup[] warriorGroups, long seed, int id) throws Exception {
-    War war = new War(memoryEventListener, competitionEventListener, false);
+    War war = new War(memoryEventListener, competitionEventListener, false, options);
     war.setSeed(seed);
     boolean selectedAsCurrent = false;
     
