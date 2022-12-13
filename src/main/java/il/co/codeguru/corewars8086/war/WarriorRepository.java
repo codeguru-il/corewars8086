@@ -92,7 +92,7 @@ public class WarriorRepository {
                 continue;
             }
 
-            WarriorData data = readWarriorFile(file);
+            WarriorData data = readWarriorFile(file, WarriorType.ZOMBIE);
             zombieGroup.addWarrior(data);
         }
     }
@@ -105,8 +105,7 @@ public class WarriorRepository {
         File[] warriorFiles = warriorsDirectory.listFiles();
         if (warriorFiles == null) {
             JOptionPane.showMessageDialog(null,
-                    "Error - survivors directory (\"" +
-                            options.warriorsDir + "\") not found");
+                    "Error - survivors directory (\"" + path + "\") not found");
             System.exit(1);
         }
 
@@ -120,20 +119,20 @@ public class WarriorRepository {
             }
 
             String name = file.getName();
-            WarriorData data = readWarriorFile(file);
+
             if (name.endsWith("1")) {
                 // start a new group!
                 currentGroup = new WarriorGroup(name.substring(0, name.length() - 1));
-                currentGroup.addWarrior(data);
+                currentGroup.addWarrior(readWarriorFile(file, WarriorType.SURVIVOR_1));
                 warriorNameToGroup.put(name, warriorGroups.size());
             } else if (name.endsWith("2")) {
-                currentGroup.addWarrior(data);
+                currentGroup.addWarrior(readWarriorFile(file, WarriorType.SURVIVOR_2));
                 warriorNameToGroup.put(name, warriorGroups.size());
                 warriorGroups.add(currentGroup);
                 currentGroup = null;
             } else {
                 currentGroup = new WarriorGroup(name);
-                currentGroup.addWarrior(data);
+                currentGroup.addWarrior(readWarriorFile(file, WarriorType.SURVIVOR));
                 warriorNameToGroup.put(name, warriorGroups.size());
                 warriorGroups.add(currentGroup);
                 currentGroup = null;
@@ -161,16 +160,16 @@ public class WarriorRepository {
         }
     }
 
-    private static WarriorData readWarriorFile(File filename) throws IOException {
-        String warriorName = filename.getName();
+    private static WarriorData readWarriorFile(File file, WarriorType type) throws IOException {
+        String warriorName = file.getName();
 
-        int warriorSize = (int) filename.length();
+        int warriorSize = (int) file.length();
         if (warriorSize > MAX_WARRIOR_SIZE) {
             warriorSize = MAX_WARRIOR_SIZE;
         }
 
         byte[] warriorData = new byte[warriorSize];
-        FileInputStream fis = new FileInputStream(filename);
+        FileInputStream fis = new FileInputStream(file);
         int size = fis.read(warriorData);
         fis.close();
 
@@ -178,7 +177,12 @@ public class WarriorRepository {
             throw new IOException();
         }
 
-        return new WarriorData(warriorName, warriorData);
+        // Zombie H - runs at double speed
+        if (type == WarriorType.ZOMBIE && warriorName.toLowerCase().endsWith("h")) {
+            type = WarriorType.ZOMBIE_H;
+        }
+
+        return new WarriorData(warriorName, warriorData, type);
     }
 
     /**

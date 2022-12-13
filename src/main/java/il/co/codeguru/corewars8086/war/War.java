@@ -1,5 +1,6 @@
 package il.co.codeguru.corewars8086.war;
 
+import il.co.codeguru.corewars8086.cli.Options;
 import il.co.codeguru.corewars8086.cpu.CpuException;
 import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.memory.MemoryException;
@@ -56,11 +57,17 @@ public class War {
     /** The listener for war events */
     private CompetitionEventListener m_warListener;
 
+    private final Options options;
+
     /**
      * Constructor.
      * Fills the Arena with its initial data. 
      */
-    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener, boolean startPaused) {
+    public War(MemoryEventListener memoryListener,
+               CompetitionEventListener warListener,
+               boolean startPaused,
+               Options options) {
+        this.options = options;
     	isPaused = startPaused;
         m_warListener = warListener;
         m_warriors = new Warrior[MAX_WARRIORS];
@@ -114,10 +121,19 @@ public class War {
                     // run first opcode
                     warrior.nextOpcode();
 
-                    // run one extra opcode, if warrior deserves it :)
-                    updateWarriorEnergy(warrior, round);
-                    if (shouldRunExtraOpcode(warrior)) {
-                        warrior.nextOpcode();
+                    if (warrior.isZombie()) {
+                        // Zombie H runs at double speed
+                        int remainingRounds =
+                                (options.zombieSpeed * ((warrior.getType() == WarriorType.ZOMBIE_H) ? 2 : 1)) - 1;
+
+                        for (int j = 0; j < remainingRounds; j++) {
+                            warrior.nextOpcode();
+                        }
+                    } else {  // run one extra opcode, if warrior deserves it :)
+                        updateWarriorEnergy(warrior, round);
+                        if (shouldRunExtraOpcode(warrior)) {
+                            warrior.nextOpcode();
+                        }
                     }
                 } catch (CpuException e) {
                     m_warListener.onWarriorDeath(warrior.getName(), "CPU exception");
@@ -230,7 +246,9 @@ public class War {
                 loadAddress,
                 initialStack,
                 groupSharedMemory,
-                GROUP_SHARED_MEMORY_SIZE);
+                GROUP_SHARED_MEMORY_SIZE,
+                warrior.getType()
+            );
 
             // load warrior to arena
             for (int offset = 0; offset < warriorData.length; ++offset) {
