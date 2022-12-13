@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 
 public class Disassembler {
 	
@@ -14,7 +15,7 @@ public class Disassembler {
 		
 		File root = new File(Disassembler.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile();
 		File tempfile = new File( root + "\\temp_disassemblr");
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempfile));
+		BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(tempfile.toPath()));
 		bos.write(bytes);
 		bos.flush();
 		bos.close();
@@ -35,7 +36,7 @@ public class Disassembler {
 			String args[] = line.split("\\s\\s+");
 			StringBuffer opcode = new StringBuffer(args[1]);
 			while(opcode.length() < 10) opcode.append(" ");
-			sb.append(opcode + args[2] + "\n");
+			sb.append(opcode).append(args[2]).append("\n");
 			
 		}
 		

@@ -11,9 +11,9 @@ public interface CompetitionEventListener extends EventListener  {
 	
     /**
      * Called when a new War is started.
-     * @param warId  0-based war counter.
+     * @param seed  Seed for the war's RNG features.
      */
-    void onWarStart();
+    void onWarStart(long seed);
 
     /** Possible reasons for a war session to end. */
     public static final int SINGLE_WINNER = 0;

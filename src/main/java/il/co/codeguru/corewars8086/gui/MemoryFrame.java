@@ -63,12 +63,12 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 		
 		add(top);
 		
-		refrash(address);
+		refresh(address);
 		
 	}
 
 	
-	public void refrash(int address) {
+	public void refresh(int address) {
 		last = address;
 		int i = 0;
 		for (JLabel la : labels) {
@@ -99,12 +99,12 @@ public class MemoryFrame extends JFrame implements CompetitionEventListener {
 	
 	@Override
 	public void onEndRound() {
-		refrash(last);
+		refresh(last);
 	}
 
 
 	@Override
-	public void onWarStart() {
+	public void onWarStart(long seed) {
 		// TODO Auto-generated method stub
 		
 	}

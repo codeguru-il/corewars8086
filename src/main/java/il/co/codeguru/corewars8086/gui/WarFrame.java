@@ -2,18 +2,13 @@ package il.co.codeguru.corewars8086.gui;
 
 import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.utils.EventMulticaster;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 import il.co.codeguru.corewars8086.war.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Enumeration;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 
 /**
@@ -54,7 +49,7 @@ public class WarFrame extends JFrame
 	// Debugger
 	private JLabel addressFiled;
 	private JButton btnCpuState;
-	private CpuFrame cpuframe;
+	private CpuFrame cpuFrame;
 	private JButton btnPause;
 	private JButton btnSingleRound;
     
@@ -63,7 +58,7 @@ public class WarFrame extends JFrame
 
     private final Competition competition;
 
-	private MemoryFrame memory_frame;
+	private MemoryFrame memoryFrame;
 
     public WarFrame(final Competition competition) {
         super("CodeGuru Extreme - Session Viewer");
@@ -105,19 +100,13 @@ public class WarFrame extends JFrame
         buttonPanel.add(roundNumber);
         buttonPanel.add(Box.createHorizontalStrut(20));
         JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+        closeButton.addActionListener(e -> dispose());
         buttonPanel.add(closeButton);
         buttonPanel.add(Box.createHorizontalStrut(20));
         buttonPanel.add(new JLabel("Speed:"));
         speedSlider = new JSlider(1,100,competition.getSpeed());
-        speedSlider.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                WarFrame.this.competition.setSpeed((int) Math.pow(1.2, speedSlider.getValue()) ); //exponential speed slider		
-            }
+        speedSlider.addChangeListener(e -> {
+            WarFrame.this.competition.setSpeed((int) Math.pow(1.2, speedSlider.getValue()) ); //exponential speed slider
         });
         buttonPanel.add(speedSlider);
         nRoundNumber = 0;
@@ -130,46 +119,31 @@ public class WarFrame extends JFrame
 
 		btnCpuState = new JButton("View CPU");
 		btnCpuState.setEnabled(false);
-		btnCpuState.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				cpuframe = new CpuFrame(competition);
-				WarFrame.this.competition.addCompetitionEventListener(cpuframe);
-
-			}
-		});
+		btnCpuState.addActionListener(event -> {
+            cpuFrame = new CpuFrame(competition);
+            WarFrame.this.competition.addCompetitionEventListener(cpuFrame);
+        });
 
 		competition.addCompetitionEventListener(this);
 		
 		btnPause = new JButton("Pause");
 		btnPause.setEnabled(false);
-		btnPause.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (competition.getCurrentWar().isPaused()) {
-					competition.getCurrentWar().resume();
-					btnPause.setText("Pause");
-					btnSingleRound.setEnabled(false);
-				} else {
-					competition.getCurrentWar().pause();
-					btnPause.setText("Resume");
-					btnSingleRound.setEnabled(true);
-				}
+		btnPause.addActionListener(event -> {
+            if (competition.getCurrentWar().isPaused()) {
+                competition.getCurrentWar().resume();
+                btnPause.setText("Pause");
+                btnSingleRound.setEnabled(false);
+            } else {
+                competition.getCurrentWar().pause();
+                btnPause.setText("Resume");
+                btnSingleRound.setEnabled(true);
+            }
 
-			}
-
-		});
+        });
 
 		btnSingleRound = new JButton("Single Round");
 		btnSingleRound.setEnabled(false);
-		btnSingleRound.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				competition.getCurrentWar().runSingleRound();
-			}
-		});
+		btnSingleRound.addActionListener(event -> competition.getCurrentWar().runSingleRound());
         
 		buttonPanel.add(btnCpuState);
 		buttonPanel.add(btnPause);
@@ -226,8 +200,8 @@ public class WarFrame extends JFrame
         }
     }
 
-    /** @see CompetitionEventListener#onWarStart(int) */
-    public void onWarStart() {
+    /** @see CompetitionEventListener#onWarStart(long) */
+    public void onWarStart(long seed) {
         addMessage("=== Session started ===");
         nameListModel.clear();
         warCanvas.clear();
@@ -397,7 +371,7 @@ public class WarFrame extends JFrame
 		this.competition.getCurrentWar().resume();
 
 		try {
-			this.cpuframe.dispose();
+			this.cpuFrame.dispose();
 		} catch (Exception e) {
 		}
 		// restoring maximum speed
@@ -408,8 +382,7 @@ public class WarFrame extends JFrame
 
 	@Override
 	public void addressAtMouseLocationRequested(int address) {
-		RealModeAddress tmp = new RealModeAddress(
-				this.competition.getCurrentWar().ARENA_SEGMENT, (short) address);
+		RealModeAddress tmp = new RealModeAddress(War.ARENA_SEGMENT, (short) address);
 		byte data = this.competition.getCurrentWar().getMemory().readByte(tmp);
 
 		// Warrior w = this.competition.getCurrentWar().getNumWarriors()
@@ -417,12 +390,12 @@ public class WarFrame extends JFrame
 		this.addressFiled.setText(Integer.toHexString(address).toUpperCase()
 				+ ": " + String.format("%02X", data).toUpperCase());
 		
-		if(memory_frame == null || memory_frame.isVisible() == false){
-			memory_frame = new MemoryFrame(competition, tmp.getLinearAddress());
-			WarFrame.this.competition.addCompetitionEventListener(memory_frame);
+		if (memoryFrame == null || !memoryFrame.isVisible()) {
+			memoryFrame = new MemoryFrame(competition, tmp.getLinearAddress());
+			this.competition.addCompetitionEventListener(memoryFrame);
 		}
 		else
-			memory_frame.refrash(tmp.getLinearAddress());
+			memoryFrame.refresh(tmp.getLinearAddress());
 	}
  
 }

@@ -13,7 +13,7 @@ public class CoreWarsEngine {
     optionsParser.parseAndExitUponError(args);
     Options options = optionsParser.getOptions(Options.class);
   
-    if (options.headless) {
+    if (options != null && options.headless) {  // options should never be null
       HeadlessCompetitionRunner r = new HeadlessCompetitionRunner(options);
     } else {
       CompetitionWindow c = new CompetitionWindow(options);
