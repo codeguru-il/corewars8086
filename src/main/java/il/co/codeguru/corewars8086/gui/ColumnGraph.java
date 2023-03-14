@@ -1,5 +1,7 @@
 package il.co.codeguru.corewars8086.gui;
 
+import il.co.codeguru.corewars8086.cli.Options;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -25,7 +27,7 @@ public class ColumnGraph extends JComponent {
     // We assume the teams' first 3 characters are the school name
     private static final int SCHOOL_PREFIX_LEN = 3;
 
-    public ColumnGraph(String[] names) {
+    public ColumnGraph(String[] names, Options options) {
         super();
         this.names = new String[names.length];
         // the first element holds the sum of all the other values
@@ -36,7 +38,7 @@ public class ColumnGraph extends JComponent {
         numTopTeams = Math.min(names.length / 2, 10); // If you are in the top half you count as top team
         // Give out colors by the team name first 3 characters
         // So teams from the same school have the same color
-        teamColorHolder = new TeamColorHolder(names, SCHOOL_PREFIX_LEN);
+        teamColorHolder = new TeamColorHolder(names, SCHOOL_PREFIX_LEN, options);
     }
 
     @Override

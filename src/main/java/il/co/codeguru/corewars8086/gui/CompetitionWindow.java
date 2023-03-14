@@ -53,7 +53,7 @@ public class CompetitionWindow extends JFrame
         competition.addCompetitionEventListener(this);
         WarriorRepository warriorRepository = competition.getWarriorRepository();
         warriorRepository.addScoreEventListener(this);
-        columnGraph = new ColumnGraph(warriorRepository.getGroupNames());
+        columnGraph = new ColumnGraph(warriorRepository.getGroupNames(), options);
         getContentPane().add(columnGraph, BorderLayout.CENTER);
         // -------------
         JPanel controlArea = new JPanel();
