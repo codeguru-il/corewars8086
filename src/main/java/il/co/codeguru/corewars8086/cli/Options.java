@@ -4,6 +4,10 @@ import com.google.devtools.common.options.Option;
 import com.google.devtools.common.options.OptionsBase;
 
 /**
+ * Configuration holder for CoreWars8086 - parameters are set using command-line arguments.
+ * <p>Due to a limitation with the Google Options library, the parameter fields
+ * cannot be set as {@code final}, however please treat them so.
+ *
  * @author RM
  */
 public class Options extends OptionsBase {
@@ -47,7 +51,7 @@ public class Options extends OptionsBase {
       name = "zombieSpeed",
       help = "Number of turns zombies play per round",
       category = "Gameplay",
-      defaultValue = "5"
+      defaultValue = "2"
   )
   public int zombieSpeed;
   
@@ -95,4 +99,12 @@ public class Options extends OptionsBase {
       defaultValue = "scores.csv"
   )
   public String outputFile;
+
+  @Option(
+      name = "colorsFile",
+      help = "Path to color holder file",
+      category = "Data",
+      defaultValue = "colors.csv"
+  )
+  public String colorsFile;
 }
