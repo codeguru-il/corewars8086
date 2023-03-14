@@ -4,3 +4,5 @@ target/
 survivors/
 zombies/
 *.csv
+!bundle/**
+!bundle/*.csv
