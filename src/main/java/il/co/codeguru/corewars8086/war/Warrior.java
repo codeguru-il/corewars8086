@@ -45,39 +45,76 @@ public class Warrior {
 
         m_state = new CpuState();
         initializeCpuState(loadAddress, initialStack, groupSharedMemory);
+        // Hack to integrate in ZomBOX
+        RealModeMemoryRegion[] readAccessRegions = null;
+        RealModeMemoryRegion[] writeAccessRegions = null;
+        RealModeMemoryRegion[] executeAccessRegions = null;
+        if(type == WarriorType.ZOMBIE_BOX){
+            // this is a hack!
+            // groupSharedMemory -> ARENA
+            // loadAddress -> ZOMBOX memory
+            RealModeAddress lowestCoreAddress =
+                    new RealModeAddress(groupSharedMemory.getSegment(), (short)0);
+            RealModeAddress highestCoreAddress =
+                    new RealModeAddress(groupSharedMemory.getSegment(), (short)-1);
 
-        // initialize read-access regions
-        RealModeAddress lowestStackAddress =
-            new RealModeAddress(initialStack.getSegment(), (short)0); 
-        RealModeAddress lowestCoreAddress =
-            new RealModeAddress(loadAddress.getSegment(), (short)0);
-        RealModeAddress highestCoreAddress =
-            new RealModeAddress(loadAddress.getSegment(), (short)-1);
-        RealModeAddress highestGroupSharedMemoryAddress =
-            new RealModeAddress(groupSharedMemory.getSegment(),
-            (short)(groupSharedMemorySize-1));
+            RealModeAddress highestZomboxMemoryAddress =
+                    new RealModeAddress(loadAddress.getSegment(),
+                            (short) (groupSharedMemorySize - 1));
+            // initialize read-access regions
+            readAccessRegions =
+                    new RealModeMemoryRegion[] {
+                            new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
+                            new RealModeMemoryRegion(groupSharedMemory, highestZomboxMemoryAddress)
+                    };
 
-        RealModeMemoryRegion[] readAccessRegions =
-            new RealModeMemoryRegion[] {
-                new RealModeMemoryRegion(lowestStackAddress, initialStack),
-                new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
-                new RealModeMemoryRegion(groupSharedMemory, highestGroupSharedMemoryAddress)
-            };
+            // initialize write-access regions
+            writeAccessRegions =
+                    new RealModeMemoryRegion[]{
+                            new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
+                            new RealModeMemoryRegion(groupSharedMemory, highestZomboxMemoryAddress)
+                    };
 
-        // initialize write-access regions
-        RealModeMemoryRegion[] writeAccessRegions =
-            new RealModeMemoryRegion[] {
-                new RealModeMemoryRegion(lowestStackAddress, initialStack),
-                new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
-                new RealModeMemoryRegion(groupSharedMemory, highestGroupSharedMemoryAddress)
-            };
+            // initialize execute-access regions
+            executeAccessRegions =
+                    new RealModeMemoryRegion[]{
+                            new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
+                            new RealModeMemoryRegion(groupSharedMemory, highestZomboxMemoryAddress)
+                    };
+        }
+        else {
+            // initialize read-access regions
+            RealModeAddress lowestStackAddress =
+                    new RealModeAddress(initialStack.getSegment(), (short) 0);
+            RealModeAddress lowestCoreAddress =
+                    new RealModeAddress(loadAddress.getSegment(), (short) 0);
+            RealModeAddress highestCoreAddress =
+                    new RealModeAddress(loadAddress.getSegment(), (short) -1);
+            RealModeAddress highestGroupSharedMemoryAddress =
+                    new RealModeAddress(groupSharedMemory.getSegment(),
+                            (short) (groupSharedMemorySize - 1));
 
-        // initialize execute-access regions
-        RealModeMemoryRegion[] executeAccessRegions =
-            new RealModeMemoryRegion[] {
-                new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress)
-            };
+            readAccessRegions =
+                    new RealModeMemoryRegion[]{
+                            new RealModeMemoryRegion(lowestStackAddress, initialStack),
+                            new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
+                            new RealModeMemoryRegion(groupSharedMemory, highestGroupSharedMemoryAddress)
+                    };
 
+            // initialize write-access regions
+            writeAccessRegions =
+                    new RealModeMemoryRegion[]{
+                            new RealModeMemoryRegion(lowestStackAddress, initialStack),
+                            new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress),
+                            new RealModeMemoryRegion(groupSharedMemory, highestGroupSharedMemoryAddress)
+                    };
+
+            // initialize execute-access regions
+            executeAccessRegions =
+                    new RealModeMemoryRegion[]{
+                            new RealModeMemoryRegion(lowestCoreAddress, highestCoreAddress)
+                    };
+        }
         m_memory = new RestrictedAccessRealModeMemory(
             core, readAccessRegions, writeAccessRegions, executeAccessRegions);
 
@@ -101,7 +138,7 @@ public class Warrior {
     }
 
     public boolean isZombie() {
-        return type == WarriorType.ZOMBIE || type == WarriorType.ZOMBIE_H;
+        return type == WarriorType.ZOMBIE || type == WarriorType.ZOMBIE_H || type == WarriorType.ZOMBIE_BOX;
     }
 
     public WarriorType getType() {

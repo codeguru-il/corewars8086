@@ -18,6 +18,7 @@ public class WarriorRepository {
 
     private List<WarriorGroup> warriorGroups;
     private WarriorGroup zombieGroup;
+    private WarriorGroup zomboxGroup;
     private Map<String, Integer> warriorNameToGroup;
 
     private EventMulticaster scoreEventsCaster;
@@ -32,6 +33,7 @@ public class WarriorRepository {
       this.options = options;
         warriorNameToGroup = new HashMap<>();
         warriorGroups = new ArrayList<>();
+        zomboxGroup = null;
         if (shouldReadWarriorsFile)
             readWarriorFiles();
 
@@ -73,10 +75,34 @@ public class WarriorRepository {
     private void readWarriorFiles() throws IOException {
         readWarriorsFileFromPath(options.warriorsDir);
         readZombiesFiles();
+        readZomboxFiles();
     }
 
+
+    private void readZomboxFiles() throws IOException {
+        readZomboxFileFromPath(options.zomboxDir);
+    }
     private void readZombiesFiles() throws IOException {
         readZombiesFileFromPath(options.zombiesDir);
+    }
+
+
+    public void readZomboxFileFromPath(String path) throws IOException {
+        File zomboxDirectory = new File(path);
+        File[] zomboxFiles = zomboxDirectory.listFiles();
+        if (zomboxFiles == null) {
+            // no zombies!
+            return;
+        }
+        zomboxGroup = new WarriorGroup("ZoMbOx");
+        for (File file : zomboxFiles) {
+            if (file.isDirectory()) {
+                continue;
+            }
+
+            WarriorData data = readWarriorFile(file, WarriorType.ZOMBIE_BOX);
+            zomboxGroup.addWarrior(data);
+        }
     }
 
     public void readZombiesFileFromPath(String path) throws IOException {
@@ -195,7 +221,12 @@ public class WarriorRepository {
 
         // add requested warrior groups
         for (int groupIndex : groupIndices) {
-          groupsList.add(warriorGroups.get(groupIndex));
+            WarriorGroup group = warriorGroups.get(groupIndex);
+            // add zombox (if exist)
+            if (zomboxGroup != null) {
+                group.setMyZomboxGroup(zomboxGroup);
+            }
+            groupsList.add(group);
         }
 
         // add zombies (if exist)

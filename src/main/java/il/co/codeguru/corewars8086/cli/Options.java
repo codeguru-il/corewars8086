@@ -90,7 +90,14 @@ public class Options extends OptionsBase {
       defaultValue = "zombies"
   )
   public String zombiesDir;
-  
+  @Option(
+          name = "zomboxDir",
+          abbrev = 'x',
+          help = "Directory for zombox files",
+          category = "Data",
+          defaultValue = "zombox"
+  )
+  public String zomboxDir;
   @Option(
       name = "outputFile",
       abbrev = 'o',

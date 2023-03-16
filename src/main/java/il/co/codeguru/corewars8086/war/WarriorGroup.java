@@ -8,6 +8,7 @@ public class WarriorGroup {
     private ArrayList<WarriorData> warriorData;
     private List<Float> scores;
     private float groupScore;
+    private WarriorGroup myZomboxGroup;
 
     public WarriorGroup(String name) {
         this.name = name;
@@ -19,7 +20,8 @@ public class WarriorGroup {
         warriorData.add(data);
         scores.add(0f);
     }
-
+    public WarriorGroup getMyZomboxGroup(){ return myZomboxGroup;};
+    public void setMyZomboxGroup(WarriorGroup group){ myZomboxGroup = group;};
     public List<WarriorData> getWarriors() {
         return warriorData;
     }

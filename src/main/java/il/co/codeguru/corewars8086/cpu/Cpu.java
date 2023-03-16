@@ -862,6 +862,8 @@ public class Cpu {
                         int87();
                     } else if (opcodeId == (byte)0x88) {
                         int88();
+                    } else if (opcodeId == (byte)0x89) {
+                        int89();
                     } else {
                         throw new IntOpcodeException();
                     }
@@ -2143,6 +2145,20 @@ public class Cpu {
                 stosdw();
             }
         }
+    }
+
+    /**
+     * Implements the virtual INT 0x89 opcode.
+     * try to catch personal zombie
+     *
+     * @throws MemoryException
+     */
+    private void int89() throws MemoryException{
+        byte bombCount = m_state.getBomb4Count();
+        if (bombCount != 0) {
+            m_state.setBomb4Count((byte)(bombCount - 1));
+        }
+        // TODO: capture zombox
     }
 
     /**

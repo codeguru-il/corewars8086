@@ -28,6 +28,8 @@ public class War {
     private final static short STACK_SIZE = 2*1024;
     /** Group-shared private memory size */
     private final static short GROUP_SHARED_MEMORY_SIZE = 1024;
+    /** Group-zombox-shared private memory size */
+    private final static short GROUP_ZOMBOX_SHARED_MEMORY_SIZE = 1024;
     /** Arena is filled with this byte */
     private final static byte ARENA_BYTE = (byte)0xCC;
     /** Maximum number of warriors in a fight */
@@ -220,6 +222,56 @@ public class War {
 	
     private void loadWarriorGroup(WarriorGroup warriorGroup) throws Exception {
         List<WarriorData> warriors = warriorGroup.getWarriors();
+        if(warriors.size() == 0){
+            return;
+        }
+        WarriorType warrior_type = warriors.get(0).getType();
+        // Hack to integrate in ZomBOX
+        boolean is_player = ((warrior_type == WarriorType.SURVIVOR) ||
+                            (warrior_type == WarriorType.SURVIVOR_1) ||
+                            (warrior_type == WarriorType.SURVIVOR_2));
+        if( warriorGroup.getMyZomboxGroup() != null &&
+            is_player){
+            String survivorName = warriors.get(0).getName();
+            RealModeAddress groupZomboxSharedMemory =
+                    allocateCoreMemory(GROUP_ZOMBOX_SHARED_MEMORY_SIZE);
+
+            WarriorData zomboxWarrior = warriorGroup.getMyZomboxGroup().getWarriors().get(0);
+
+            String zomboxName = zomboxWarrior.getName();
+            byte[] zomboxData = zomboxWarrior.getCode();
+
+            short zomboxLoadOffset = 0x0;
+
+            RealModeAddress zomboxLoadAddress =
+                    new RealModeAddress(groupZomboxSharedMemory.getSegment(), zomboxLoadOffset);
+
+
+            RealModeAddress arenaAddress =
+                    new RealModeAddress(ARENA_SEGMENT, (short) 0x0);
+            m_warriors[m_numWarriors++] = new Warrior(
+                    zomboxName + "_" + survivorName,
+                    zomboxData.length,
+                    m_core,
+                    zomboxLoadAddress,
+                    arenaAddress,
+                    arenaAddress,
+                    GROUP_ZOMBOX_SHARED_MEMORY_SIZE,
+                    zomboxWarrior.getType()
+            );
+
+            // load warrior to arena
+            for (int offset = 0; offset < zomboxData.length; ++offset) {
+                RealModeAddress tmp = new RealModeAddress(groupZomboxSharedMemory.getSegment(),
+                        (short)(zomboxLoadOffset + offset));
+                m_core.writeByte(tmp, zomboxData[offset]);
+            }
+            ++m_numWarriorsAlive;
+            ++m_currentWarrior;
+
+            // notify listener
+            m_warListener.onWarriorBirth(zomboxName);
+        }
 
         RealModeAddress groupSharedMemory =
             allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
