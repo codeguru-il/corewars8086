@@ -860,6 +860,8 @@ public class Cpu {
                         int86();
                     } else if (opcodeId == (byte)0x87) {
                         int87();
+                    } else if (opcodeId == (byte)0x88) {
+                        int88();
                     } else {
                         throw new IntOpcodeException();
                     }
@@ -2143,6 +2145,32 @@ public class Cpu {
         }
     }
 
+    /**
+     * Implements the virtual INT 0x88 opcode.
+     * If enough bombs are left, searches from ES:DI for a given 1 byte specified by AL
+     * and its first occurrence address keep in DI
+     *
+     * @throws MemoryException
+     */
+    private void int88() throws MemoryException{
+        byte bombCount = m_state.getBomb3Count();
+        if (bombCount != 0) {
+            m_state.setBomb3Count((byte)(bombCount - 1));
+
+            for (int i = 0; i <= 0xFFFF; ++i) {
+                int diff = (m_state.getDirectionFlag() ? -i : i);
+
+                RealModeAddress address1 = new RealModeAddress(
+                        m_state.getES(), (short)(m_state.getDI() + diff));
+
+                if (m_memory.readByte(address1) == m_state.getAL()) {
+                    // found!
+                    m_state.setDI((short)(m_state.getDI() + diff));
+                    break;
+                }
+            }
+        }
+    }
     /**
      * Implements the virtual INT 0x87 opcode.
      * If enough bombs are left, searches for a given 4 bytes and replaces

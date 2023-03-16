@@ -191,6 +191,8 @@ public class Warrior {
         // initialize bombs
         m_state.setBomb1Count((byte)2);
         m_state.setBomb2Count((byte)1);
+        m_state.setBomb3Count((byte)1);
+
     }
     
     public CpuState getCpuState(){

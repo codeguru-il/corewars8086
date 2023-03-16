@@ -173,8 +173,14 @@ public class CpuState {
     public byte getBomb2Count() {
         return m_bomb2count;
     }
+    public byte getBomb3Count() {
+        return m_bomb3count;
+    }
     public void setBomb2Count(byte value) {
         m_bomb2count = value;
+    }
+    public void setBomb3Count(byte value) {
+        m_bomb3count = value;
     }
 
     /**
@@ -299,10 +305,10 @@ public class CpuState {
     /** The virtual Energy register (used to calculate the warrior's speed). */
     private short m_energy;
 
-    /** The virtual bomb count registers (used for INT 0x86, INT 0x87 opcodes). */
+    /** The virtual bomb count registers (used for INT 0x86, INT 0x87 and INT 0x88 opcodes ). */
     private byte m_bomb1count;
     private byte m_bomb2count;
-
+    private byte m_bomb3count;
 
     /**
      * Masks for the various 'flags' fields.
