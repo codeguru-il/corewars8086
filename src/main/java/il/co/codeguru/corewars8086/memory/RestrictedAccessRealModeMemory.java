@@ -102,12 +102,18 @@ public class RestrictedAccessRealModeMemory extends AbstractRealModeMemory {
         return found;		
     }
 
+    public RealModeMemoryRegion[] getReadAccessRegions(){return m_readAccessRegions;};
+    public void setReadAccessRegions(RealModeMemoryRegion[] value){m_readAccessRegions = value;};
+    public RealModeMemoryRegion[] getWriteAccessRegions(){return m_writeAccessRegions;};
+    public void setWriteAccessRegions(RealModeMemoryRegion[] value){m_writeAccessRegions = value;};
+    public RealModeMemoryRegion[] getExecAccessRegions(){return m_executeAccessRegions;};
+    public void setExecAccessRegions(RealModeMemoryRegion[] value){m_executeAccessRegions = value;};
     /** Wrapped RealModeMemory implementation */
     private final RealModeMemory m_memory;
     /** Reading from these regions is allowed */
-    private final RealModeMemoryRegion[] m_readAccessRegions;
+    private RealModeMemoryRegion[] m_readAccessRegions;
     /** Writing to these regions is allowed */
-    private final RealModeMemoryRegion[] m_writeAccessRegions;
+    private RealModeMemoryRegion[] m_writeAccessRegions;
     /** Executing these regions is allowed */	
-    private final RealModeMemoryRegion[] m_executeAccessRegions;
+    private RealModeMemoryRegion[] m_executeAccessRegions;
 }

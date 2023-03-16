@@ -2,10 +2,7 @@ package il.co.codeguru.corewars8086.war;
 
 import il.co.codeguru.corewars8086.cli.Options;
 import il.co.codeguru.corewars8086.cpu.CpuException;
-import il.co.codeguru.corewars8086.memory.MemoryEventListener;
-import il.co.codeguru.corewars8086.memory.MemoryException;
-import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.memory.RealModeMemoryImpl;
+import il.co.codeguru.corewars8086.memory.*;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 
 import java.util.ArrayList;
@@ -219,79 +216,18 @@ public class War {
             return Math.min(MAX_SPEED, 1 + (int)(Math.log(energy) / Math.log(2)));
         }
     }
-	
-    private void loadWarriorGroup(WarriorGroup warriorGroup) throws Exception {
-        List<WarriorData> warriors = warriorGroup.getWarriors();
-        if(warriors.size() == 0){
-            return;
-        }
-        WarriorType warrior_type = warriors.get(0).getType();
-        // Hack to integrate in ZomBOX
-        boolean is_player = ((warrior_type == WarriorType.SURVIVOR) ||
-                            (warrior_type == WarriorType.SURVIVOR_1) ||
-                            (warrior_type == WarriorType.SURVIVOR_2));
-        if( warriorGroup.getMyZomboxGroup() != null &&
-            is_player){
-            String survivorName = warriors.get(0).getName();
-            RealModeAddress groupZomboxSharedMemory =
-                    allocateCoreMemory(GROUP_ZOMBOX_SHARED_MEMORY_SIZE);
+    private Warrior loadWarriorData(WarriorData warrior, RealModeAddress groupSharedMemory, boolean writeSurvivor) throws Exception{
+        String warriorName = warrior.getName();
+        byte[] warriorData = warrior.getCode();
 
-            WarriorData zomboxWarrior = warriorGroup.getMyZomboxGroup().getWarriors().get(0);
+        short loadOffset = getLoadOffset(warriorData.length);
 
-            String zomboxName = zomboxWarrior.getName();
-            byte[] zomboxData = zomboxWarrior.getCode();
-
-            short zomboxLoadOffset = 0x0;
-
-            RealModeAddress zomboxLoadAddress =
-                    new RealModeAddress(groupZomboxSharedMemory.getSegment(), zomboxLoadOffset);
-
-
-            RealModeAddress arenaAddress =
-                    new RealModeAddress(ARENA_SEGMENT, (short) 0x0);
-            m_warriors[m_numWarriors++] = new Warrior(
-                    zomboxName + "_" + survivorName,
-                    zomboxData.length,
-                    m_core,
-                    zomboxLoadAddress,
-                    arenaAddress,
-                    arenaAddress,
-                    GROUP_ZOMBOX_SHARED_MEMORY_SIZE,
-                    zomboxWarrior.getType()
-            );
-
-            // load warrior to arena
-            for (int offset = 0; offset < zomboxData.length; ++offset) {
-                RealModeAddress tmp = new RealModeAddress(groupZomboxSharedMemory.getSegment(),
-                        (short)(zomboxLoadOffset + offset));
-                m_core.writeByte(tmp, zomboxData[offset]);
-            }
-            ++m_numWarriorsAlive;
-            ++m_currentWarrior;
-
-            // notify listener
-            m_warListener.onWarriorBirth(zomboxName);
-        }
-
-        RealModeAddress groupSharedMemory =
-            allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
-
-        for (int i = 0; i < warriors.size(); ++i) {
-
-            WarriorData warrior = warriors.get(i);
-
-            String warriorName = warrior.getName();
-            byte[] warriorData = warrior.getCode();
-
-            short loadOffset = getLoadOffset(warriorData.length);
-
-            RealModeAddress loadAddress =
-                    new RealModeAddress(ARENA_SEGMENT, loadOffset); 
-            RealModeAddress stackMemory = allocateCoreMemory(STACK_SIZE);
-            RealModeAddress initialStack =
+        RealModeAddress loadAddress =
+                new RealModeAddress(ARENA_SEGMENT, loadOffset);
+        RealModeAddress stackMemory = allocateCoreMemory(STACK_SIZE);
+        RealModeAddress initialStack =
                 new RealModeAddress(stackMemory.getSegment(), STACK_SIZE);
-
-            m_warriors[m_numWarriors++] = new Warrior(
+        Warrior loadedWarrior = new Warrior(
                 warriorName,
                 warriorData.length,
                 m_core,
@@ -300,18 +236,121 @@ public class War {
                 groupSharedMemory,
                 GROUP_SHARED_MEMORY_SIZE,
                 warrior.getType()
-            );
+        );
+        m_warriors[m_numWarriors++] = loadedWarrior;
 
-            // load warrior to arena
+        // load warrior to arena
+        if(writeSurvivor) {
             for (int offset = 0; offset < warriorData.length; ++offset) {
-                RealModeAddress tmp = new RealModeAddress(ARENA_SEGMENT, (short)(loadOffset + offset));
-                m_core.writeByte(tmp, warriorData[offset]);			
+                RealModeAddress tmp = new RealModeAddress(ARENA_SEGMENT, (short) (loadOffset + offset));
+                m_core.writeByte(tmp, warriorData[offset]);
             }
-            ++m_numWarriorsAlive;
-			++m_currentWarrior;
+        }
+        ++m_numWarriorsAlive;
+        ++m_currentWarrior;
 
-            // notify listener
-            m_warListener.onWarriorBirth(warriorName);		
+        // notify listener
+        m_warListener.onWarriorBirth(warriorName);
+
+        return loadedWarrior;
+    }
+	private void loadZombox(WarriorGroup warriorGroup, RealModeAddress groupSharedMemory, RealModeAddress groupZomboxSharedMemory) throws Exception{
+        List<WarriorData> warriors = warriorGroup.getWarriors();
+        String survivorName = warriors.get(0).getName();
+        WarriorData zomboxWarrior = warriorGroup.getMyZomboxGroup().getWarriors().get(0);
+        byte[] zomboxData = zomboxWarrior.getCode();
+
+        Warrior loadedZombox = loadWarriorData(zomboxWarrior, groupSharedMemory, false);
+        loadedZombox.setName(loadedZombox.getName() + "_" + survivorName);
+
+        loadedZombox.getCpuState().setAX((short) 0x0);
+        loadedZombox.getCpuState().setCS(groupZomboxSharedMemory.getSegment());
+        loadedZombox.getCpuState().setIP(groupZomboxSharedMemory.getOffset());
+        loadedZombox.setLoadOffset(new RealModeAddress(ARENA_SEGMENT, (short)0x0));
+
+        RealModeAddress highestGroupZomboxSharedMemory =
+                new RealModeAddress(groupZomboxSharedMemory.getSegment(),
+                        (short) (GROUP_ZOMBOX_SHARED_MEMORY_SIZE - 1));
+
+        RestrictedAccessRealModeMemory warriorMemoryRestrictions = loadedZombox.getRestrictedAccessRealModeMemory();
+
+        RealModeMemoryRegion[] readRegions = warriorMemoryRestrictions.getReadAccessRegions();
+        RealModeMemoryRegion[] modifiedReadRegions = new RealModeMemoryRegion[readRegions.length + 1];
+        System.arraycopy(readRegions, 0, modifiedReadRegions, 0, readRegions.length);
+        modifiedReadRegions[readRegions.length] = new RealModeMemoryRegion(groupZomboxSharedMemory,
+                highestGroupZomboxSharedMemory);
+        warriorMemoryRestrictions.setReadAccessRegions(modifiedReadRegions);
+
+        RealModeMemoryRegion[] writeRegions = warriorMemoryRestrictions.getWriteAccessRegions();
+        RealModeMemoryRegion[] modifiedWriteRegions = new RealModeMemoryRegion[writeRegions.length + 1];
+        System.arraycopy(writeRegions, 0, modifiedWriteRegions, 0, writeRegions.length);
+        modifiedWriteRegions[writeRegions.length] = new RealModeMemoryRegion(groupZomboxSharedMemory,
+                highestGroupZomboxSharedMemory);
+        warriorMemoryRestrictions.setWriteAccessRegions(modifiedWriteRegions);
+
+        RealModeMemoryRegion[] execRegions = warriorMemoryRestrictions.getExecAccessRegions();
+        RealModeMemoryRegion[] modifiedExecRegions = new RealModeMemoryRegion[execRegions.length + 1];
+        System.arraycopy(execRegions, 0, modifiedExecRegions, 0, execRegions.length);
+        modifiedExecRegions[execRegions.length] = new RealModeMemoryRegion(groupZomboxSharedMemory,
+                highestGroupZomboxSharedMemory);
+        warriorMemoryRestrictions.setExecAccessRegions(modifiedExecRegions);
+
+        // actual load zombox to zombox memory
+        for (int offset = 0; offset < zomboxData.length; ++offset) {
+            RealModeAddress tmp = new RealModeAddress(groupZomboxSharedMemory.getSegment(),
+                    (short)(groupZomboxSharedMemory.getOffset() + offset));
+            m_core.writeByte(tmp, zomboxData[offset]);
+        }
+    }
+    private void loadWarriorGroup(WarriorGroup warriorGroup) throws Exception {
+        List<WarriorData> warriors = warriorGroup.getWarriors();
+        if(warriors.size() == 0){
+            return;
+        }
+
+        RealModeAddress groupSharedMemory =
+            allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
+
+        ArrayList<Warrior> myWarriors = new ArrayList<>();
+        for (int i = 0; i < warriors.size(); ++i) {
+            WarriorData warrior = warriors.get(i);
+            Warrior loadedWarrior = loadWarriorData(warrior, groupSharedMemory, true);
+            myWarriors.add(loadedWarrior);
+        }
+
+        WarriorType warriorType = warriors.get(0).getType();
+        // Hack to integrate in ZomBOX
+        boolean isPlayer = ((warriorType == WarriorType.SURVIVOR) ||
+                (warriorType == WarriorType.SURVIVOR_1) ||
+                (warriorType == WarriorType.SURVIVOR_2));
+        if( warriorGroup.getMyZomboxGroup() != null &&
+                isPlayer) {
+            RealModeAddress groupZomboxSharedMemory =
+                    allocateCoreMemory(GROUP_ZOMBOX_SHARED_MEMORY_SIZE);
+            RealModeAddress highestGroupZomboxSharedMemory =
+                    new RealModeAddress(groupZomboxSharedMemory.getSegment(),
+                            (short) (GROUP_ZOMBOX_SHARED_MEMORY_SIZE - 1));
+
+            loadZombox(warriorGroup, groupSharedMemory, groupZomboxSharedMemory);
+
+            for (Warrior myWarrior : myWarriors) {
+                RestrictedAccessRealModeMemory warriorMemoryRestrictions = myWarrior.getRestrictedAccessRealModeMemory();
+
+                RealModeMemoryRegion[] readRegions = warriorMemoryRestrictions.getReadAccessRegions();
+                RealModeMemoryRegion[] modifiedReadRegions = new RealModeMemoryRegion[readRegions.length + 1];
+                System.arraycopy(readRegions, 0, modifiedReadRegions, 0, readRegions.length);
+                modifiedReadRegions[readRegions.length] = new RealModeMemoryRegion(groupZomboxSharedMemory,
+                        highestGroupZomboxSharedMemory);
+                warriorMemoryRestrictions.setReadAccessRegions(modifiedReadRegions);
+
+                RealModeMemoryRegion[] writeRegions = warriorMemoryRestrictions.getWriteAccessRegions();
+                RealModeMemoryRegion[] modifiedWriteRegions = new RealModeMemoryRegion[writeRegions.length + 1];
+                System.arraycopy(writeRegions, 0, modifiedWriteRegions, 0, writeRegions.length);
+                modifiedWriteRegions[writeRegions.length] = new RealModeMemoryRegion(groupZomboxSharedMemory,
+                        highestGroupZomboxSharedMemory);
+                warriorMemoryRestrictions.setWriteAccessRegions(modifiedWriteRegions);
+
+            }
         }
     }
 
