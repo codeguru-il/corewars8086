@@ -2,29 +2,26 @@ package il.co.codeguru.corewars8086.utils;
 
 /**
  * Unsigned numbers utilities.
- * 
+ *
  * @author DL
  */
 public class Unsigned {
-    
+    private Unsigned() {
+    }
+
     public static short unsignedByte(byte num) {
-        return (short)((short)num & 0xFF);
+        return (short) ((short) num & 0xFF);
     }
-    
+
     public static int unsignedShort(short num) {
-        return unsignedShort((int)num);
+        return Short.toUnsignedInt(num);
     }
-    
+
     public static int unsignedShort(int num) {
-        return (num & 0xFFFF);
+        return unsignedShort((short) num);
     }
-    
+
     public static long unsignedInt(int num) {
-        return ((long)num & 0xFFFFFFFF);
+        return Integer.toUnsignedLong(num);
     }
-    
-    /**
-     * Private constructor.
-     */
-    private Unsigned() {}
 }
