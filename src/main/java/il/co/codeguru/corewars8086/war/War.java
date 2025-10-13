@@ -8,9 +8,7 @@ import il.co.codeguru.corewars8086.memory.RealModeAddress;
 import il.co.codeguru.corewars8086.memory.RealModeMemoryImpl;
 import il.co.codeguru.corewars8086.utils.Unsigned;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 /**
@@ -43,6 +41,8 @@ public class War {
     private int m_numWarriors;
     /** Number of warriors still alive */
     private int m_numWarriorsAlive;
+    /** Number of survivors still alive */
+    private int m_numSurvivorsAlive;
     /**
      * Addresses equal or larger than this are still unused.
      * An address can be 'used' either by the Arena, or by the private stacks.
@@ -73,6 +73,7 @@ public class War {
         m_warriors = new Warrior[MAX_WARRIORS];
         m_numWarriors = 0;
         m_numWarriorsAlive = 0;
+        m_numSurvivorsAlive = 0;
         m_core = new RealModeMemoryImpl();
         m_nextFreeAddress = RealModeAddress.PARAGRAPH_SIZE *
             (ARENA_SEGMENT + RealModeAddress.PARAGRAPHS_IN_SEGMENT);
@@ -96,12 +97,9 @@ public class War {
      */
     public void loadWarriorGroups(WarriorGroup[] warriorGroups) throws Exception {
         m_currentWarrior = 0;
-        ArrayList<WarriorGroup> groupsLeftToLoad = new ArrayList<WarriorGroup>();
-        for (int i = 0; i < warriorGroups.length; ++i)
-        	groupsLeftToLoad.add(warriorGroups[i]);
+        List<WarriorGroup> groupsLeftToLoad = new ArrayList<>(Arrays.asList(warriorGroups));
                
-        while (groupsLeftToLoad.size() > 0)
-        {
+        while (!groupsLeftToLoad.isEmpty()) {
         	int randomInt = rand.nextInt(groupsLeftToLoad.size());
         	loadWarriorGroup(groupsLeftToLoad.get(randomInt));
         	groupsLeftToLoad.remove(randomInt);
@@ -116,6 +114,7 @@ public class War {
         for (int i = 0; i < m_numWarriors; ++i) {
             Warrior warrior = m_warriors[i];
             m_currentWarrior = i;
+
             if (warrior.isAlive()) {
                 try {
                     // run first opcode
@@ -135,24 +134,47 @@ public class War {
                             warrior.nextOpcode();
                         }
                     }
+
                 } catch (CpuException e) {
                     m_warListener.onWarriorDeath(warrior.getName(), "CPU exception");
                     warrior.kill();
                     --m_numWarriorsAlive;
+                    if (!warrior.isZombie()) {
+                        --m_numSurvivorsAlive;
+                    }
+
                 } catch (MemoryException e) {
                     m_warListener.onWarriorDeath(warrior.getName(), "memory exception");
                     warrior.kill();
                     --m_numWarriorsAlive;
+                    if (!warrior.isZombie()) {
+                        --m_numSurvivorsAlive;
+                    }
                 }
             }
         }
     }
 
     /**
-     * @return whether or not the War is over.
+     * Checks if the war is over. A war is defined as complete when all living survivors (that is, not zombies) are from
+     * the same group.
      */
     public boolean isOver() {
-        return (m_numWarriorsAlive < 2);
+        return m_numWarriorsAlive <= 1
+                || m_numSurvivorsAlive == 1
+                || (m_numSurvivorsAlive == 2 && countAliveSurvivorGroups() == 1);
+    }
+
+    /**
+     * Count the number of alive survivor groups - defined as survivor groups with at least one alive survivor.
+     */
+    private long countAliveSurvivorGroups() {
+        return Arrays.stream(m_warriors)
+                .filter(Objects::nonNull)  // m_warriors contains null references for indices >= m_numWarriors
+                .filter(Warrior::isAlive)
+                .filter(w -> !w.isZombie())
+                .map(Warrior::getGroupName)
+                .distinct().count();
     }
 	
     /**
@@ -224,42 +246,46 @@ public class War {
         RealModeAddress groupSharedMemory =
             allocateCoreMemory(GROUP_SHARED_MEMORY_SIZE);
 
-        for (int i = 0; i < warriors.size(); ++i) {
+        for (WarriorData warriorData : warriors) {
+            String warriorName = warriorData.getName();
+            byte[] warriorCode = warriorData.getCode();
 
-            WarriorData warrior = warriors.get(i);
-
-            String warriorName = warrior.getName();
-            byte[] warriorData = warrior.getCode();
-
-            short loadOffset = getLoadOffset(warriorData.length);
+            short loadOffset = getLoadOffset(warriorCode.length);
 
             RealModeAddress loadAddress =
-                    new RealModeAddress(ARENA_SEGMENT, loadOffset); 
+                    new RealModeAddress(ARENA_SEGMENT, loadOffset);
             RealModeAddress stackMemory = allocateCoreMemory(STACK_SIZE);
             RealModeAddress initialStack =
-                new RealModeAddress(stackMemory.getSegment(), STACK_SIZE);
+                    new RealModeAddress(stackMemory.getSegment(), STACK_SIZE);
 
-            m_warriors[m_numWarriors++] = new Warrior(
-                warriorName,
-                warriorData.length,
-                m_core,
-                loadAddress,
-                initialStack,
-                groupSharedMemory,
-                GROUP_SHARED_MEMORY_SIZE,
-                warrior.getType()
+            Warrior warrior = new Warrior(
+                    warriorName,
+                    warriorGroup.getName(),
+                    warriorCode.length,
+                    m_core,
+                    loadAddress,
+                    initialStack,
+                    groupSharedMemory,
+                    GROUP_SHARED_MEMORY_SIZE,
+                    warriorData.getType()
             );
 
+            m_warriors[m_numWarriors++] = warrior;
+
             // load warrior to arena
-            for (int offset = 0; offset < warriorData.length; ++offset) {
-                RealModeAddress tmp = new RealModeAddress(ARENA_SEGMENT, (short)(loadOffset + offset));
-                m_core.writeByte(tmp, warriorData[offset]);			
+            for (int offset = 0; offset < warriorCode.length; ++offset) {
+                RealModeAddress tmp = new RealModeAddress(ARENA_SEGMENT, (short) (loadOffset + offset));
+                m_core.writeByte(tmp, warriorCode[offset]);
             }
             ++m_numWarriorsAlive;
-			++m_currentWarrior;
+            ++m_currentWarrior;
+
+            if (!warrior.isZombie()) {
+                ++m_numSurvivorsAlive;
+            }
 
             // notify listener
-            m_warListener.onWarriorBirth(warriorName);		
+            m_warListener.onWarriorBirth(warriorName);
         }
     }
 
@@ -353,9 +379,9 @@ public class War {
         return m_numWarriors;
     }
     
-    /** @return the number of warriors still alive. */
-    public int getNumRemainingWarriors() {
-    	return m_numWarriorsAlive;
+    /** @return the number of survivors still alive. */
+    public int getNumRemainingSurvivors() {
+    	return m_numSurvivorsAlive;
     }
     
     /** @return a comma-seperated list of all warriors still alive. */
@@ -372,21 +398,19 @@ public class War {
             }
     	}
     	return names;
-    }    
+    }
  
     /**
      * Updates the scores in a given score-board.
      */
     public void updateScores(WarriorRepository repository) {
-        float score = (float)1.0 / m_numWarriorsAlive;
-    	for (int i = 0; i < m_numWarriors; ++i) {
+        float score = (float) 1.0 / m_numSurvivorsAlive;
+    	for (int i = 0; i < m_numWarriors; i++) {
             Warrior warrior = m_warriors[i];
-            if (warrior.isAlive()) {
+            if (warrior.isAlive() && !warrior.isZombie()) {
                 repository.addScore(warrior.getName(), score);
-            } /*else {    			
-                scoreBoard.addScore(warrior.getName(), 0);
-            }*/
-    	}
+            }
+        }
     }
     
     private Random rand = new Random();

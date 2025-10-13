@@ -5,7 +5,6 @@ import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.utils.EventMulticaster;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -156,7 +155,7 @@ public class Competition {
         }
         competitionEventListener.onRound(round);
 
-        int numAlive = currentWar.getNumRemainingWarriors();
+        int numAlive = currentWar.getNumRemainingSurvivors();
         String names = currentWar.getRemainingWarriorNames();
 
         if (numAlive == 1) { // we have a single winner!
@@ -207,7 +206,7 @@ public class Competition {
     
     competitionEventListener.onRound(round);
     
-    int numAlive = war.getNumRemainingWarriors();
+    int numAlive = war.getNumRemainingSurvivors();
     String names = war.getRemainingWarriorNames();
     
     if (numAlive == 1) { // we have a single winner!
