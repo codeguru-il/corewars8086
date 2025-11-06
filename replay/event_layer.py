@@ -140,17 +140,21 @@ class EventManager:
         return i
 
     def get_next_event(self, current_cycle: int) -> Optional[Event]:
-        i = self._find_event_index_by_cycle(current_cycle + 1)
-        if i < len(self._events):
-            return self._events[i]
+        # Find the next cycle greater than current_cycle
+        idx = bisect.bisect_right(self._cycles, current_cycle)
+        if idx < len(self._cycles):
+            next_cycle = self._cycles[idx]
+            lst = self._index_by_cycle.get(next_cycle, [])
+            return lst[0] if lst else None
         return None
 
     def get_previous_event(self, current_cycle: int) -> Optional[Event]:
-        # find rightmost event < current_cycle
-        dummy = Event(id=0, cycle=current_cycle, type="", symbol="", actor="")
-        i = bisect.bisect_left(self._events, dummy)
-        if i - 1 >= 0:
-            return self._events[i - 1]
+        # Find the previous cycle strictly less than current_cycle
+        idx = bisect.bisect_left(self._cycles, current_cycle) - 1
+        if idx >= 0:
+            prev_cycle = self._cycles[idx]
+            lst = self._index_by_cycle.get(prev_cycle, [])
+            return lst[-1] if lst else None
         return None
 
     def get_important_events(self) -> List[Event]:
