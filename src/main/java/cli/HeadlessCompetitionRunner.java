@@ -10,6 +10,13 @@ import me.tongfei.progressbar.ProgressBarBuilder;
 import me.tongfei.progressbar.ProgressBarStyle;
 
 import java.io.IOException;
+import java.io.BufferedWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Arrays;
 
 /**
@@ -27,6 +34,9 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   private Thread warThread;
   
   private ProgressBar progressBar;
+  private BufferedWriter replayWriter;
+
+  private Path replayPath;
   
   public HeadlessCompetitionRunner(Options options) throws IOException {
     this.options = options;
@@ -43,6 +53,17 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
     
     this.warCounter = 0;
     this.totalWars = 0;
+    // Open a JSONL replay file for this headless run (timestamped)
+    try {
+      String ts = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+      String replayFileName = "replay-" + ts + ".jsonl";
+      this.replayPath = Paths.get(replayFileName);
+      this.replayWriter = Files.newBufferedWriter(replayPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    } catch (IOException e) {
+      System.err.println("Failed to open replay JSONL file: " + e.getMessage());
+      this.replayWriter = null;
+    }
+
     this.runWar();
   }
   
@@ -86,6 +107,10 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   public void onWarEnd(int reason, String winners) {
     warCounter++;
     progressBar.stepTo(warCounter);
+    // write a war-end event to the replay JSONL
+    writeReplayJson(new String[] {
+        "{\"type\":\"WAR_END\",\"cycle\":" + warCounter + ",\"reason\":\"" + reason + "\",\"winners\":\"" + winners + "\"}"
+    });
   }
   
   @Override
@@ -115,6 +140,10 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
         .setInitialMax(totalWars)
         .showSpeed()
         .build();
+    // write competition start meta
+    writeReplayJson(new String[] {
+        "{\"type\":\"COMPETITION_START\",\"total_wars\":" + totalWars + ",\"timestamp\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date()) + "\"}"
+    });
   }
   
   @Override
@@ -122,6 +151,19 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
     progressBar.close();
     System.out.printf("Competition is over. Ran %d wars%n", warCounter);
     warThread = null;
+    // write competition end meta and close the replay writer
+    writeReplayJson(new String[] {
+        "{\"type\":\"COMPETITION_END\",\"ran_wars\":" + warCounter + "}"
+    });
+    if (this.replayWriter != null) {
+      try {
+        this.replayWriter.flush();
+        this.replayWriter.close();
+        System.out.println("Replay JSONL written to: " + this.replayPath.toAbsolutePath().toString());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
   
   @Override
@@ -131,5 +173,18 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   
   @Override
   public void scoreChanged(String name, float addedValue, int groupIndex, int subIndex) {
+  }
+
+  private synchronized void writeReplayJson(String[] lines) {
+    if (this.replayWriter == null) return;
+    try {
+      for (String l : lines) {
+        this.replayWriter.write(l);
+        this.replayWriter.newLine();
+      }
+      this.replayWriter.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
