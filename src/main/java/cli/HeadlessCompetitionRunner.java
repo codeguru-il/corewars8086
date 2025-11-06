@@ -108,9 +108,9 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
     warCounter++;
     progressBar.stepTo(warCounter);
     // write a war-end event to the replay JSONL
-    writeReplayJson(new String[] {
-        "{\"type\":\"WAR_END\",\"cycle\":" + warCounter + ",\"reason\":\"" + reason + "\",\"winners\":\"" + winners + "\"}"
-    });
+  writeReplayJson(new String[] {
+    "{\"type\":\"WAR_END\",\"round\":" + warCounter + ",\"reason\":\"" + reason + "\",\"winners\":\"" + winners + "\"}"
+  });
   }
   
   @Override
@@ -141,9 +141,9 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
         .showSpeed()
         .build();
     // write competition start meta
-    writeReplayJson(new String[] {
-        "{\"type\":\"COMPETITION_START\",\"total_wars\":" + totalWars + ",\"timestamp\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date()) + "\"}"
-    });
+  writeReplayJson(new String[] {
+    "{\"type\":\"COMPETITION_START\",\"total_wars\":" + totalWars + ",\"timestamp\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date()) + "\"}"
+  });
   }
   
   @Override
@@ -152,9 +152,9 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
     System.out.printf("Competition is over. Ran %d wars%n", warCounter);
     warThread = null;
     // write competition end meta and close the replay writer
-    writeReplayJson(new String[] {
-        "{\"type\":\"COMPETITION_END\",\"ran_wars\":" + warCounter + "}"
-    });
+  writeReplayJson(new String[] {
+    "{\"type\":\"COMPETITION_END\",\"ran_rounds\":" + warCounter + "}"
+  });
     if (this.replayWriter != null) {
       try {
         this.replayWriter.flush();

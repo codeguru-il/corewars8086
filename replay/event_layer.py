@@ -33,7 +33,7 @@ OPTIONAL_TYPES = {"NEAR_MISS", "LOOP"}
 @dataclass(order=True)
 class Event:
     id: int
-    cycle: int
+    round: int
     type: str
     symbol: str
     actor: str
@@ -47,7 +47,7 @@ class Event:
         # Accept keys flexibly and coerce types
         return cls(
             id=int(d.get("id", 0)),
-            cycle=int(d.get("cycle", 0)),
+            round=int(d.get("round", d.get("cycle", 0))),
             type=str(d.get("type", "UNKNOWN")),
             symbol=str(d.get("symbol", "")),
             actor=d.get("actor"),
@@ -70,13 +70,13 @@ class EventManager:
       - on_import_completed(count)
 
     The manager stores events in a flat chronological list (`self._events`) and
-    an index mapping cycle -> list of events for quick seeking.
+    an index mapping round -> list of events for quick seeking.
     """
 
     def __init__(self):
         self._events: List[Event] = []
-        self._cycles: List[int] = []  # list of sorted cycles for binary search
-        self._index_by_cycle: Dict[int, List[Event]] = {}
+        self._rounds: List[int] = []  # list of sorted rounds for binary search
+        self._index_by_round: Dict[int, List[Event]] = {}
         self._callbacks: Dict[str, List[Callable[..., Any]]] = {}
         self._id_counter = 1
 
@@ -107,53 +107,57 @@ class EventManager:
 
     def add_event(self, event: Event) -> None:
         """Insert event keeping chronological order and update cycle index."""
-        # Insert into flat list maintaining order by cycle then id
-        key = (event.cycle, event.id)
-        # Using bisect on cycles list is tricky because multiple events share same cycle.
-        # We'll append then sort only when necessary for small lists; but better: maintain _events sorted by (cycle,id)
+        # Insert into flat list maintaining order by round then id
+        # Using bisect on rounds list is tricky because multiple events share same round.
+        # We'll maintain _events sorted by (round,id) using the Event ordering.
         insert_pos = bisect.bisect_right(self._events, event)
         self._events.insert(insert_pos, event)
 
-        # update index_by_cycle
-        lst = self._index_by_cycle.setdefault(event.cycle, [])
-        # keep per-cycle insertion by id order using bisect
-        per_cycle_pos = bisect.bisect_right(lst, event)
-        lst.insert(per_cycle_pos, event)
+        # update index_by_round
+        lst = self._index_by_round.setdefault(event.round, [])
+        # keep per-round insertion by id order using bisect
+        per_round_pos = bisect.bisect_right(lst, event)
+        lst.insert(per_round_pos, event)
 
-        # maintain sorted cycles list
-        if event.cycle not in self._cycles:
-            bisect.insort(self._cycles, event.cycle)
+        # maintain sorted rounds list
+        if event.round not in self._rounds:
+            bisect.insort(self._rounds, event.round)
 
         self._trigger_callbacks("on_event_added", event)
 
     # ---------- Lookup helpers ----------
     def get_events_in_cycle(self, cycle: int) -> List[Event]:
-        return list(self._index_by_cycle.get(cycle, []))
+        # kept for backward compatibility
+        return list(self._index_by_round.get(cycle, []))
+    
+    def get_events_in_round(self, round_: int) -> List[Event]:
+        """Return list of events that occurred in a given round."""
+        return list(self._index_by_round.get(round_, []))
 
     def _find_event_index_by_cycle(self, cycle: int) -> int:
         """Return insertion index in the flat `_events` list for the earliest event >= cycle."""
         class _Cmp(Event):
             pass
 
-        dummy = Event(id=0, cycle=cycle, type="", symbol="", actor="")
+        dummy = Event(id=0, round=cycle, type="", symbol="", actor="")
         i = bisect.bisect_left(self._events, dummy)
         return i
 
     def get_next_event(self, current_cycle: int) -> Optional[Event]:
-        # Find the next cycle greater than current_cycle
-        idx = bisect.bisect_right(self._cycles, current_cycle)
-        if idx < len(self._cycles):
-            next_cycle = self._cycles[idx]
-            lst = self._index_by_cycle.get(next_cycle, [])
+        # Find the next round greater than current_cycle
+        idx = bisect.bisect_right(self._rounds, current_cycle)
+        if idx < len(self._rounds):
+            next_round = self._rounds[idx]
+            lst = self._index_by_round.get(next_round, [])
             return lst[0] if lst else None
         return None
 
     def get_previous_event(self, current_cycle: int) -> Optional[Event]:
-        # Find the previous cycle strictly less than current_cycle
-        idx = bisect.bisect_left(self._cycles, current_cycle) - 1
+        # Find the previous round strictly less than current_cycle
+        idx = bisect.bisect_left(self._rounds, current_cycle) - 1
         if idx >= 0:
-            prev_cycle = self._cycles[idx]
-            lst = self._index_by_cycle.get(prev_cycle, [])
+            prev_round = self._rounds[idx]
+            lst = self._index_by_round.get(prev_round, [])
             return lst[-1] if lst else None
         return None
 

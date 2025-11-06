@@ -22,9 +22,9 @@ def test_load_and_index(tmp_path):
     mgr = EventManager()
     cnt = mgr.load_jsonl(str(p))
     assert cnt == 3
-    assert len(mgr.get_events_in_cycle(10)) == 1
-    assert len(mgr.get_events_in_cycle(15)) == 1
-    assert len(mgr.get_events_in_cycle(20)) == 1
+    assert len(mgr.get_events_in_round(10)) == 1
+    assert len(mgr.get_events_in_round(15)) == 1
+    assert len(mgr.get_events_in_round(20)) == 1
 
 
 def test_navigation_and_filters(tmp_path):
@@ -34,9 +34,9 @@ def test_navigation_and_filters(tmp_path):
     mgr.load_jsonl(str(p))
 
     ev = mgr.get_next_event(10)
-    assert ev.cycle == 15
+    assert ev.round == 15
     prev = mgr.get_previous_event(15)
-    assert prev.cycle == 10
+    assert prev.round == 10
 
     important = mgr.get_important_events()
     # ENSNARE and DEATH are important
@@ -45,7 +45,7 @@ def test_navigation_and_filters(tmp_path):
 
 
 def test_render_event_on_memory():
-    e = Event(id=1, cycle=5, type="ENSNARE", symbol="🧠", actor="A", address=55, details="x")
+    e = Event(id=1, round=5, type="ENSNARE", symbol="🧠", actor="A", address=55, details="x")
     mgr = EventManager()
     data = mgr.render_event_on_memory(e)
     assert data["address"] == 55
