@@ -1,6 +1,6 @@
-package il.co.codeguru.corewars8086.cpu;
+package cpu;
 
-import il.co.codeguru.corewars8086.utils.Unsigned;
+import utils.Unsigned;
 
 /**
  * Wrapper class for CPU state (registers & flags). 

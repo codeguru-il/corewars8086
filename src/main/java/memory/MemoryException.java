@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.memory;
+package memory;
 
 /**
  * Base class for all Exceptions thrown by the RealModeMemory classes.

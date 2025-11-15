@@ -1,8 +1,8 @@
-package il.co.codeguru.corewars8086.war;
+package war;
 
-import il.co.codeguru.corewars8086.cli.Options;
-import il.co.codeguru.corewars8086.memory.MemoryEventListener;
-import il.co.codeguru.corewars8086.utils.EventMulticaster;
+import cli.Options;
+import memory.MemoryEventListener;
+import utils.EventMulticaster;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;

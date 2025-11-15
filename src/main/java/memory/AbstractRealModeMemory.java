@@ -1,6 +1,6 @@
-package il.co.codeguru.corewars8086.memory;
+package memory;
 
-import il.co.codeguru.corewars8086.utils.Unsigned;
+import utils.Unsigned;
 
 /**
  * Base class for classes implementing the RealModeMemory interface, which

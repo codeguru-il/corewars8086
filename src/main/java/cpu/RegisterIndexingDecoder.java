@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.cpu;
+package cpu;
 
 /**
  * Decodes the CPU's internal register indexing to the actual registers.

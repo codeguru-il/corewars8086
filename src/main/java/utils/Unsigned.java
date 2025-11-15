@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.utils;
+package utils;
 
 /**
  * Unsigned numbers utilities.

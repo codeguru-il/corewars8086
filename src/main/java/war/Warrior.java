@@ -1,13 +1,13 @@
-package il.co.codeguru.corewars8086.war;
+package war;
 
-import il.co.codeguru.corewars8086.cpu.Cpu;
-import il.co.codeguru.corewars8086.cpu.CpuException;
-import il.co.codeguru.corewars8086.cpu.CpuState;
-import il.co.codeguru.corewars8086.memory.MemoryException;
-import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.memory.RealModeMemory;
-import il.co.codeguru.corewars8086.memory.RealModeMemoryRegion;
-import il.co.codeguru.corewars8086.memory.RestrictedAccessRealModeMemory;
+import cpu.Cpu;
+import cpu.CpuException;
+import cpu.CpuState;
+import memory.MemoryException;
+import memory.RealModeAddress;
+import memory.RealModeMemory;
+import memory.RealModeMemoryRegion;
+import memory.RestrictedAccessRealModeMemory;
 
 
 /**

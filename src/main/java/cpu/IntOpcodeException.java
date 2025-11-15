@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.cpu;
+package cpu;
 
 /**
  * Thrown on various interrupt opcodes.

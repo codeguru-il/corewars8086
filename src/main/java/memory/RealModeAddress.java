@@ -1,6 +1,6 @@
-package il.co.codeguru.corewars8086.memory;
+package memory;
 
-import il.co.codeguru.corewars8086.utils.Unsigned;
+import utils.Unsigned;
 
 /**
  * Wrapper class for a Real-Mode segment:offset address.

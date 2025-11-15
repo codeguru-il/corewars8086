@@ -1,14 +1,14 @@
-package il.co.codeguru.corewars8086.gui;
+package gui;
 
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
-import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.utils.Disassembler;
-import il.co.codeguru.corewars8086.war.Competition;
-import il.co.codeguru.corewars8086.war.CompetitionEventListener;
+import memory.RealModeAddress;
+import utils.Disassembler;
+import war.Competition;
+import war.CompetitionEventListener;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;

@@ -1,12 +1,12 @@
-package il.co.codeguru.corewars8086.war;
+package war;
 
-import il.co.codeguru.corewars8086.cli.Options;
-import il.co.codeguru.corewars8086.cpu.CpuException;
-import il.co.codeguru.corewars8086.memory.MemoryEventListener;
-import il.co.codeguru.corewars8086.memory.MemoryException;
-import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.memory.RealModeMemoryImpl;
-import il.co.codeguru.corewars8086.utils.Unsigned;
+import cli.Options;
+import cpu.CpuException;
+import memory.MemoryEventListener;
+import memory.MemoryException;
+import memory.RealModeAddress;
+import memory.RealModeMemoryImpl;
+import utils.Unsigned;
 
 import java.util.*;
 

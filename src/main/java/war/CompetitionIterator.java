@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.war;
+package war;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.util.CombinatoricsUtils;

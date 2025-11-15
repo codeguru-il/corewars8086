@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.war;
+package war;
 
 import java.io.File;
 import java.io.FilenameFilter;
