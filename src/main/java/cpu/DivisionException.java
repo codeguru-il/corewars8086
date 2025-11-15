@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.cpu;
+package cpu;
 
 /**
  * Thrown by DIV/IDIV opcodes when the division overflows, or when dividing by zero.

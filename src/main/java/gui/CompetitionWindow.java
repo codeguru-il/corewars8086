@@ -1,10 +1,10 @@
-package il.co.codeguru.corewars8086.gui;
+package gui;
 
-import il.co.codeguru.corewars8086.cli.Options;
-import il.co.codeguru.corewars8086.war.Competition;
-import il.co.codeguru.corewars8086.war.CompetitionEventListener;
-import il.co.codeguru.corewars8086.war.ScoreEventListener;
-import il.co.codeguru.corewars8086.war.WarriorRepository;
+import cli.Options;
+import war.Competition;
+import war.CompetitionEventListener;
+import war.ScoreEventListener;
+import war.WarriorRepository;
 
 import javax.swing.*;
 import java.awt.*;

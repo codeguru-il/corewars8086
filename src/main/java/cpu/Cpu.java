@@ -1,9 +1,9 @@
-package il.co.codeguru.corewars8086.cpu;
+package cpu;
 
-import il.co.codeguru.corewars8086.memory.MemoryException;
-import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.memory.RealModeMemory;
-import il.co.codeguru.corewars8086.utils.Unsigned;
+import memory.MemoryException;
+import memory.RealModeAddress;
+import memory.RealModeMemory;
+import utils.Unsigned;
 
 
 /**

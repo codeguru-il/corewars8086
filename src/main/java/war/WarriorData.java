@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.war;
+package war;
 
 /**
  * Holds a single warrior's name & code.

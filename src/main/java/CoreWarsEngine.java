@@ -1,9 +1,8 @@
-package il.co.codeguru.corewars8086;
-
 import com.google.devtools.common.options.OptionsParser;
-import il.co.codeguru.corewars8086.cli.HeadlessCompetitionRunner;
-import il.co.codeguru.corewars8086.cli.Options;
-import il.co.codeguru.corewars8086.gui.CompetitionWindow;
+
+import cli.HeadlessCompetitionRunner;
+import cli.Options;
+import gui.CompetitionWindow;
 
 import java.io.IOException;
 

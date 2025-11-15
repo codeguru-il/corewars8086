@@ -1,9 +1,9 @@
-package il.co.codeguru.corewars8086.gui;
+package gui;
 
-import il.co.codeguru.corewars8086.memory.MemoryEventListener;
-import il.co.codeguru.corewars8086.memory.RealModeAddress;
-import il.co.codeguru.corewars8086.utils.Unsigned;
-import il.co.codeguru.corewars8086.war.*;
+import memory.MemoryEventListener;
+import memory.RealModeAddress;
+import utils.Unsigned;
+import war.*;
 
 import java.awt.*;
 import java.util.Enumeration;

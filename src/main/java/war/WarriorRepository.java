@@ -1,7 +1,7 @@
-package il.co.codeguru.corewars8086.war;
+package war;
 
-import il.co.codeguru.corewars8086.cli.Options;
-import il.co.codeguru.corewars8086.utils.EventMulticaster;
+import cli.Options;
+import utils.EventMulticaster;
 
 import java.io.*;
 import java.util.*;

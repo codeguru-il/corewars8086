@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.memory;
+package memory;
 
 /**
  * Implementation of the RealModeMemory interface which limits memory access

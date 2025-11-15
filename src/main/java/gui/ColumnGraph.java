@@ -1,6 +1,6 @@
-package il.co.codeguru.corewars8086.gui;
+package gui;
 
-import il.co.codeguru.corewars8086.cli.Options;
+import cli.Options;
 
 import java.awt.Color;
 import java.awt.Dimension;

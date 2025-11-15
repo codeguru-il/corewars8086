@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.cli;
+package cli;
 
 import com.google.devtools.common.options.Option;
 import com.google.devtools.common.options.OptionsBase;

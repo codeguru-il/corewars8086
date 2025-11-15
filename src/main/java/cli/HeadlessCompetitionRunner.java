@@ -1,10 +1,10 @@
-package il.co.codeguru.corewars8086.cli;
+package cli;
 
 import com.google.common.primitives.Longs;
-import il.co.codeguru.corewars8086.war.Competition;
-import il.co.codeguru.corewars8086.war.CompetitionEventListener;
-import il.co.codeguru.corewars8086.war.ScoreEventListener;
-import il.co.codeguru.corewars8086.war.WarriorRepository;
+import war.Competition;
+import war.CompetitionEventListener;
+import war.ScoreEventListener;
+import war.WarriorRepository;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarBuilder;
 import me.tongfei.progressbar.ProgressBarStyle;

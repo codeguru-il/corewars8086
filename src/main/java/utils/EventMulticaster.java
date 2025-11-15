@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.utils;
+package utils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

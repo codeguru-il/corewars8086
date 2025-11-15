@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.memory;
+package memory;
 
 /**
  * Interface for 16bit Real-Mode memory.

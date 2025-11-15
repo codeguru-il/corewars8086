@@ -1,4 +1,4 @@
-package il.co.codeguru.corewars8086.memory;
+package memory;
 
 /**
  * Memory region (start address, end address)
