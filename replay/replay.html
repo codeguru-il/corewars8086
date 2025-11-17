@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CoreWars8086 - Replay Dashboard</title>
+    <link rel="stylesheet" href="replay.css">
+</head>
+<body>
+    <!-- Main container for the two-column layout -->
+    <div id="dashboard-container">
+        
+        <!-- === LEFT COLUMN === -->
+        <div class="left-column">
+            <!-- Arena takes up the top space -->
+            <div id="arena-container">
+                <canvas id="replay-canvas"></canvas>
+            </div>
+            <!-- Playback controls are at the bottom -->
+            <div id="playback-container"></div>
+        </div>
+
+        <!-- === RIGHT COLUMN === -->
+        <div class="right-column">
+            <div id="info-panel">
+                <div class="file-loader">
+                    <label for="file-input">Load Replay File:</label>
+                    <input type="file" id="file-input" accept=".jsonl">
+                </div>
+                <div id="warrior-list">
+                    <h2>Warriors</h2>
+                    <ul></ul>
+                </div>
+                <div id="event-log">
+                    <h2>Log</h2>
+                    <textarea readonly></textarea>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts remain the same -->
+    <script src="ReplayManager.js"></script>
+    <script src="ReplayCanvas.js"></script>
+    <script src="PlaybackControl.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

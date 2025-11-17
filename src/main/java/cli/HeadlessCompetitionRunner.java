@@ -5,6 +5,7 @@ import war.Competition;
 import war.CompetitionEventListener;
 import war.ScoreEventListener;
 import war.WarriorRepository;
+import war.ReplayRecorder;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarBuilder;
 import me.tongfei.progressbar.ProgressBarStyle;
@@ -19,9 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Arrays;
 
-/**
- * @author RM
- */
 public class HeadlessCompetitionRunner implements ScoreEventListener, CompetitionEventListener {
   private final Options options;
   
@@ -37,10 +35,11 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   private BufferedWriter replayWriter;
 
   private Path replayPath;
+  private boolean isReplayRecording = false;
   
-  public HeadlessCompetitionRunner(Options options) throws IOException {
+  public HeadlessCompetitionRunner(Options options) throws IOException, InterruptedException { // Added InterruptedException
     this.options = options;
-    System.out.println("CoreWars8086 - headless mode\n");
+    System.out.println("CodeGuru - headless mode\n");
     
     this.competition = new Competition(options);
     this.competition.addCompetitionEventListener(this);
@@ -53,33 +52,48 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
     
     this.warCounter = 0;
     this.totalWars = 0;
-    // Open a JSONL replay file for this headless run (timestamped)
-    try {
-      String ts = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
-      String replayFileName = "replay-" + ts + ".jsonl";
-      this.replayPath = Paths.get(replayFileName);
-      this.replayWriter = Files.newBufferedWriter(replayPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-    } catch (IOException e) {
-      System.err.println("Failed to open replay JSONL file: " + e.getMessage());
-      this.replayWriter = null;
+
+    if (options.replayFile != null && !options.replayFile.isEmpty()) {
+        System.out.println("Detailed replay recording enabled. A single war will be recorded to: " + options.replayFile);
+        isReplayRecording = true;
+        
+        ReplayRecorder recorder = new ReplayRecorder(options.replayFile, competition);
+        competition.addCompetitionEventListener(recorder);
+        competition.addMemoryEventLister(recorder);
+        
+        this.replayWriter = null;
+    } else {
+        try {
+          String ts = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+          String replayFileName = "replay-" + ts + ".jsonl";
+          this.replayPath = Paths.get(replayFileName);
+          this.replayWriter = Files.newBufferedWriter(replayPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+          System.out.println("Meta-log will be written to: " + replayFileName);
+        } catch (IOException e) {
+          System.err.println("Failed to open meta-log file: " + e.getMessage());
+          this.replayWriter = null;
+        }
     }
 
     this.runWar();
   }
   
-  public boolean runWar() {
+  public void runWar() throws InterruptedException { // Added InterruptedException
     try {
       competition.setSeed(this.seed);
       if (competition.getWarriorRepository().getNumberOfGroups() < options.combinationSize) {
         System.err.printf("Not enough survivors (got %d but %d are needed)%n", competition.getWarriorRepository().getNumberOfGroups(), options.combinationSize);
-        return false;
+        return;
       }
       
       warThread = new Thread("CompetitionThread") {
         @Override
         public void run() {
           try {
-            if (options.parallel) {
+            if (isReplayRecording) {
+                 System.out.println("Forcing single-threaded mode and 1 battle for replay recording.");
+                 competition.runCompetition(1, options.combinationSize, false);
+            } else if (options.parallel) {
               competition.runCompetitionInParallel(options.battlesPerCombo, options.combinationSize, options.threads);
             } else {
               competition.runCompetition(options.battlesPerCombo, options.combinationSize, false);
@@ -91,45 +105,54 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
       };
       
       warThread.start();
-      return true;
+      // --- THIS IS THE CRITICAL FIX ---
+      // Wait here until the competition thread is completely finished.
+      warThread.join();
+
     } catch (Exception e) {
       e.printStackTrace();
-      return false;
     }
   }
   
   @Override
   public void onWarStart(long seed) {
-  
   }
   
   @Override
   public void onWarEnd(int reason, String winners) {
     warCounter++;
-    progressBar.stepTo(warCounter);
-    // write a war-end event to the replay JSONL
-  writeReplayJson(new String[] {
-    "{\"type\":\"WAR_END\",\"round\":" + warCounter + ",\"reason\":\"" + reason + "\",\"winners\":\"" + winners + "\"}"
-  });
+    if (progressBar != null) progressBar.stepTo(warCounter);
+    
+    writeReplayJson(new String[] {
+      "{\"type\":\"WAR_END\",\"round\":" + warCounter + ",\"reason\":\"" + reason + "\",\"winners\":\"" + winners + "\"}"
+    });
+
+    if (isReplayRecording) {
+        System.out.println("Replay recording finished.");
+        // DO NOT System.exit(0) here. Let the program terminate naturally.
+    }
   }
   
   @Override
   public void onRound(int round) {
-  
   }
   
   @Override
   public void onWarriorBirth(String warriorName) {
-  
   }
   
   @Override
   public void onWarriorDeath(String warriorName, String reason) {
-  
   }
   
   @Override
   public void onCompetitionStart() {
+    if (isReplayRecording) {
+        totalWars = 1;
+        System.out.printf("Starting single war for replay recording.%n");
+        return;
+    }
+      
     warCounter = 0;
     totalWars = competition.getTotalNumberOfWars();
     competition.setAbort(false);
@@ -140,26 +163,26 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
         .setInitialMax(totalWars)
         .showSpeed()
         .build();
-    // write competition start meta
-  writeReplayJson(new String[] {
-    "{\"type\":\"COMPETITION_START\",\"total_wars\":" + totalWars + ",\"timestamp\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date()) + "\"}"
-  });
+        
+    writeReplayJson(new String[] {
+      "{\"type\":\"COMPETITION_START\",\"total_wars\":" + totalWars + ",\"timestamp\":\"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date()) + "\"}"
+    });
   }
   
   @Override
   public void onCompetitionEnd() {
-    progressBar.close();
+    if (progressBar != null) progressBar.close();
     System.out.printf("Competition is over. Ran %d wars%n", warCounter);
     warThread = null;
-    // write competition end meta and close the replay writer
-  writeReplayJson(new String[] {
-    "{\"type\":\"COMPETITION_END\",\"ran_rounds\":" + warCounter + "}"
-  });
+    
+    writeReplayJson(new String[] {
+      "{\"type\":\"COMPETITION_END\",\"ran_rounds\":" + warCounter + "}"
+    });
+    
     if (this.replayWriter != null) {
       try {
         this.replayWriter.flush();
         this.replayWriter.close();
-        System.out.println("Replay JSONL written to: " + this.replayPath.toAbsolutePath().toString());
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -168,7 +191,6 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
   
   @Override
   public void onEndRound() {
-  
   }
   
   @Override
@@ -184,7 +206,9 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
       }
       this.replayWriter.flush();
     } catch (IOException e) {
-      e.printStackTrace();
+      if (!e.getMessage().contains("Stream closed")) {
+        e.printStackTrace();
+      }
     }
   }
 }

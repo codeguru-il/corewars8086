@@ -3,6 +3,8 @@ package gui;
 import cli.Options;
 import war.Competition;
 import war.CompetitionEventListener;
+import war.ReplayManager;
+import war.ReplayRecorder;
 import war.ScoreEventListener;
 import war.WarriorRepository;
 
@@ -43,6 +45,7 @@ public class CompetitionWindow extends JFrame
     private final JCheckBox startPausedCheckBox;
     
     private final Options options;
+    private final JButton loadReplayButton;
     
     public CompetitionWindow(Options options) throws IOException {
         super("CodeGuru Extreme - Competition Viewer");
@@ -63,6 +66,9 @@ public class CompetitionWindow extends JFrame
         runWarButton = new JButton("<html><font color=red>Start!</font></html>");
         runWarButton.addActionListener(this);
         buttonPanel.add(runWarButton);
+        loadReplayButton = new JButton("Load Replay");
+        loadReplayButton.addActionListener(this);
+        buttonPanel.add(loadReplayButton);
         warCounterDisplay = new JLabel("");
         buttonPanel.add(warCounterDisplay);
         buttonPanel.add(Box.createHorizontalStrut(30));
@@ -145,6 +151,16 @@ public class CompetitionWindow extends JFrame
                 seedValue = seed.getText().hashCode();
             }
             competition.setSeed(seedValue);
+            if (options.replayFile != null && !options.replayFile.isEmpty()) {
+                try {
+                    ReplayRecorder recorder = new ReplayRecorder(options.replayFile, competition);
+                    competition.addCompetitionEventListener(recorder);
+                    competition.addMemoryEventLister(recorder);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Error creating replay file.");
+                }
+            }
             final int battlesPerGroup = Integer.parseInt(
                     battlesPerGroupField.getText().trim());
             final int warriorsPerGroup = Integer.parseInt(
@@ -203,6 +219,22 @@ public class CompetitionWindow extends JFrame
                     break;
                 default:
                     break;
+            }
+        }
+        
+        if (e.getSource() == loadReplayButton) {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                try {
+                    ReplayManager manager = new ReplayManager();
+                    manager.load(fileChooser.getSelectedFile().getAbsolutePath());
+                    WarFrame replayFrame = new WarFrame(manager);
+                    replayFrame.pack();
+                    replayFrame.setVisible(true);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "Error loading replay file: " + ex.getMessage());
+                }
             }
         }
     }

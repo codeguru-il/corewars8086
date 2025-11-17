@@ -101,10 +101,18 @@ public class Options extends OptionsBase {
   public String outputFile;
 
   @Option(
-      name = "colorsFile",
-      help = "Path to color holder file",
-      category = "Data",
-      defaultValue = "colors.csv"
+        name = "colorsFile",
+        help = "Path to color holder file",
+        category = "Data",
+        defaultValue = "colors.csv"
   )
   public String colorsFile;
+
+  @Option(
+        name = "replayFile",
+        help = "Path to generate a detailed war replay file.",
+        category = "Data",
+        defaultValue = ""
+    )
+    public String replayFile;
 }

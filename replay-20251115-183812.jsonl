@@ -1,0 +1,65 @@
+{"type":"COMPETITION_START","total_wars":100,"timestamp":"2025-11-15T18:38:12"}
+{"type":"WAR_END","round":1,"reason":"1","winners":"Quickscan, Minefield, Pulsar"}
+{"type":"WAR_END","round":2,"reason":"1","winners":"Minefield, Pulsar, Quickscan"}
+{"type":"WAR_END","round":3,"reason":"0","winners":"Pulsar"}
+{"type":"WAR_END","round":4,"reason":"0","winners":"Pulsar"}
+{"type":"WAR_END","round":5,"reason":"0","winners":"Gatecrasher"}
+{"type":"WAR_END","round":6,"reason":"1","winners":"Quickscan, Gatecrasher"}
+{"type":"WAR_END","round":7,"reason":"0","winners":"Quickscan"}
+{"type":"WAR_END","round":8,"reason":"1","winners":"Gatecrasher, Quickscan"}
+{"type":"WAR_END","round":9,"reason":"0","winners":"Quickscan"}
+{"type":"WAR_END","round":10,"reason":"1","winners":"Quickscan, Minefield, Pulsar"}
+{"type":"WAR_END","round":11,"reason":"1","winners":"Quickscan, Minefield, Pulsar"}
+{"type":"WAR_END","round":12,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":13,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":14,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":15,"reason":"0","winners":"Quickscan"}
+{"type":"WAR_END","round":16,"reason":"0","winners":"Dwarf"}
+{"type":"WAR_END","round":17,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":18,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":19,"reason":"1","winners":"Minefield, Pulsar"}
+{"type":"WAR_END","round":20,"reason":"1","winners":"Minefield, Pulsar, Gatecrasher, Quickscan"}
+{"type":"WAR_END","round":21,"reason":"1","winners":"Quickscan, Pulsar, Dwarf, Gatecrasher"}
+{"type":"WAR_END","round":22,"reason":"1","winners":"Gatecrasher, Quickscan, Minefield, Dwarf"}
+{"type":"WAR_END","round":23,"reason":"1","winners":"Quickscan, Dwarf, Pulsar"}
+{"type":"WAR_END","round":24,"reason":"0","winners":"Quickscan"}
+{"type":"WAR_END","round":25,"reason":"1","winners":"Gatecrasher, Minefield, Pulsar"}
+{"type":"WAR_END","round":26,"reason":"1","winners":"Quickscan, Minefield, Pulsar, Gatecrasher"}
+{"type":"WAR_END","round":27,"reason":"1","winners":"Gatecrasher, Quickscan"}
+{"type":"WAR_END","round":28,"reason":"1","winners":"Minefield, Pulsar"}
+{"type":"WAR_END","round":29,"reason":"1","winners":"Pulsar, Quickscan, Dwarf"}
+{"type":"WAR_END","round":30,"reason":"1","winners":"Minefield, Pulsar, Dwarf, Gatecrasher, Quickscan"}
+{"type":"WAR_END","round":31,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":32,"reason":"1","winners":"Gatecrasher, Minefield"}
+{"type":"WAR_END","round":33,"reason":"1","winners":"Quickscan, Minefield, Pulsar"}
+{"type":"WAR_END","round":34,"reason":"1","winners":"Pulsar, Gatecrasher"}
+{"type":"WAR_END","round":35,"reason":"1","winners":"Gatecrasher, Quickscan, Minefield"}
+{"type":"WAR_END","round":36,"reason":"1","winners":"Gatecrasher, Minefield"}
+{"type":"WAR_END","round":37,"reason":"1","winners":"Quickscan, Minefield, Pulsar, Gatecrasher"}
+{"type":"WAR_END","round":38,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":39,"reason":"1","winners":"Gatecrasher, Minefield, Pulsar, Quickscan, Dwarf"}
+{"type":"WAR_END","round":40,"reason":"1","winners":"Quickscan, Gatecrasher, Minefield"}
+{"type":"WAR_END","round":41,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":42,"reason":"1","winners":"Quickscan, Minefield, Gatecrasher"}
+{"type":"WAR_END","round":43,"reason":"0","winners":"Gatecrasher"}
+{"type":"WAR_END","round":44,"reason":"0","winners":"Quickscan"}
+{"type":"WAR_END","round":45,"reason":"1","winners":"Quickscan, Gatecrasher, Minefield, Pulsar"}
+{"type":"WAR_END","round":46,"reason":"1","winners":"Minefield, Gatecrasher"}
+{"type":"WAR_END","round":47,"reason":"1","winners":"Minefield, Quickscan"}
+{"type":"WAR_END","round":48,"reason":"1","winners":"Gatecrasher, Dwarf"}
+{"type":"WAR_END","round":49,"reason":"1","winners":"Quickscan, Gatecrasher, Minefield, Pulsar"}
+{"type":"WAR_END","round":50,"reason":"1","winners":"Gatecrasher, Quickscan, Minefield, Pulsar"}
+{"type":"WAR_END","round":51,"reason":"0","winners":"Dwarf"}
+{"type":"WAR_END","round":52,"reason":"0","winners":"Quickscan"}
+{"type":"WAR_END","round":53,"reason":"1","winners":"Quickscan, Minefield, Gatecrasher"}
+{"type":"WAR_END","round":54,"reason":"1","winners":"Quickscan, Minefield, Pulsar, Dwarf"}
+{"type":"WAR_END","round":55,"reason":"1","winners":"Gatecrasher, Dwarf, Quickscan, Minefield, Pulsar"}
+{"type":"WAR_END","round":56,"reason":"0","winners":"Minefield"}
+{"type":"WAR_END","round":57,"reason":"0","winners":"Dwarf"}
+{"type":"WAR_END","round":58,"reason":"1","winners":"Minefield, Pulsar, Quickscan, Gatecrasher"}
+{"type":"WAR_END","round":59,"reason":"1","winners":"Minefield, Gatecrasher"}
+{"type":"WAR_END","round":60,"reason":"1","winners":"Dwarf, Quickscan, Minefield"}
+{"type":"WAR_END","round":61,"reason":"1","winners":"Pulsar, Gatecrasher"}
+{"type":"WAR_END","round":62,"reason":"1","winners":"Minefield, Dwarf, Gatecrasher, Quickscan"}
+{"type":"WAR_END","round":63,"reason":"1","winners":"Dwarf, Minefield, Gatecrasher, Quickscan"}
+{"type":"COMPETITION_END","ran_rounds":63}
