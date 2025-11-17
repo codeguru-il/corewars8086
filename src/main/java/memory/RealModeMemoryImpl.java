@@ -1,74 +1,51 @@
 package memory;
 
-/**
- * Implements the RealModeMemory interface using a buffer.
- *
- * @author DL
- */
+import utils.EventMulticaster;
+
 public class RealModeMemoryImpl extends AbstractRealModeMemory {
 
-    /** Listener to memory events */
-    private MemoryEventListener listener;
+    private final byte[] m_data;
+    private final EventMulticaster eventCaster;
+    private final MemoryEventListener memoryEventListener;
 
-    /** Actual memory data */
-    private byte[] m_data;
-
-    /**
-     * Constructor.
-     */
     public RealModeMemoryImpl() {
         m_data = new byte[RealModeAddress.MEMORY_SIZE];
+        eventCaster = new EventMulticaster(MemoryEventListener.class);
+        memoryEventListener = (MemoryEventListener) eventCaster.getProxy();
     }
 
-    /**
-     * Reads a single byte from the specified address.
-     *
-     * @param address    Real-mode address to read from.
-     * @return the read byte.
-     * 
-     * @throws MemoryException  on any error. 
-     */
+    @Override
     public byte readByte(RealModeAddress address) {
         return m_data[address.getLinearAddress()];		
     }
 
-    /**
-     * Writes a single byte to the specified address.
-     *
-     * @param address    Real-mode address to write to.
-     * @param value      Data to write.
-     * 
-     * @throws MemoryException  on any error. 
-     */
+    @Override
     public void writeByte(RealModeAddress address, byte value) {
         m_data[address.getLinearAddress()] = value;
-        if (listener != null) {
-            listener.onMemoryWrite(address);
-        }
+        // This will now notify ALL registered listeners
+        memoryEventListener.onMemoryWrite(address);
     }
 
-    /**
-     * Reads a single byte from the specified address, in order to execute it.
-     *
-     * @param address    Real-mode address to read from.
-     * @return the read byte.
-     * 
-     * @throws MemoryException  on any error. 
-     */
+    @Override
     public byte readExecuteByte(RealModeAddress address) {
         return m_data[address.getLinearAddress()];		
     }	
 
     /**
-     * @return Returns the listener.
-     */
-    public MemoryEventListener getListener() {
-        return listener;
-    }
-    /**
-     * @param listener The listener to set.
+     * The original listener setter, used by War.java
      */
     public void setListener(MemoryEventListener listener) {
-        this.listener = listener;
+        if (listener != null) {
+            eventCaster.add(listener);
+        }
+    }
+
+    /**
+     * The new listener setter for external listeners like the GUI or ReplayRecorder.
+     */
+    public void setExternalListener(MemoryEventListener listener) {
+        if (listener != null) {
+            eventCaster.add(listener);
+        }
     }
 }

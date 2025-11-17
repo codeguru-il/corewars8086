@@ -11,10 +11,9 @@ import utils.Unsigned;
 import java.util.*;
 
 
-public class War {
+public class War implements MemoryEventListener {
     public final static short ARENA_SEGMENT = 0x1000;
-    public final static int ARENA_SIZE =
-        RealModeAddress.PARAGRAPHS_IN_SEGMENT * RealModeAddress.PARAGRAPH_SIZE;
+    public final static int ARENA_SIZE = RealModeAddress.PARAGRAPHS_IN_SEGMENT * RealModeAddress.PARAGRAPH_SIZE;
     private final static short STACK_SIZE = 2*1024;
     private final static short GROUP_SHARED_MEMORY_SIZE = 1024;
     private final static byte ARENA_BYTE = (byte)0xCC;
@@ -40,28 +39,41 @@ public class War {
     private CompetitionEventListener m_warListener;
     private final Options options;
 
-    public War(MemoryEventListener memoryListener,
-               CompetitionEventListener warListener,
-               boolean startPaused,
-               Options options) {
+    private final byte[] memoryOwnerIds = new byte[ARENA_SIZE]; // Tracks which warrior owns each byte
+    private final int[] lastWriteCycles = new int[ARENA_SIZE];
+    private final byte[] lastWriterIds = new byte[ARENA_SIZE];
+    private int kills = 0;
+    private int closeCalls = 0;
+    private int zombieTilesOverwritten = 0;
+    private int playerTilesOverwritten = 0;
+    private byte lastWarriorTurnId = -1;
+
+    public War(MemoryEventListener memoryListener, CompetitionEventListener warListener, boolean startPaused, Options options) {
         this.options = options;
-    	isPaused = startPaused;
+        isPaused = startPaused;
         m_warListener = warListener;
         m_warriors = new Warrior[MAX_WARRIORS];
         m_numWarriors = 0;
         m_numWarriorsAlive = 0;
         m_numSurvivorsAlive = 0;
-        m_core = new RealModeMemoryImpl();
-        m_nextFreeAddress = RealModeAddress.PARAGRAPH_SIZE *
-            (ARENA_SEGMENT + RealModeAddress.PARAGRAPHS_IN_SEGMENT);
+        Arrays.fill(memoryOwnerIds, (byte)-1); // -1 means no owner
+        Arrays.fill(lastWriteCycles, -100);    // Initialize to a distant cycle
+        Arrays.fill(lastWriterIds, (byte)-1);
 
-        for (int offset = 0; offset < ARENA_SIZE; ++offset) {
-            RealModeAddress tmp = new RealModeAddress(ARENA_SEGMENT, (short)offset);
-            m_core.writeByte(tmp, ARENA_BYTE);			
+        m_core = new RealModeMemoryImpl();
+        m_core.setListener(this); // The War itself now listens to every memory write
+
+        // Forward events to any external listeners (like the GUI or ReplayRecorder)
+        if (memoryListener != null) {
+            m_core.setExternalListener(memoryListener);
         }
 
+        m_nextFreeAddress = RealModeAddress.PARAGRAPH_SIZE * (ARENA_SEGMENT + RealModeAddress.PARAGRAPHS_IN_SEGMENT);
+
+        for (int offset = 0; offset < ARENA_SIZE; ++offset) {
+            m_core.writeByte(new RealModeAddress(ARENA_SEGMENT, (short)offset), ARENA_BYTE);
+        }
         isSingleRound = false;
-        m_core.setListener(memoryListener);
     }
 
     // --- NEW METHOD ---
@@ -70,6 +82,36 @@ public class War {
     }
     public int getCurrentRound() {
         return this.currentRound;
+    }
+
+    @Override
+    public void onMemoryWrite(RealModeAddress address) {
+        int linear = address.getLinearAddress();
+        if (linear < 0x10000 || linear >= 0x20000) return; // Only track arena writes
+        int offset = linear - 0x10000;
+
+        byte previousOwnerId = memoryOwnerIds[offset];
+        byte currentWarriorId = (byte)m_currentWarrior;
+
+        // 1. Track Tile Overwrites
+        if (previousOwnerId != -1 && previousOwnerId != currentWarriorId) {
+            Warrior previousOwner = m_warriors[previousOwnerId];
+            if (previousOwner.isZombie()) {
+                zombieTilesOverwritten++;
+            } else {
+                playerTilesOverwritten++;
+            }
+        }
+        memoryOwnerIds[offset] = currentWarriorId;
+
+        // 2. Detect Close Calls
+        if (lastWriterIds[offset] != -1 && lastWriterIds[offset] != currentWarriorId) {
+            if ((currentRound - lastWriteCycles[offset]) <= 2) {
+                closeCalls++;
+            }
+        }
+        lastWriteCycles[offset] = currentRound;
+        lastWriterIds[offset] = currentWarriorId;
     }
 
     public void loadWarriorGroups(WarriorGroup[] warriorGroups) throws Exception {
@@ -92,22 +134,20 @@ public class War {
             if (warrior.isAlive()) {
                 try {
                     warrior.nextOpcode();
-
                     if (warrior.isZombie()) {
-                        int remainingRounds =
-                                (options.zombieSpeed * ((warrior.getType() == WarriorType.ZOMBIE_H) ? 2 : 1)) - 1;
-                        for (int j = 0; j < remainingRounds; j++) {
-                            warrior.nextOpcode();
-                        }
+                        int remainingRounds = (options.zombieSpeed * (warrior.getType() == WarriorType.ZOMBIE_H ? 2 : 1)) - 1;
+                        for (int j = 0; j < remainingRounds; j++) warrior.nextOpcode();
                     } else {
-                        // --- THIS IS THE CORRECTED LINE ---
                         updateWarriorEnergy(warrior, this.currentRound);
-                        if (shouldRunExtraOpcode(warrior)) {
-                            warrior.nextOpcode();
-                        }
+                        if (shouldRunExtraOpcode(warrior)) warrior.nextOpcode();
                     }
+                    lastWarriorTurnId = (byte)i; // Track last player to have a turn
 
                 } catch (CpuException e) {
+                    // 3. Track Kills
+                    if (lastWarriorTurnId != -1 && lastWarriorTurnId != i) {
+                        kills++;
+                    }
                     m_warListener.onWarriorDeath(warrior.getName(), "CPU exception");
                     warrior.kill();
                     --m_numWarriorsAlive;
@@ -126,6 +166,11 @@ public class War {
             }
         }
     }
+
+    public int getKills() { return kills; }
+    public int getCloseCalls() { return closeCalls; }
+    public int getZombieTilesOverwritten() { return zombieTilesOverwritten; }
+    public int getPlayerTilesOverwritten() { return playerTilesOverwritten; }
 
     /**
      * Checks if the war is over. A war is defined as complete when all living survivors (that is, not zombies) are from
@@ -260,7 +305,7 @@ public class War {
     public int getNumWarriors() {
         return m_numWarriors;
     }
-    
+
     /** @return the number of survivors still alive. */
     public int getNumRemainingSurvivors() {
     	return m_numSurvivorsAlive;

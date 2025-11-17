@@ -48,8 +48,6 @@ public class Competition {
         competitionEventListener = (CompetitionEventListener) competitionEventCaster.getProxy();
         memoryEventCaster = new EventMulticaster(MemoryEventListener.class);
         memoryEventListener = (MemoryEventListener) memoryEventCaster.getProxy();
-        
-        // Server is now started on demand by the runner.
     }
 
     public void startWebSocketServer() {
@@ -61,8 +59,6 @@ public class Competition {
 
     public void shutdown() {
         try {
-            // --- THIS IS THE CORRECTED LINE ---
-            // The isOpen() check is removed. stop() is safe to call multiple times.
             if (socketServer != null) {
                 socketServer.stop();
             }
@@ -148,8 +144,10 @@ public class Competition {
         int numAlive = currentWar.getNumRemainingSurvivors();
         String[] winners = currentWar.getRemainingWarriorNames().split(", ");
         float score = (numAlive > 0) ? 1.0f / numAlive : 0;
-        warResults.add(new WarResult(warId, currentWar.getSeed(), winners, score, warriorGroups));
-
+        warResults.add(new WarResult(warId, currentWar.getSeed(), winners, warriorGroups,
+            currentWar.getKills(), currentWar.getCloseCalls(),
+            currentWar.getZombieTilesOverwritten(), currentWar.getPlayerTilesOverwritten(), round));
+        
         competitionEventListener.onWarEnd(0, String.join(", ", winners));
         currentWar.updateScores(warriorRepository);
         currentWar = null;
@@ -157,7 +155,8 @@ public class Competition {
 
     private void runWarInParallel(WarriorGroup[] warriorGroups, long seed) throws Exception {
         int warId = warIdCounter.getAndIncrement();
-        War war = new War(null, competitionEventListener, false, options);
+        // --- FIX: Pass the main competition listener directly, not a proxy ---
+        War war = new War(null, this.competitionEventListener, false, options);
         war.setSeed(seed);
 
         competitionEventListener.onWarStart(seed);
@@ -177,7 +176,9 @@ public class Competition {
         float score = (numAlive > 0) ? 1.0f / numAlive : 0;
 
         synchronized(warResults) {
-            warResults.add(new WarResult(warId, seed, winners, score, warriorGroups));
+            warResults.add(new WarResult(warId, seed, winners, warriorGroups,
+                war.getKills(), war.getCloseCalls(),
+                war.getZombieTilesOverwritten(), war.getPlayerTilesOverwritten(), round));
         }
 
         competitionEventListener.onWarEnd(0, String.join(", ", winners));
@@ -189,15 +190,31 @@ public class Competition {
 
     public void rerunWarForReplay(WarResult result, String outputFilename) throws Exception {
         System.out.printf("   -> Rerunning War ID %d (Seed: %d) for replay...%n", result.getId(), result.getSeed());
-        Competition replayComp = new Competition(false, this.options);
 
+        // --- THIS IS THE CORRECTED LOGIC ---
+        Competition replayComp = new Competition(false, this.options); // Temporary, no server
         ReplayRecorder recorder = new ReplayRecorder(outputFilename, replayComp);
-        replayComp.addCompetitionEventListener(recorder);
-        replayComp.addMemoryEventLister(recorder);
 
-        replayComp.setSeed(result.getSeed());
-        replayComp.runWar(result.getParticipatingGroups(), false);
-        replayComp.shutdown();
+        War replayWar = new War(recorder, recorder, false, this.options);
+
+        // Explicitly link the recorder to the war it needs to observe
+        recorder.setCurrentWar(replayWar);
+
+        replayWar.setSeed(result.getSeed());
+        recorder.onWarStart(result.getSeed()); // Manually trigger this now that the link is made
+        replayWar.loadWarriorGroups(result.getParticipatingGroups());
+
+        int round = 0;
+        while(round < MAX_ROUND && !replayWar.isOver()) {
+            replayWar.setCurrentRound(round);
+            recorder.onRound(round);
+            replayWar.nextRound();
+            round++;
+        }
+        replayWar.setCurrentRound(round);
+
+        String[] winners = replayWar.getRemainingWarriorNames().split(", ");
+        recorder.onWarEnd(0, String.join(", ", winners));
     }
 
     public int getTotalNumberOfWars() {
