@@ -19,6 +19,14 @@ public class Options extends OptionsBase {
       defaultValue = "false"
   )
   public boolean headless;
+
+  @Option(
+        name = "replays",
+        help = "After the competition, generate this many replay files for the top-scoring groups.",
+        category = "Data",
+        defaultValue = "10"
+    )
+    public int replays;
   
   @Option(
       name = "comboSize",

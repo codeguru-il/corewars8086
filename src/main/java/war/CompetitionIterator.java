@@ -7,34 +7,33 @@ import java.util.Iterator;
 
 public class CompetitionIterator implements Iterator<int[]> {
 	private final RandomDataGenerator rnd;
-	private int[] counters;
-	private int numItems;
+	private final int numItems;
 	private final int groupSize;
 
     public CompetitionIterator(int numItems, int groupSize) {
         assert numItems >= groupSize;
         this.numItems = numItems;
         this.groupSize = groupSize;
-        counters = new int[groupSize];
         rnd = new RandomDataGenerator();
     }
 
     /**
-     * Returns the next group in the sequence
+     * Returns the next random group combination.
      */
-    public int[] next()
-    {
+    public int[] next() {
 		return rnd.nextPermutation(numItems, Math.min(groupSize, numItems));
     }
 
 	public boolean hasNext() {
-        return counters[0] != -1;
+        // This iterator can produce random combinations indefinitely.
+        return true;
     }
     
     public void remove() {
+        throw new UnsupportedOperationException();
     }
 
-    public long getNumberOfItems() {
-		return CombinatoricsUtils.binomialCoefficient(numItems, counters.length);
+    public long getNumberOfCombos() {
+		return CombinatoricsUtils.binomialCoefficient(numItems, groupSize);
     }
 }

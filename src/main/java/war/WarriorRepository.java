@@ -249,4 +249,18 @@ public class WarriorRepository {
     public List<WarriorGroup> getWarriorGroups() {
         return warriorGroups;
     }
+
+    public WarriorGroup[] getRandomOpponents(WarriorGroup exclude, int count) {
+        List<WarriorGroup> opponentsPool = new ArrayList<>(this.warriorGroups);
+        opponentsPool.remove(exclude); // Don't let a warrior fight itself
+
+        Collections.shuffle(opponentsPool);
+
+        int numToTake = Math.min(count, opponentsPool.size());
+        WarriorGroup[] opponents = new WarriorGroup[numToTake];
+        for (int i = 0; i < numToTake; i++) {
+            opponents[i] = opponentsPool.get(i);
+        }
+        return opponents;
+    }
 }

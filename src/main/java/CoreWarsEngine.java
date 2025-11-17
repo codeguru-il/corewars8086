@@ -5,7 +5,8 @@ import gui.CompetitionWindow;
 import java.io.IOException;
 
 public class CoreWarsEngine {
-  public static void main(String[] args) throws IOException, InterruptedException { // Added InterruptedException
+  // --- THIS IS THE CORRECTED LINE ---
+  public static void main(String[] args) throws Exception { 
     OptionsParser optionsParser = OptionsParser.newOptionsParser(Options.class);
     optionsParser.parseAndExitUponError(args);
     Options options = optionsParser.getOptions(Options.class);

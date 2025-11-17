@@ -255,14 +255,24 @@ public class War {
     private Random rand = new Random();
     private boolean isSingleRound;
     private boolean isPaused;
-    
-    public void setSeed(long seed){
-    	rand.setSeed(seed);
-    }
     public void pause(){ isPaused = true; }
     public boolean isPaused(){ return isPaused; }
     public void resume(){ isPaused = false; isSingleRound = false; }
     public void runSingleRound(){ this.resume(); isSingleRound = true; }
     public boolean isSingleRound(){ return this.isSingleRound; }
     public RealModeMemoryImpl getMemory(){ return m_core; }
+
+    public long getSeed() {
+        // We need to get the seed from the Random object
+        // Since Random doesn't let us get the seed directly after it's used,
+        // we'll store it.
+        return this.seed;
+    }
+
+    // Also, add a member variable for the seed and set it.
+    private long seed;
+    public void setSeed(long seed){
+        this.seed = seed;
+        rand.setSeed(seed);
+    }
 }
