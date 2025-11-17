@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>il.co.codeguru</groupId>
+    <groupId>CodeGuru</groupId>
     <artifactId>corewars8086</artifactId>
     <version>6.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -20,6 +20,16 @@
     </developers>
 
     <dependencies>
+        <dependency>
+            <groupId>org.java-websocket</groupId>
+            <artifactId>Java-WebSocket</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
@@ -89,7 +99,7 @@
                     <archive>
                         <manifest>
                             <mainClass>
-                                il.co.codeguru.corewars8086.CoreWarsEngine
+                                CoreWarsEngine
                             </mainClass>
                         </manifest>
                     </archive>
@@ -103,7 +113,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>il.co.codeguru.corewars8086.CoreWarsEngine</mainClass>
+                    <mainClass>CoreWarsEngine</mainClass>
                 </configuration>
             </plugin>
         </plugins>

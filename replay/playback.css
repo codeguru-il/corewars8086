@@ -1,0 +1,264 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+        }
+
+        .demo-container {
+            text-align: center;
+        }
+
+        .demo-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .playback-control {
+            background: linear-gradient(145deg, #1e1e3f 0%, #2a2a4a 100%);
+            border-radius: 20px;
+            padding: 30px 40px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: inline-block;
+        }
+
+        .event-input-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .event-label {
+            display: block;
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .event-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .event-input:focus {
+            outline: none;
+            border-color: rgba(157, 78, 221, 0.5);
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.3);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .event-input::placeholder {
+            color: #555;
+        }
+
+        .round-counter {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .round-label {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .round-value {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 2px 10px rgba(157, 78, 221, 0.5);
+        }
+
+        .round-max {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #9d4edd, #7b2cbf);
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 6px 20px rgba(157, 78, 221, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .control-btn:hover::before {
+            opacity: 1;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(145deg, #ad5eed, #8b3ccf);
+            box-shadow: 
+                0 8px 25px rgba(157, 78, 221, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                0 0 30px rgba(157, 78, 221, 0.5);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 4px 12px rgba(157, 78, 221, 0.4),
+                inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn.center.playing {
+            background: linear-gradient(145deg, #ff4a6f, #ee3a5f);
+            box-shadow: 
+                0 6px 20px rgba(255, 74, 111, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn.center.playing:hover {
+            background: linear-gradient(145deg, #ff5a7f, #ff4a6f);
+            box-shadow: 
+                0 8px 25px rgba(255, 74, 111, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                0 0 30px rgba(255, 74, 111, 0.5);
+        }
+
+        .speed-indicator {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .speed-label {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .speed-value {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .direction-indicator {
+            color: #6a7fff;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .direction-indicator.visible {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .control-btn.active {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .demo-events {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            max-width: 600px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-events h3 {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .event-log {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #6a7fff;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .event-log div {
+            padding: 4px 8px;
+            border-left: 2px solid rgba(106, 127, 255, 0.3);
+            margin-bottom: 4px;
+            background: rgba(106, 127, 255, 0.05);
+            border-radius: 4px;
+        }
