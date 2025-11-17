@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        playbackControl.updateDisplay(cycle + 1, replayManager.getTotalCycles() + 1);
+        playbackControl.updateDisplay(cycle + 1, replayManager.getTotalCycles());
     }
 
     function logEvent(message) {
