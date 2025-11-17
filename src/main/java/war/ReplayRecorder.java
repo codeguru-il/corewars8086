@@ -1,6 +1,5 @@
 package war;
 
-// CORRECTED IMPORTS
 import memory.MemoryEventListener;
 import memory.RealModeAddress;
 
@@ -26,8 +25,13 @@ public class ReplayRecorder implements CompetitionEventListener, MemoryEventList
         this.competition = competition;
     }
 
+    // --- NEW METHOD to link the recorder to a specific war ---
+    public void setCurrentWar(War war) {
+        this.currentWar = war;
+    }
+
     private synchronized void writeEvent(String type, JSONObject payload) {
-        if (isClosed.get()) return; // Don't write to a closed stream
+        if (isClosed.get()) return;
         try {
             JSONObject event = new JSONObject();
             event.put("type", type);
@@ -35,14 +39,23 @@ public class ReplayRecorder implements CompetitionEventListener, MemoryEventList
             writer.write(event.toString());
             writer.newLine();
         } catch (IOException e) {
-            // This might happen in parallel mode, but we've guarded against it.
-            // e.printStackTrace(); 
+            // Errors here can happen if the main thread shuts down prematurely.
         }
     }
 
     @Override
     public void onWarStart(long seed) {
-        this.currentWar = competition.getCurrentWar();
+        // For live runs, get the war from the competition object.
+        // For replays, this will already be set by setCurrentWar().
+        if (this.currentWar == null) {
+            this.currentWar = competition.getCurrentWar();
+        }
+
+        // If it's still null, we cannot proceed.
+        if (this.currentWar == null) {
+            System.err.println("ReplayRecorder Error: currentWar is null in onWarStart. Cannot record.");
+            return;
+        }
         
         JSONObject payload = new JSONObject();
         payload.put("seed", seed);

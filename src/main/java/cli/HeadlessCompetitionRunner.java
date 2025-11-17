@@ -33,14 +33,12 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
         this.options = options;
         System.out.println("CodeGuru - headless mode\n");
         
-        // --- Generate timestamp once for the entire run ---
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy_HHmmss", Locale.ENGLISH);
         this.timestamp = LocalDateTime.now().format(formatter).toUpperCase();
 
         Path replaysPath = Paths.get(REPLAYS_DIR);
         if (!Files.exists(replaysPath)) {
             Files.createDirectories(replaysPath);
-            System.out.println("Created output directory: " + REPLAYS_DIR);
         }
         
         this.competition = new Competition(options);
@@ -52,18 +50,41 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
         long seed = (Longs.tryParse(options.seed) != null) ? Long.parseLong(options.seed) : options.seed.hashCode();
         competition.setSeed(seed);
 
-        System.out.println("\n--- Phase 1: Running Scoring Competition ---");
-        runFullCompetition();
+        // --- Check if we are running a single replay or a full competition ---
+        if (options.replayFile != null && !options.replayFile.isEmpty()) {
+            System.out.println("\n--- Running Single Replay Generation ---");
+            runSingleReplay();
+        } else {
+            System.out.println("\n--- Phase 1: Running Scoring Competition ---");
+            runFullCompetition();
 
-        // --- Always save scores to the timestamped JSON file ---
-        saveScoresToJson();
+            saveScoresToJson();
 
-        if (options.replays > 0) {
-            System.out.println("\n--- Phase 2: Generating Replays for Top Warriors ---");
-            generateTopReplays();
+            // Use the default value from the options if it existed, otherwise hardcode to 10
+            int numTopReplays = 10; 
+            if (numTopReplays > 0) {
+                System.out.println("\n--- Phase 2: Generating Replays for Top Warriors ---");
+                generateTopReplays(numTopReplays);
+            }
         }
         
         System.out.println("\nRun complete.");
+    }
+    
+    private void runSingleReplay() throws Exception {
+         System.out.println("Forcing single-threaded mode and 1 battle for replay recording.");
+         // Create a temporary competition to run just one war
+         Competition singleRunComp = new Competition(options);
+         ReplayRecorder recorder = new ReplayRecorder(options.replayFile, singleRunComp);
+         singleRunComp.addCompetitionEventListener(recorder);
+         singleRunComp.addMemoryEventLister(recorder);
+         
+         // Use the main repository to get a random set of warriors
+         WarriorRepository repo = competition.getWarriorRepository();
+         CompetitionIterator iter = new CompetitionIterator(repo.getNumberOfGroups(), options.combinationSize);
+         
+         singleRunComp.runWar(repo.createGroupList(iter.next()), false);
+         singleRunComp.shutdown();
     }
 
     private void runFullCompetition() throws InterruptedException {
@@ -80,7 +101,10 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
             JSONObject resultJson = new JSONObject();
             resultJson.put("id", result.getId());
             resultJson.put("seed", result.getSeed());
-            resultJson.put("score", result.getScore());
+            resultJson.put("interestScore", result.getInterestScore());
+            resultJson.put("totalCycles", result.getTotalCycles());
+            resultJson.put("kills", result.getKills());
+            resultJson.put("closeCalls", result.getCloseCalls());
             resultJson.put("winners", new JSONArray(Arrays.asList(result.getWinningTeamNames())));
 
             JSONArray groupsJson = new JSONArray();
@@ -96,16 +120,17 @@ public class HeadlessCompetitionRunner implements ScoreEventListener, Competitio
         }
     }
 
-    private void generateTopReplays() throws Exception {
+    private void generateTopReplays(int numToGenerate) throws Exception {
         List<WarResult> results = new ArrayList<>(competition.getWarResults());
         Collections.sort(results);
 
-        int count = Math.min(options.replays, results.size());
+        int count = Math.min(numToGenerate, results.size());
+        if (count == 0) return;
+
         System.out.printf("Found %d war results. Generating replays for the top %d highest-scoring wars.%n", results.size(), count);
 
         for (int i = 0; i < count; i++) {
             WarResult topResult = results.get(i);
-            // --- UPDATED: Filename now includes the timestamp ---
             String replayFilename = String.format("replay_%d_%s.jsonl", topResult.getId(), this.timestamp);
             Path replayPath = Paths.get(REPLAYS_DIR, replayFilename);
             
