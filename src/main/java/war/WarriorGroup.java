@@ -3,7 +3,7 @@ package war;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WarriorGroup {
+public class WarriorGroup implements Comparable<WarriorGroup> {
     private String name;
     private ArrayList<WarriorData> warriorData;
     private List<Float> scores;
@@ -47,5 +47,11 @@ public class WarriorGroup {
         }
         groupScore += value;
         return i;
+    }
+
+    @Override
+    public int compareTo(WarriorGroup other) {
+        // Sort in descending order (highest score first)
+        return Float.compare(other.getGroupScore(), this.getGroupScore());
     }
 }
