@@ -1,0 +1,27 @@
+{
+  "name": "Tournament",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the tournament (e.g., High School 2025)"
+    },
+    "tournament_type": {
+      "type": "string",
+      "enum": [
+        "middle_school",
+        "high_school"
+      ],
+      "description": "The unique key for this tournament category"
+    },
+    "status": {
+      "type": "string",
+      "enum": [ "upcoming", "running", "completed" ],
+      "default": "upcoming"
+    }
+  },
+  "required": [
+    "name",
+    "tournament_type"
+  ]
+}

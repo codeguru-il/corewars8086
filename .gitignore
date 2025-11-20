@@ -1,8 +1,36 @@
+# Compiled Java output
 target/
+*.class
+
+# IDE files
 *.iml
-.idea/**
+.idea/
+
+# Local data and simulation outputs
 survivors/
 zombies/
 *.csv
-!bundle/**
+replays/
+
+# Node.js dependencies and build artifacts
+node_modules/
+frontend/dist/
+backend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated context files
+code_context_dump.txt
+create_code_dump.py
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Don't ignore the bundle folder or its contents
+!bundle/
 !bundle/*.csv
