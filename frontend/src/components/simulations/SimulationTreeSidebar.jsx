@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, ChevronDown, PlaySquare, Trophy, Circle, ServerCrash } from "lucide-react";
+import { ChevronRight, ChevronDown, PlaySquare, Trophy, ServerCrash } from "lucide-react";
 
 const formatTournamentName = (name) => {
     if (!name) return "General";
@@ -21,25 +21,33 @@ export default function SimulationTreeSidebar({ onReplaySelect, selectedReplayId
         sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(Array.from(expandedTournaments)));
     }, [expandedTournaments]);
 
+    // --- THIS IS THE FIX ---
+    // We add { refetchOnWindowFocus: false } to each query to stop the automatic re-fetching.
+    const queryOptions = {
+        refetchOnWindowFocus: false,
+    };
+
     const { data: tournaments = [], isError, isLoading } = useQuery({
         queryKey: ['tournaments'],
-        queryFn: () => fetch('http://localhost:3001/api/tournaments').then(res => res.json())
+        queryFn: () => fetch('http://localhost:3001/api/tournaments').then(res => res.json()),
+        ...queryOptions
     });
-    const { data: simulations = [] } = useQuery({ queryKey: ['simulations'], queryFn: () => fetch('http://localhost:3001/api/simulations').then(res => res.json()) });
-    const { data: allReplays = [] } = useQuery({ queryKey: ['replays'], queryFn: () => fetch('http://localhost:3001/api/replays').then(res => res.json()) });
+    const { data: simulations = [] } = useQuery({ 
+        queryKey: ['simulations'], 
+        queryFn: () => fetch('http://localhost:3001/api/simulations').then(res => res.json()),
+        ...queryOptions
+    });
+    const { data: allReplays = [] } = useQuery({ 
+        queryKey: ['replays'], 
+        queryFn: () => fetch('http://localhost:3001/api/replays').then(res => res.json()),
+        ...queryOptions
+    });
 
     const toggleTournament = (tourneyId) => {
         const newExpanded = new Set(expandedTournaments);
         if (newExpanded.has(tourneyId)) newExpanded.delete(tourneyId);
         else newExpanded.add(tourneyId);
         setExpandedTournaments(newExpanded);
-    };
-
-    const getCircleColor = (index) => {
-      if (index === 0) return 'text-yellow-400'; // Gold for the 1st item
-      if (index === 1) return 'text-gray-400';   // Silver for the 2nd item
-      if (index === 2) return 'text-orange-400'; // Bronze for the 3rd item
-      return 'text-green-700';                   // A default color for the rest
     };
 
     return (
@@ -71,7 +79,7 @@ export default function SimulationTreeSidebar({ onReplaySelect, selectedReplayId
                                 {isTournamentExpanded && (
                                     <div className="ml-4 mt-1 space-y-1 border-l-2 border-border pl-4">
                                         {tournamentReplays.length > 0 ? (
-                                            tournamentReplays.map((replay, index) => {
+                                            tournamentReplays.map((replay) => {
                                                 const isActive = replay.id === selectedReplayId;
                                                 return (
                                                     <button key={replay.id} onClick={() => onReplaySelect(replay)} className={`w-full text-left flex items-center gap-3 p-2 rounded-lg transition-colors ${isActive ? 'bg-primary/20' : 'hover:bg-muted'}`}>

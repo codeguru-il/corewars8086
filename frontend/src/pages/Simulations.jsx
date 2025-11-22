@@ -4,7 +4,10 @@ import SimulationTreeSidebar from "../components/simulations/SimulationTreeSideb
 import ReplayViewer from "./ReplayViewer.jsx";
 
 const SESSION_STORAGE_KEY = 'simulations_selectedReplay';
-const CHUNK_SIZE = 1000;
+// --- THIS IS THE MODIFIED LINE ---
+const CHUNK_SIZE = 5000; // Changed from 1000 to 5000
+const DRAW_INTERVAL_MS = 1000 / 30;
+const PREFETCH_THRESHOLD = CHUNK_SIZE * 0.75; 
 
 export default function Simulations() {
     const getInitialState = () => {
@@ -28,67 +31,105 @@ export default function Simulations() {
     
     const canvasApi = useRef(null);
     const animationFrameId = useRef(null);
+    const eventsRef = useRef(events);
+    useEffect(() => { eventsRef.current = events; });
+
+    const directionRef = useRef(playbackDirection);
+    useEffect(() => { directionRef.current = playbackDirection; });
+
+    const speedRef = useRef(playbackSpeed);
+    useEffect(() => { speedRef.current = playbackSpeed; });
+
+    const playbackTimeRef = useRef(currentCycle);
+    const cycleRef = useRef(currentCycle);
+    useEffect(() => { cycleRef.current = currentCycle; });
+    const lastDrawnCycleRef = useRef(0);
+
+    const handlePlay = useCallback(() => {
+        playbackTimeRef.current = cycleRef.current;
+        setIsPlaying(true);
+    }, []);
+
+    const handlePause = useCallback(() => setIsPlaying(false), []);
+    const handleSetDirection = useCallback((dir) => setPlaybackDirection(dir), []);
+    const handleSetSpeed = useCallback((speed) => setPlaybackSpeed(speed), []);
+    const handleSetEventCycles = useCallback((cycles) => setEventCycles(cycles), []);
 
     const handleReplaySelect = (replay) => {
         setSelectedReplayInfo(prev => (prev?.id === replay.id ? null : replay));
     };
-
-    const jumpToCycle = useCallback((cycle) => {
+    
+    const jumpToCycle = useCallback(async (cycle) => {
         if (!activeReplay || !canvasApi.current) return;
-
-        const totalCycles = activeReplay.max_rounds || 0;
-        let targetCycle = Math.floor(Math.max(0, Math.min(cycle, totalCycles)));
-
-        const getEventsFromChunk = (c) => {
-            const chunkStart = Math.floor(c / CHUNK_SIZE) * CHUNK_SIZE;
-            const chunk = events.get(chunkStart);
-            return chunk ? chunk.filter(e => e.payload.round === c) : [];
-        };
         
-        // Redraw previous state to clear old pointers, then draw current state
+        const totalCycles = activeReplay.max_rounds || 0;
+        const targetCycle = Math.floor(Math.max(0, Math.min(cycle, totalCycles)));
+
+        const targetChunkStart = Math.floor(targetCycle / CHUNK_SIZE) * CHUNK_SIZE;
+        await Promise.all([
+            fetchCycleChunk(targetChunkStart, selectedReplayInfo.filename),
+            fetchCycleChunk(targetChunkStart - CHUNK_SIZE, selectedReplayInfo.filename),
+            fetchCycleChunk(targetChunkStart + CHUNK_SIZE, selectedReplayInfo.filename),
+        ]);
+        
+        playbackTimeRef.current = targetCycle;
+        
         canvasApi.current.clear();
-        const relevantEvents = [];
+        const memoryWriteEvents = [];
+        const currentEvents = eventsRef.current;
         for (let i = 0; i <= targetCycle; i++) {
-             const chunkStart = Math.floor(i / CHUNK_SIZE) * CHUNK_SIZE;
-             const chunk = events.get(chunkStart);
-             if (chunk) {
-                const cycleEvents = chunk.filter(e => e.payload.round === i && e.type === 'MEMORY_WRITE');
-                if(cycleEvents.length > 0) relevantEvents.push(...cycleEvents);
-             }
+            const chunkStart = Math.floor(i / CHUNK_SIZE) * CHUNK_SIZE;
+            const chunk = currentEvents.get(chunkStart);
+            if (chunk) {
+                for (const event of chunk) {
+                    if (event.payload.round === i && event.type === 'MEMORY_WRITE') {
+                        memoryWriteEvents.push(event);
+                    }
+                }
+            }
         }
-        canvasApi.current.applyEvents(relevantEvents);
-
-        const updateEvent = getEventsFromChunk(targetCycle).find(e => e.type === 'ROUND_UPDATE');
-        if (updateEvent) {
-            canvasApi.current.drawPointers(updateEvent.payload.warriorStates);
+        canvasApi.current.applyEvents(memoryWriteEvents);
+        
+        const targetChunk = currentEvents.get(targetChunkStart);
+        if (targetChunk) {
+            const updateEvent = targetChunk.find(e => e.payload.round === targetCycle && e.type === 'ROUND_UPDATE');
+            if (updateEvent) {
+                canvasApi.current.drawPointers(updateEvent.payload.warriorStates);
+            }
         }
-
         setCurrentCycle(targetCycle);
+        lastDrawnCycleRef.current = targetCycle;
 
-        if ((targetCycle >= totalCycles && playbackDirection === 'forward') || (targetCycle <= 0 && playbackDirection === 'backward')) {
+        if ((targetCycle >= totalCycles && directionRef.current === 'forward') || 
+            (targetCycle <= 0 && directionRef.current === 'backward')) {
             setIsPlaying(false);
         }
-    }, [activeReplay, events, playbackDirection]);
+    }, [activeReplay, selectedReplayInfo]);
 
-    const fetchCycleChunk = useCallback(async (startCycle, filename, replayInfo) => {
-        if (!filename || events.has(startCycle)) return;
+    const fetchCycleChunk = useCallback(async (startCycle, filename) => {
+        if (!filename || startCycle < 0 || eventsRef.current.has(startCycle)) return;
         
-        setIsLoading(true);
+        if (eventsRef.current.size === 0) setIsLoading(true);
         setError(null);
+
         try {
-            const endCycle = startCycle + CHUNK_SIZE - 1;
-            const response = await fetch(`http://localhost:3001/api/replay/${filename}/cycles?start=${startCycle}&end=${endCycle}`);
+            const response = await fetch(`http://localhost:3001/api/replay/${filename}/cycles?start=${startCycle}&end=${startCycle + CHUNK_SIZE - 1}`);
             if (!response.ok) throw new Error(`Server responded with status ${response.status}`);
             const data = await response.json();
             
-            setEvents(prev => new Map(prev).set(startCycle, data.events));
+            setEvents(prevEvents => {
+                const newEvents = new Map(prevEvents);
+                newEvents.set(startCycle, data.events);
+                const currentChunkStart = Math.floor(cycleRef.current / CHUNK_SIZE) * CHUNK_SIZE;
+                const validChunks = new Set([currentChunkStart, currentChunkStart - CHUNK_SIZE, currentChunkStart + CHUNK_SIZE]);
+                for (const key of newEvents.keys()) {
+                    if (!validChunks.has(key)) newEvents.delete(key);
+                }
+                return newEvents;
+            });
 
-            if (data.warStartData && startCycle === 0) {
-                setActiveReplay({
-                    ...replayInfo,
-                    ...data.warStartData,
-                    duration_cycles: data.warStartData.max_rounds || 0,
-                });
+            if (data.warStartData && startCycle === 0 && selectedReplayInfo) {
+                setActiveReplay({ ...selectedReplayInfo, ...data.warStartData, duration_cycles: data.warStartData.max_rounds || 0 });
             }
         } catch (err) {
             console.error("Fetch error:", err);
@@ -98,9 +139,8 @@ export default function Simulations() {
         } finally {
             setIsLoading(false);
         }
-    }, [events]); // Removed unstable dependencies
+    }, [selectedReplayInfo]);
 
-    // Effect to INITIATE loading when a new replay is selected
     useEffect(() => {
         if (selectedReplayInfo) {
             sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(selectedReplayInfo));
@@ -109,47 +149,113 @@ export default function Simulations() {
             setError(null);
             setIsPlaying(false);
             setCurrentCycle(0);
-            fetchCycleChunk(0, selectedReplayInfo.filename, selectedReplayInfo);
+            playbackTimeRef.current = 0;
+            lastDrawnCycleRef.current = 0;
+            setPlaybackDirection('forward');
+            setPlaybackSpeed(1);
+            fetchCycleChunk(0, selectedReplayInfo.filename);
         } else {
             sessionStorage.removeItem(SESSION_STORAGE_KEY);
             setActiveReplay(null);
         }
-    }, [selectedReplayInfo]); // Intentionally not including fetchCycleChunk
+    }, [selectedReplayInfo, fetchCycleChunk]);
 
-    // Effect to draw the INITIAL frame once data is loaded
     useEffect(() => {
         if (activeReplay && canvasApi.current) {
-             // Use a timeout to ensure canvas is ready after the state update
             setTimeout(() => jumpToCycle(0), 0);
         }
-    }, [activeReplay]); // Runs only when activeReplay is set
+    }, [activeReplay, jumpToCycle]);
 
-    // Effect for the ANIMATION LOOP
+
     useEffect(() => {
         if (!isPlaying || !activeReplay) {
             cancelAnimationFrame(animationFrameId.current);
             return;
         }
-        let lastTime = performance.now();
-        const run = (currentTime) => {
-            const deltaTime = currentTime - lastTime;
-            const cyclesPerSecond = 60 * playbackSpeed;
-            const cyclesToAdvance = (deltaTime / 1000) * cyclesPerSecond;
-            const step = playbackDirection === 'forward' ? cyclesToAdvance : -cyclesToAdvance;
-            const nextCycle = currentCycle + step;
 
-            const nextChunkStart = Math.floor(nextCycle / CHUNK_SIZE) * CHUNK_SIZE;
-            if (nextChunkStart >= 0 && !events.has(nextChunkStart)) {
-                fetchCycleChunk(nextChunkStart, selectedReplayInfo.filename, selectedReplayInfo);
-            }
-            
-            jumpToCycle(nextCycle);
-            lastTime = currentTime;
+        let lastTime = performance.now();
+        let lastDrawTime = 0;
+
+        const run = (currentTime) => {
             animationFrameId.current = requestAnimationFrame(run);
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            const cyclesPerSecond = 30 * speedRef.current;
+            const cyclesToAdvance = (deltaTime / 1000) * cyclesPerSecond;
+            const step = directionRef.current === 'forward' ? cyclesToAdvance : -cyclesToAdvance;
+            playbackTimeRef.current += step;
+
+            const totalCycles = activeReplay.max_rounds || 0;
+            const targetCycle = Math.floor(Math.max(0, Math.min(playbackTimeRef.current, totalCycles)));
+
+            setCurrentCycle(targetCycle);
+            
+            const currentChunkStart = Math.floor(targetCycle / CHUNK_SIZE) * CHUNK_SIZE;
+
+            if (directionRef.current === 'forward' && (targetCycle % CHUNK_SIZE > PREFETCH_THRESHOLD)) {
+                fetchCycleChunk(currentChunkStart + CHUNK_SIZE, selectedReplayInfo.filename);
+            } else if (directionRef.current === 'backward' && (targetCycle % CHUNK_SIZE < (CHUNK_SIZE - PREFETCH_THRESHOLD))) {
+                 fetchCycleChunk(currentChunkStart - CHUNK_SIZE, selectedReplayInfo.filename);
+            }
+
+            if (currentTime - lastDrawTime > DRAW_INTERVAL_MS) {
+                lastDrawTime = currentTime;
+                
+                if (directionRef.current === 'backward') {
+                    jumpToCycle(targetCycle);
+                    return;
+                }
+
+                const prevDrawnCycle = lastDrawnCycleRef.current;
+                const newEvents = [];
+                for (let i = prevDrawnCycle + 1; i <= targetCycle; i++) {
+                    const chunkStart = Math.floor(i / CHUNK_SIZE) * CHUNK_SIZE;
+                    const chunk = eventsRef.current.get(chunkStart);
+                    if (chunk) {
+                        for (const event of chunk) {
+                            if (event.payload.round === i && event.type === 'MEMORY_WRITE') {
+                                newEvents.push(event);
+                            }
+                        }
+                    }
+                }
+                
+                if (canvasApi.current) {
+                    const prevChunk = eventsRef.current.get(Math.floor(prevDrawnCycle / CHUNK_SIZE) * CHUNK_SIZE);
+                    if(prevChunk) {
+                        const prevUpdateEvent = prevChunk.find(e => e.payload.round === prevDrawnCycle && e.type === 'ROUND_UPDATE');
+                        if (prevUpdateEvent) {
+                            canvasApi.current.applyEvents(prevUpdateEvent.payload.warriorStates.map(ws => ({
+                                type: 'MEMORY_WRITE',
+                                payload: { address: ws.ip, actorId: -1 } 
+                            })));
+                        }
+    
+                    }
+
+                    canvasApi.current.applyEvents(newEvents);
+                    
+                    const targetChunk = eventsRef.current.get(currentChunkStart);
+                    if (targetChunk) {
+                        const updateEvent = targetChunk.find(e => e.payload.round === targetCycle && e.type === 'ROUND_UPDATE');
+                        if (updateEvent) {
+                            canvasApi.current.drawPointers(updateEvent.payload.warriorStates);
+                        }
+                    }
+                }
+                lastDrawnCycleRef.current = targetCycle;
+            }
+
+            if ((targetCycle >= totalCycles && directionRef.current === 'forward') || 
+                (targetCycle <= 0 && directionRef.current === 'backward')) {
+                setIsPlaying(false);
+            }
         };
+
         animationFrameId.current = requestAnimationFrame(run);
         return () => cancelAnimationFrame(animationFrameId.current);
-    }, [isPlaying, playbackSpeed, playbackDirection, currentCycle, jumpToCycle, activeReplay, events, selectedReplayInfo, fetchCycleChunk]);
+    }, [isPlaying, activeReplay, selectedReplayInfo, jumpToCycle, fetchCycleChunk]);
     
     return (
         <div className="grid grid-cols-[320px_1fr] h-full">
@@ -180,15 +286,15 @@ export default function Simulations() {
                             replayData={activeReplay}
                             onClose={() => setSelectedReplayInfo(null)}
                             isPlaying={isPlaying}
-                            setIsPlaying={setIsPlaying}
-                            currentCycle={currentCycle}
+                            onPlay={handlePlay}
+                            onPause={handlePause}
                             jumpToCycle={jumpToCycle}
-                            playbackSpeed={playbackSpeed}
-                            setPlaybackSpeed={setPlaybackSpeed}
+                            currentCycle={currentCycle}
+                            setPlaybackSpeed={handleSetSpeed}
                             playbackDirection={playbackDirection}
-                            setPlaybackDirection={setPlaybackDirection}
+                            setPlaybackDirection={handleSetDirection}
                             eventCycles={eventCycles}
-                            setEventCycles={setEventCycles}
+                            setEventCycles={handleSetEventCycles}
                         />
                     ) : null
                 ) : (

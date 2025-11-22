@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Zap, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import PlaybackControl from "../components/replay/PlaybackControl.jsx";
@@ -10,7 +10,8 @@ export default function ReplayViewer({
     replayData,
     onClose,
     isPlaying,
-    setIsPlaying,
+    onPlay,
+    onPause,
     currentCycle,
     jumpToCycle,
     playbackSpeed,
@@ -20,8 +21,12 @@ export default function ReplayViewer({
     eventCycles,
     setEventCycles
 }) {
-    // This component no longer contains the animation loop or complex useEffect hooks.
-    // It simply renders the UI based on the props passed down from Simulations.jsx.
+
+    const handleCanvasReady = useCallback((api) => {
+        if (canvasApiRef) {
+            canvasApiRef.current = api;
+        }
+    }, [canvasApiRef]);
 
     if (!replayData) {
         return (
@@ -45,29 +50,25 @@ export default function ReplayViewer({
                 </h1>
             </div>
 
-            <div className="flex-1 flex items-center justify-center bg-black rounded-lg border border-border p-2 min-h-0">
-                <ReplayCanvas onCanvasReady={(api) => {
-                    if (canvasApiRef) {
-                        canvasApiRef.current = api;
-                    }
-                }} />
+            {/* --- THIS IS THE MODIFIED LINE --- */}
+            {/* We remove 'items-center' and 'justify-center' to allow the child to fill the space */}
+            <div className="flex-1 flex bg-black rounded-lg p-2 min-h-0">
+                <div className="w-full h-full max-w-full max-h-full aspect-square border-2 border-primary/50 shadow-lg shadow-primary/20 rounded-lg relative">
+                    <ReplayCanvas onCanvasReady={handleCanvasReady} />
+                </div>
             </div>
 
             <div className="flex-shrink-0">
                 <PlaybackControl
                     isPlaying={isPlaying}
+                    onPause={onPause}
+                    onPlay={onPlay}
+                    onSetSpeed={setPlaybackSpeed}
+                    onSetDirection={setPlaybackDirection}
                     direction={playbackDirection}
                     currentCycle={currentCycle}
                     maxCycle={totalCycles}
-                    onPlay={(detail) => { 
-                        setPlaybackDirection(detail.direction); 
-                        setPlaybackSpeed(detail.speed); 
-                        setIsPlaying(true); 
-                    }}
-                    onPause={() => setIsPlaying(false)}
-                    onSetSpeed={(speed) => setPlaybackSpeed(speed)}
-                    onSetDirection={(dir) => setPlaybackDirection(dir)}
-                    onJumpTo={(cycle) => jumpToCycle(cycle)}
+                    jumpToCycle={jumpToCycle}
                     onSetEventCycles={setEventCycles}
                 />
             </div>

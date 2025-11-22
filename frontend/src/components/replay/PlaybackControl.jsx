@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-// Define icons at the top for clarity
 const ICONS = {
-    playForward: 'icons/play-forward.png',
-    playBackward: 'icons/play-backward.png',
-    pause: 'icons/pause.png',
-    rewind: 'icons/rewind.png',
-    fastForward: 'icons/fast-forward.png',
-    jumpStart: 'icons/jump-start.png',
-    jumpEnd: 'icons/jump-end.png'
+    playForward: '/icons/play-forward.png',
+    playBackward: '/icons/play-backward.png',
+    pause: '/icons/pause.png',
+    rewind: '/icons/rewind.png',
+    fastForward: '/icons/fast-forward.png',
+    jumpStart: '/icons/jump-start.png',
+    jumpEnd: '/icons/jump-end.png'
 };
 
 export default function PlaybackControl({
-    onPlay, onPause, onSetSpeed, onSetDirection, onJumpTo, onSetEventCycles,
-    maxCycle, currentCycle, isPlaying, direction
+    isPlaying, onPlay, onPause, onSetSpeed, onSetDirection, jumpToCycle, onSetEventCycles,
+    maxCycle, currentCycle, direction
 }) {
     const [speedIndex, setSpeedIndex] = useState(0);
     const speedLevels = [1, 2, 4, 8, 16];
@@ -22,7 +21,8 @@ export default function PlaybackControl({
         if (isPlaying) {
             onPause();
         } else {
-            onPlay({ speed: speedLevels[speedIndex], direction });
+            onSetDirection(direction);
+            onPlay();
         }
     };
 
@@ -74,16 +74,23 @@ export default function PlaybackControl({
                 />
             </div>
             <div className="round-counter">
-                <span className="round-label">CYCLE</span>
-                <span className="cycle-value">{Math.floor(currentCycle).toLocaleString()}</span>
-                <span className="cycle-max">/ {maxCycle.toLocaleString()}</span>
+                {/* --- THIS IS THE FIX --- */}
+                {/* Use a ternary operator to show either "RUNNING" or "CYCLE" */}
+                {isPlaying ? (
+                    <span className="round-label text-primary animate-pulse">RUNNING</span>
+                ) : (
+                    <span className="round-label">CYCLE</span>
+                )}
+                
+                <span className="cycle-value">{(Math.floor(currentCycle) + 1).toLocaleString()}</span>
+                <span className="cycle-max">/ {(maxCycle > 0 ? maxCycle : 1).toLocaleString()}</span>
             </div>
             <div className="controls">
-                <button onClick={() => onJumpTo(0)} className="control-btn" title="Jump to Start"><img src={ICONS.jumpStart} alt="Jump Start" /></button>
+                <button onClick={() => jumpToCycle(0)} className="control-btn" title="Jump to Start"><img src={ICONS.jumpStart} alt="Jump Start" /></button>
                 <button onClick={handleSlowDown} className="control-btn" title="Slow Down / Reverse"><img src={ICONS.rewind} alt="Rewind" /></button>
                 <button onClick={handlePlayPause} className={`control-btn center ${isPlaying ? 'playing' : ''}`} title="Play/Pause"><img src={getCenterIcon()} alt="Play/Pause" /></button>
                 <button onClick={handleSpeedUp} className="control-btn" title="Speed Up / Forward"><img src={ICONS.fastForward} alt="Fast Forward" /></button>
-                <button onClick={() => onJumpTo(maxCycle)} className="control-btn" title="Jump to End"><img src={ICONS.jumpEnd} alt="Jump End" /></button>
+                <button onClick={() => jumpToCycle(maxCycle)} className="control-btn" title="Jump to End"><img src={ICONS.jumpEnd} alt="Jump End" /></button>
             </div>
         </div>
     );
