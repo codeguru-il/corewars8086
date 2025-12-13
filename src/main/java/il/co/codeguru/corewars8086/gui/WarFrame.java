@@ -117,9 +117,9 @@ public class WarFrame extends JFrame
         enableEffectsCheckBox.setForeground(Color.BLACK);
         enableEffectsCheckBox.setOpaque(false);
         enableEffectsCheckBox.addActionListener(e -> {
-            if (effectsHandler != null) {
-                effectsHandler.setEffectsEnabled(enableEffectsCheckBox.isSelected());
-            }
+        	if (effectsHandler != null) {
+        		effectsHandler.setEffectsEnabled(enableEffectsCheckBox.isSelected());
+        	}
         });
         buttonPanel.add(enableEffectsCheckBox);
         nRoundNumber = 0;
@@ -185,9 +185,9 @@ public class WarFrame extends JFrame
         getContentPane().add(mainPanel, BorderLayout.CENTER);
         //getContentPane().add(new JLabel(new ImageIcon("images/title2.png")), BorderLayout.EAST);
         getContentPane().add(infoZone, BorderLayout.SOUTH);
-        
-        // Initialize effects handler
-        effectsHandler = new WarEffectsHandler(warCanvas, competition);
+		
+		// Initialize effects handler
+		effectsHandler = new WarEffectsHandler(warCanvas, competition);
     }
 
     /** Add a message to the message zone */
