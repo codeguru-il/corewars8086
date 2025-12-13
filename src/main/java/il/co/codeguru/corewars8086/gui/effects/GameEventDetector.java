@@ -22,11 +22,7 @@ public class GameEventDetector {
     public enum EventType {
         BOMB_USED,
         ZOMBIE_CAPTURED,
-        SURVIVOR_OVERWRITTEN,
-        WARRIOR_DEATH,
-        WAR_START,
-        WAR_END,
-        WARRIOR_BIRTH
+        WARRIOR_DEATH
     }
     
     public static class GameEvent {
@@ -83,19 +79,11 @@ public class GameEventDetector {
         final int warriorIndex;
         final String name;
         final WarriorType type;
-        final int startOffset;
-        final int endOffset;
         
-        WarriorRegion(int warriorIndex, String name, int loadOffset, int codeSize, WarriorType type) {
+        WarriorRegion(int warriorIndex, String name, WarriorType type) {
             this.warriorIndex = warriorIndex;
             this.name = name;
             this.type = type;
-            this.startOffset = loadOffset;
-            this.endOffset = loadOffset + codeSize;
-        }
-        
-        boolean contains(int offset) {
-            return offset >= startOffset && offset < endOffset;
         }
     }
     
@@ -127,14 +115,6 @@ public class GameEventDetector {
     }
     
     /**
-     * @deprecated Use {@link #onRound(int)} instead
-     */
-    @Deprecated
-    public void markWarStarted() {
-        this.warStarted = true;
-    }
-    
-    /**
      * Updates warrior region tracking. Should be called when warriors are loaded.
      */
     public void updateWarriorRegions() {
@@ -145,13 +125,9 @@ public class GameEventDetector {
         for (int i = 0; i < numWarriors; i++) {
             Warrior warrior = war.getWarrior(i);
             if (warrior != null && warrior.isAlive()) {
-                int loadOffset = Unsigned.unsignedShort(warrior.getLoadOffset());
-                int codeSize = warrior.getCodeSize();
                 warriorRegions.add(new WarriorRegion(
                     i,
                     warrior.getName(),
-                    loadOffset,
-                    codeSize,
                     warrior.getType()
                 ));
             }
@@ -286,34 +262,6 @@ public class GameEventDetector {
             );
         }
         
-        // Check if write is in another survivor's code region (not zombie - zombie capture is checked separately)
-        for (WarriorRegion region : warriorRegions) {
-            if (region.warriorIndex == writerWarriorIndex) {
-                continue; // Skip self
-            }
-            
-            // Skip zombies - zombie capture is detected by checkZombieCapture()
-            if (region.type == WarriorType.ZOMBIE || region.type == WarriorType.ZOMBIE_H) {
-                continue;
-            }
-            
-            // Skip if the target warrior is already dead (to avoid duplicate death events)
-            Warrior targetWarrior = war.getWarrior(region.warriorIndex);
-            if (targetWarrior != null && !targetWarrior.isAlive()) {
-                continue;
-            }
-            
-            if (region.contains(arenaOffset)) {
-                return new GameEvent(
-                    EventType.SURVIVOR_OVERWRITTEN,
-                    arenaOffset,
-                    region.warriorIndex,
-                    region.name,
-                    "SURVIVOR OVERWRITTEN!"
-                );
-            }
-        }
-        
         return null;
     }
     
@@ -335,27 +283,6 @@ public class GameEventDetector {
             warriorIndex,
             warriorName,
             warriorName + " ELIMINATED!"
-        );
-    }
-    
-    /**
-     * Creates a birth event.
-     */
-    public GameEvent createBirthEvent(String warriorName, int warriorIndex) {
-        int arenaOffset = 0;
-        if (war != null && warriorIndex >= 0 && warriorIndex < war.getNumWarriors()) {
-            Warrior warrior = war.getWarrior(warriorIndex);
-            if (warrior != null) {
-                arenaOffset = Unsigned.unsignedShort(warrior.getLoadOffset());
-            }
-        }
-        
-        return new GameEvent(
-            EventType.WARRIOR_BIRTH,
-            arenaOffset,
-            warriorIndex,
-            warriorName,
-            warriorName + " enters!"
         );
     }
     

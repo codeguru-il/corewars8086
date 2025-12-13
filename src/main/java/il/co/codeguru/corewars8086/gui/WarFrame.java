@@ -299,10 +299,6 @@ public class WarFrame extends JFrame
                 ));
                 break;
                 
-            case SURVIVOR_OVERWRITTEN:
-                // Effect removed
-                break;
-                
             case WARRIOR_DEATH:
                 // Prevent duplicate death events (within 2 seconds)
                 String deathKey = event.warriorName + "_death";
@@ -344,10 +340,6 @@ public class WarFrame extends JFrame
                         canvasWidth, canvasHeight
                     ));
                 }
-                break;
-                
-            case WARRIOR_BIRTH:
-                // Entrance effect removed - no visual effects
                 break;
         }
     }
@@ -518,31 +510,6 @@ public class WarFrame extends JFrame
         if (eventDetector != null) {
             eventDetector.updateWarriorRegions();
         }
-        
-        // Trigger birth effect
-        if (eventDetector != null) {
-            Integer warriorIndex = warriorNameToIndex.get(warriorName);
-            if (warriorIndex == null) {
-                // Find index by name
-                if (competition.getCurrentWar() != null) {
-                    for (int i = 0; i < competition.getCurrentWar().getNumWarriors(); i++) {
-                        Warrior w = competition.getCurrentWar().getWarrior(i);
-                        if (w != null && w.getName().equals(warriorName)) {
-                            warriorIndex = i;
-                            warriorNameToIndex.put(warriorName, i);
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            if (warriorIndex != null) {
-                GameEventDetector.GameEvent event = eventDetector.createBirthEvent(
-                    warriorName, warriorIndex
-                );
-                triggerEffectForEvent(event);
-            }
-        }
     }
 
     /** @see CompetitionEventListener#onWarriorDeath(String) */
@@ -579,12 +546,7 @@ public class WarFrame extends JFrame
                 }
             }
             
-            // Only trigger death effect if warrior was alive (to prevent duplicates)
             if (warriorIndex != null) {
-                Warrior warrior = competition.getCurrentWar().getWarrior(warriorIndex);
-                // Check if this is a real death event (warrior should be dead now, but we check to avoid duplicates)
-                // We'll use a simple approach: only trigger if we haven't already processed this death
-                // The event detector will handle checking if warrior is actually dead
                 GameEventDetector.GameEvent event = eventDetector.createDeathEvent(
                     warriorName, warriorIndex
                 );
