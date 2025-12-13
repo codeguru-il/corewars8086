@@ -1,13 +1,16 @@
 package il.co.codeguru.corewars8086.gui;
 
+import il.co.codeguru.corewars8086.gui.effects.VisualEffectManager;
 import il.co.codeguru.corewars8086.utils.EventMulticaster;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JComponent;
+import javax.swing.Timer;
 import javax.swing.event.MouseInputListener;
 
 
@@ -29,6 +32,9 @@ public class Canvas extends JComponent implements MouseInputListener {
 	private MouseAddressRequest eventHandler;
 
 	private int MouseX, MouseY;
+	
+	private VisualEffectManager effectManager;
+	private Timer animationTimer;
 
     public Canvas() {
 		eventCaster = new EventMulticaster(MouseAddressRequest.class);
@@ -37,6 +43,15 @@ public class Canvas extends JComponent implements MouseInputListener {
 		this.addMouseListener(this);
 		this.MouseX = 0;
 		this.MouseY = 0;
+		this.effectManager = new VisualEffectManager();
+		
+		// Animation timer for effects (60 FPS)
+		animationTimer = new Timer(16, e -> {
+			effectManager.update();
+			repaint();
+		});
+		animationTimer.start();
+		
         clear();
     }
 
@@ -107,7 +122,9 @@ public class Canvas extends JComponent implements MouseInputListener {
      */
     @Override
     public void paint(Graphics g) {
-        g.fillRect(0,0, BOARD_SIZE * DOT_SIZE, BOARD_SIZE * DOT_SIZE);
+        Graphics2D g2d = (Graphics2D) g.create();
+        
+        g2d.fillRect(0,0, BOARD_SIZE * DOT_SIZE, BOARD_SIZE * DOT_SIZE);
 
         for (int y = 0; y < BOARD_SIZE; y++) {
             for (int x = 0; x < BOARD_SIZE; x++) {
@@ -116,10 +133,34 @@ public class Canvas extends JComponent implements MouseInputListener {
                     continue;
                 }
 
-                g.setColor(ColorHolder.getInstance().getColor(cellVal,false));
-                g.fillRect(x*DOT_SIZE, y*DOT_SIZE, DOT_SIZE, DOT_SIZE);
+                g2d.setColor(ColorHolder.getInstance().getColor(cellVal,false));
+                g2d.fillRect(x*DOT_SIZE, y*DOT_SIZE, DOT_SIZE, DOT_SIZE);
             }
         }
+        
+        // Enable alpha blending for effects
+        g2d.setComposite(java.awt.AlphaComposite.SrcOver);
+        
+        // Render visual effects on top
+        effectManager.render(g2d);
+        
+        g2d.dispose();
+    }
+    
+    /**
+     * Adds a visual effect to be displayed.
+     * 
+     * @param effect The visual effect to add
+     */
+    public void addVisualEffect(il.co.codeguru.corewars8086.gui.effects.VisualEffect effect) {
+        effectManager.addEffect(effect);
+    }
+    
+    /**
+     * Clears all visual effects.
+     */
+    public void clearEffects() {
+        effectManager.clear();
     }
     
 	@Override
