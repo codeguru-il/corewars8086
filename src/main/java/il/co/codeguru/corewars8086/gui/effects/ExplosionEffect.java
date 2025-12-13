@@ -7,8 +7,6 @@ import java.awt.Graphics2D;
 /**
  * Explosion effect - expanding circles with color fade.
  * Used for bomb detonations.
- * 
- * @author Visual Effects System
  */
 public class ExplosionEffect extends AbstractVisualEffect {
     private final int centerX;
@@ -53,5 +51,6 @@ public class ExplosionEffect extends AbstractVisualEffect {
         g2d.dispose();
     }
 }
+
 
 

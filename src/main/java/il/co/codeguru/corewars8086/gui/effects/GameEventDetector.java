@@ -14,8 +14,6 @@ import java.util.Map;
 
 /**
  * Detects special game events by tracking warrior code regions and memory writes.
- * 
- * @author Visual Effects System
  */
 public class GameEventDetector {
     

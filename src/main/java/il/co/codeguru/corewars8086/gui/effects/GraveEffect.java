@@ -14,8 +14,6 @@ import javax.imageio.ImageIO;
  * Grave effect - a permanent marker showing where a warrior died.
  * Displays a grave image with the warrior's name, blinking continuously.
  * This effect never completes - it stays forever.
- * 
- * @author Visual Effects System
  */
 public class GraveEffect extends AbstractVisualEffect {
     private final int centerX;

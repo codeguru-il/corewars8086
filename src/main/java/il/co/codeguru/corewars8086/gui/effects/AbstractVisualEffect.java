@@ -2,8 +2,6 @@ package il.co.codeguru.corewars8086.gui.effects;
 
 /**
  * Abstract base class for visual effects providing common functionality.
- * 
- * @author Visual Effects System
  */
 public abstract class AbstractVisualEffect implements VisualEffect {
     protected long startTime;
@@ -47,5 +45,6 @@ public abstract class AbstractVisualEffect implements VisualEffect {
         return Math.min(1.0f, (float) elapsed / duration);
     }
 }
+
 
 

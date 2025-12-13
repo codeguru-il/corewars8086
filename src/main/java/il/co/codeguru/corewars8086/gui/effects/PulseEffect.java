@@ -7,8 +7,6 @@ import java.awt.Graphics2D;
 /**
  * Pulse effect - concentric ripples expanding from a point.
  * Used for captures and other impactful events.
- * 
- * @author Visual Effects System
  */
 public class PulseEffect extends AbstractVisualEffect {
     private final int centerX;
@@ -57,5 +55,6 @@ public class PulseEffect extends AbstractVisualEffect {
         g2d.dispose();
     }
 }
+
 
 

@@ -9,8 +9,6 @@ import java.awt.geom.Point2D;
 /**
  * Glow effect - a localized area that blinks/pulses with a radial glow.
  * Creates a soft glowing highlight that pulses multiple times.
- * 
- * @author Visual Effects System
  */
 public class GlowEffect extends AbstractVisualEffect {
     private final int centerX;

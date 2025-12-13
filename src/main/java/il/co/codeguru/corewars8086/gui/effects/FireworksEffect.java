@@ -10,8 +10,6 @@ import java.util.Random;
 /**
  * Fireworks effect - colorful sparks that shoot up and fall with gravity.
  * Creates a celebratory burst effect perfect for special events like zombie captures.
- * 
- * @author Visual Effects System
  */
 public class FireworksEffect extends AbstractVisualEffect {
     

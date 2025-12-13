@@ -10,8 +10,6 @@ import java.util.Random;
 /**
  * Particle effect - multiple particles radiating outward.
  * Used for various explosive or impactful events.
- * 
- * @author Visual Effects System
  */
 public class ParticleEffect extends AbstractVisualEffect {
     private static class Particle {

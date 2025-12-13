@@ -12,8 +12,6 @@ import java.util.List;
 /**
  * Floating text effect - text that floats upward and fades out.
  * Used for event announcements.
- * 
- * @author Visual Effects System
  */
 public class FloatingTextEffect extends AbstractVisualEffect {
     private final String text;

@@ -8,8 +8,6 @@ import java.util.List;
 /**
  * Manages all active visual effects.
  * Handles updating and rendering effects, and removes completed ones.
- * 
- * @author Visual Effects System
  */
 public class VisualEffectManager {
     private final List<VisualEffect> effects;

@@ -5,8 +5,6 @@ import java.awt.Graphics;
 /**
  * Base interface for all visual effects.
  * Effects are time-based animations that render on top of the canvas.
- * 
- * @author Visual Effects System
  */
 public interface VisualEffect {
     /**
