@@ -163,6 +163,21 @@ public class Canvas extends JComponent implements MouseInputListener {
         effectManager.clear();
     }
     
+    /**
+     * Disposes of resources used by the canvas.
+     * Stops the animation timer to prevent memory leaks.
+     * Should be called when the canvas is no longer needed.
+     */
+    public void dispose() {
+        if (animationTimer != null) {
+            animationTimer.stop();
+            animationTimer = null;
+        }
+        if (effectManager != null) {
+            effectManager.clear();
+        }
+    }
+    
 	@Override
 	public void mouseMoved(MouseEvent e) {
 

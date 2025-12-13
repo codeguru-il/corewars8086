@@ -400,6 +400,12 @@ public class WarFrame extends JFrame
 			this.cpuFrame.dispose();
 		} catch (Exception e) {
 		}
+		
+		// Clean up canvas resources (stop animation timer)
+		if (warCanvas != null) {
+			warCanvas.dispose();
+		}
+		
 		// restoring maximum speed
 		competition.getCurrentWar().resume();
 		competition.setSpeed(Competition.MAXIMUM_SPEED);
