@@ -109,6 +109,10 @@ public class Competition {
     }
 
     public int getTotalNumberOfWars() {
+        if (options.totalBattles > 0) {
+            return options.totalBattles;
+        }
+
         return (int) competitionIterator.getNumberOfItems() * warsPerCombination;
     }
 

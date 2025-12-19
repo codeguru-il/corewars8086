@@ -37,6 +37,14 @@ public class Options extends OptionsBase {
       defaultValue = "100"
   )
   public int battlesPerCombo;
+
+  @Option(
+      name = "totalBattles",
+      help = "Total amount of battles. Overrides comboSize and battlesPerCombo if more than zero.",
+      category = "Gameplay",
+      defaultValue = "0"
+  )
+  public int totalBattles;
   
   @Option(
       name = "seed",
