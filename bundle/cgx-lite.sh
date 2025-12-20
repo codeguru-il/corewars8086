@@ -1,1 +1,1 @@
-java -jar bin/corewars8086-5.0.1.jar --noparallel
+java -jar bin/corewars8086-6.0.0.jar --noparallel
