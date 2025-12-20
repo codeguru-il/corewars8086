@@ -1,5 +1,6 @@
 package il.co.codeguru.corewars8086.gui;
 
+import il.co.codeguru.corewars8086.gui.effects.WarEffectsHandler;
 import il.co.codeguru.corewars8086.memory.MemoryEventListener;
 import il.co.codeguru.corewars8086.memory.RealModeAddress;
 import il.co.codeguru.corewars8086.utils.Unsigned;
@@ -59,6 +60,8 @@ public class WarFrame extends JFrame
     private final Competition competition;
 
 	private MemoryFrame memoryFrame;
+	
+	private WarEffectsHandler effectsHandler;
 
     public WarFrame(final Competition competition) {
         super("CodeGuru Extreme - Session Viewer");
@@ -109,6 +112,16 @@ public class WarFrame extends JFrame
             WarFrame.this.competition.setSpeed((int) Math.pow(1.2, speedSlider.getValue()) ); //exponential speed slider
         });
         buttonPanel.add(speedSlider);
+        buttonPanel.add(Box.createHorizontalStrut(20));
+        JCheckBox enableEffectsCheckBox = new JCheckBox("Enable Effects", true);
+        enableEffectsCheckBox.setForeground(Color.BLACK);
+        enableEffectsCheckBox.setOpaque(false);
+        enableEffectsCheckBox.addActionListener(e -> {
+        	if (effectsHandler != null) {
+        		effectsHandler.setEffectsEnabled(enableEffectsCheckBox.isSelected());
+        	}
+        });
+        buttonPanel.add(enableEffectsCheckBox);
         nRoundNumber = 0;
         infoZone.add(buttonPanel, BorderLayout.SOUTH);
         infoZone.setBackground(Color.black);
@@ -171,7 +184,10 @@ public class WarFrame extends JFrame
         getContentPane().setBackground(Color.BLACK);
         getContentPane().add(mainPanel, BorderLayout.CENTER);
         //getContentPane().add(new JLabel(new ImageIcon("images/title2.png")), BorderLayout.EAST);
-        getContentPane().add(infoZone, BorderLayout.SOUTH);		
+        getContentPane().add(infoZone, BorderLayout.SOUTH);
+		
+		// Initialize effects handler
+		effectsHandler = new WarEffectsHandler(warCanvas, competition);
     }
 
     /** Add a message to the message zone */
@@ -197,6 +213,8 @@ public class WarFrame extends JFrame
         	warCanvas.paintPixel(
         			Unsigned.unsignedShort(ipInsideArena),
         			(byte)competition.getCurrentWarrior());
+        	
+        	effectsHandler.onMemoryWrite(competition.getCurrentWarrior(), address);
         }
     }
 
@@ -205,6 +223,7 @@ public class WarFrame extends JFrame
         addMessage("=== Session started ===");
         nameListModel.clear();
         warCanvas.clear();
+        effectsHandler.onWarStart();
         if (competition.getCurrentWar().isPaused()){
 			btnPause.setText("Resume");
 			btnSingleRound.setEnabled(true);
@@ -232,11 +251,14 @@ public class WarFrame extends JFrame
             default:
                 throw new RuntimeException();			
         }
+        
+        effectsHandler.onWarEnd(reason, winners, nRoundNumber);
     }	
 
     /** @see CompetitionEventListener#onRound(int) */
     public void onRound(int round) {
         nRoundNumber = round;
+        effectsHandler.onRound(round);
         if ((nRoundNumber % 1000) == 0) {
             roundNumber.setText(Integer.toString(nRoundNumber));
             roundNumber.repaint();
@@ -249,6 +271,7 @@ public class WarFrame extends JFrame
     public void onWarriorBirth(String warriorName) {
         addMessage(nRoundNumber, warriorName + " enters the arena.");
         nameListModel.addElement(new WarriorInfo(warriorName));
+        effectsHandler.onWarriorBirth();
     }
 
     /** @see CompetitionEventListener#onWarriorDeath(String) */
@@ -269,6 +292,8 @@ public class WarFrame extends JFrame
                 nameList.repaint();
             }
         });
+        
+        effectsHandler.onWarriorDeath(warriorName);
     }	
 
     /**
@@ -344,6 +369,7 @@ public class WarFrame extends JFrame
 	@Override
 	public void onEndRound() {
 		this.warCanvas.deletePointers();
+		effectsHandler.onEndRound();
 		for (int i = 0; i < this.competition.getCurrentWar().getNumWarriors(); i++)
 			if (this.competition.getCurrentWar().getWarrior(i).isAlive()) {
 				short ip = this.competition.getCurrentWar().getWarrior(i).getCpuState().getIP();
@@ -374,6 +400,12 @@ public class WarFrame extends JFrame
 			this.cpuFrame.dispose();
 		} catch (Exception e) {
 		}
+		
+		// Clean up canvas resources (stop animation timer)
+		if (warCanvas != null) {
+			warCanvas.dispose();
+		}
+		
 		// restoring maximum speed
 		competition.getCurrentWar().resume();
 		competition.setSpeed(Competition.MAXIMUM_SPEED);
