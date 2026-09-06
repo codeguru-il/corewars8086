@@ -1249,9 +1249,20 @@ public class Cpu {
                             m_state.setCarryFlag(true);							
                         }
                         break;
-                    case 5: // TODO: IMUL
-                        throw new UnimplementedOpcodeException();
+                    case 5: // IMUL
+                    {
+                            byte al = m_state.getAL();
+                            byte mem = m_indirect.getMem8();
+                            int product = al * mem;
+                            m_state.setAL((byte)product);
+                            m_state.setAH((byte)(product >> 8));
+                            boolean fits = product == (byte) product;
+                            m_state.setOverflowFlag(!fits);
+                            m_state.setCarryFlag(!fits);
+                            break;
+                    }
                     case 6: // DIV
+                    {
                         int tmp = Unsigned.unsignedShort(m_state.getAX());
                         short divisor = Unsigned.unsignedByte(m_indirect.getMem8());
                         if (divisor == 0) { // divide by zero ?
@@ -1264,8 +1275,23 @@ public class Cpu {
                         m_state.setAL((byte)quotient);
                         m_state.setAH((byte)(tmp % divisor));
                         break;
-                    case 7: // TODO: IDIV
-                        throw new UnimplementedOpcodeException();
+                    }
+                    case 7: // IDIV
+                    {
+                        short dividened = m_state.getAX();
+                        byte divisor = m_indirect.getMem8();
+                        if (divisor == 0) {
+                            throw new DivisionException();
+                        }
+                        int quotient = dividened / divisor;
+                        int remainder = dividened % divisor;
+                        if (quotient > 127 || quotient < -128) {
+                            throw new DivisionException();
+                        }
+                        m_state.setAL((byte)quotient);
+                        m_state.setAH((byte)remainder);
+                        break;
+                    }
                     default:
                         throw new RuntimeException();
                 }
@@ -1301,9 +1327,20 @@ public class Cpu {
                             m_state.setCarryFlag(true);							
                         }
                         break;
-                    case 5: // TODO: IMUL
-                        throw new UnimplementedOpcodeException();
+                    case 5: // IMUL
+                    {
+                        short ax = m_state.getAX();
+                        short mem = m_indirect.getMem16();
+                        int product = ax * mem;
+                        m_state.setAX((short)product);
+                        m_state.setDX((short)(product >> 16));
+                        boolean fits = product == (int)(short)product;
+                        m_state.setOverflowFlag(!fits);
+                        m_state.setCarryFlag(!fits);
+                        break;
+                    }
                     case 6: // DIV
+                    {
                         long tmp = Unsigned.unsignedInt(
                             (Unsigned.unsignedShort(m_state.getDX()) << 16) +
                             Unsigned.unsignedShort(m_state.getAX()));
@@ -1318,8 +1355,23 @@ public class Cpu {
                         m_state.setAX((short)quotient);
                         m_state.setDX((short)(tmp % divisor));
                         break;
-                    case 7: // TODO: IDIV
-                        throw new UnimplementedOpcodeException();
+                    }
+                    case 7: // IDIV
+                    {
+                        int dividend = (((int)m_state.getDX()) << 16) | Unsigned.unsignedShort(m_state.getAX());
+                        short divisor = m_indirect.getMem16();
+                        if (divisor == 0) {
+                            throw new DivisionException();
+                        }
+                        int quotient = dividend / divisor;
+                        int remainder = dividend % divisor;
+                        if (quotient > 0x7FFF || quotient < -0x8000) {
+                            throw new DivisionException();
+                        }
+                        m_state.setAX((short)quotient);
+                        m_state.setDX((short)remainder);
+                        break;
+                    }
                     default:
                         throw new RuntimeException();
                 }
