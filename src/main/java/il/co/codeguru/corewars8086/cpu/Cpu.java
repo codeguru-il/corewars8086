@@ -1443,7 +1443,6 @@ public class Cpu {
      */
     private void updateFlags8(short value) {
         m_state.setCarryFlag((value & 0xFF00) != 0);
-        // TODO: update overflow flag
         updateFlagsNoCarryOverflow8((byte)value);
     }
 
@@ -1453,8 +1452,51 @@ public class Cpu {
      */
     private void updateFlags16(int value) {
         m_state.setCarryFlag((value & 0xFFFF0000) != 0);
-        // TODO: update overflow flag
         updateFlagsNoCarryOverflow16((short)value);
+    }
+
+    /**
+     * For signed add operations, overflow occurs when the operands have the same
+     * sign and the result sign differs.
+     */
+    private boolean signedOverflowAdd(byte left, byte right, byte result) {
+        int leftSign = left & 0x80;
+        int rightSign = right & 0x80;
+        int resultSign = result & 0x80;
+        return (leftSign == rightSign) && (leftSign != resultSign);
+    }
+
+    /**
+     * For signed subtraction, overflow occurs when the operands have opposite
+     * signs and the result sign differs from the left operand.
+     */
+    private boolean signedOverflowSub(byte left, byte right, byte result) {
+        int leftSign = left & 0x80;
+        int rightSign = right & 0x80;
+        int resultSign = result & 0x80;
+        return (leftSign != rightSign) && (leftSign != resultSign);
+    }
+
+    /**
+     * For signed add operations, overflow occurs when the operands have the same
+     * sign and the result sign differs.
+     */
+    private boolean signedOverflowAdd(short left, short right, short result) {
+        int leftSign = left & 0x8000;
+        int rightSign = right & 0x8000;
+        int resultSign = result & 0x8000;
+        return (leftSign == rightSign) && (leftSign != resultSign);
+    }
+
+    /**
+     * For signed subtraction, overflow occurs when the operands have opposite
+     * signs and the result sign differs from the left operand.
+     */
+    private boolean signedOverflowSub(short left, short right, short result) {
+        int leftSign = left & 0x8000;
+        int rightSign = right & 0x8000;
+        int resultSign = result & 0x8000;
+        return (leftSign != rightSign) && (leftSign != resultSign);
     }
 
     /**
@@ -1488,8 +1530,10 @@ public class Cpu {
     private byte add8(byte value1, byte value2) {
         short result16 = 
             (short)(Unsigned.unsignedByte(value1) + Unsigned.unsignedByte(value2));
-        byte result8 = (byte)result16;	
-        updateFlags8(result16);
+        byte result8 = (byte)result16;
+        m_state.setCarryFlag((result16 & 0xFF00) != 0);
+        m_state.setOverflowFlag(signedOverflowAdd(value1, value2, result8));
+        updateFlagsNoCarryOverflow8(result8);
         return result8;
     }
 
@@ -1499,8 +1543,10 @@ public class Cpu {
     private short add16(short value1, short value2) {
         int result32 =
             Unsigned.unsignedShort(value1) + Unsigned.unsignedShort(value2);
-        short result16 = (short)result32;		
-        updateFlags16(result32);
+        short result16 = (short)result32;
+        m_state.setCarryFlag((result32 & 0xFFFF0000L) != 0L);
+        m_state.setOverflowFlag(signedOverflowAdd(value1, value2, result16));
+        updateFlagsNoCarryOverflow16(result16);
         return result16;
     }
 
@@ -1554,7 +1600,8 @@ public class Cpu {
     private byte or8(byte value1, byte value2) {
         short result16 = 
             (short)(Unsigned.unsignedByte(value1) | Unsigned.unsignedByte(value2));
-        byte result8 = (byte)result16;	
+        byte result8 = (byte)result16;
+        m_state.setOverflowFlag(false);
         updateFlags8(result16);
         return result8;
     }
@@ -1565,7 +1612,8 @@ public class Cpu {
     private short or16(short value1, short value2) {
         int result32 =
             Unsigned.unsignedShort(value1) | Unsigned.unsignedShort(value2);
-        short result16 = (short)result32;		
+        short result16 = (short)result32;
+        m_state.setOverflowFlag(false);
         updateFlags16(result32);
         return result16;
     }
@@ -1580,8 +1628,10 @@ public class Cpu {
         if (m_state.getCarryFlag()) {
             ++result16;
         }
-        byte result8 = (byte)result16;	
-        updateFlags8(result16);
+        byte result8 = (byte)result16;
+        m_state.setCarryFlag((result16 & 0xFF00) != 0);
+        m_state.setOverflowFlag(signedOverflowAdd(value1, value2, result8));
+        updateFlagsNoCarryOverflow8(result8);
         return result8;
     }
 
@@ -1595,8 +1645,10 @@ public class Cpu {
         if (m_state.getCarryFlag()) {
             ++result32;
         }
-        short result16 = (short)result32;		
-        updateFlags16(result32);
+        short result16 = (short)result32;
+        m_state.setCarryFlag((result32 & 0xFFFF0000L) != 0L);
+        m_state.setOverflowFlag(signedOverflowAdd(value1, value2, result16));
+        updateFlagsNoCarryOverflow16(result16);
         return result16;
     }	
 
@@ -1610,8 +1662,10 @@ public class Cpu {
         if (m_state.getCarryFlag()) {
             --result16;
         }
-        byte result8 = (byte)result16;	
-        updateFlags8(result16);
+        byte result8 = (byte)result16;
+        m_state.setCarryFlag((result16 & 0xFF00) != 0);
+        m_state.setOverflowFlag(signedOverflowSub(value1, value2, result8));
+        updateFlagsNoCarryOverflow8(result8);
         return result8;
     }
 
@@ -1625,8 +1679,10 @@ public class Cpu {
         if (m_state.getCarryFlag()) {
             --result32;
         }
-        short result16 = (short)result32;		
-        updateFlags16(result32);
+        short result16 = (short)result32;
+        m_state.setCarryFlag((result32 & 0xFFFF0000L) != 0L);
+        m_state.setOverflowFlag(signedOverflowSub(value1, value2, result16));
+        updateFlagsNoCarryOverflow16(result16);
         return result16;
     }
 
@@ -1636,7 +1692,8 @@ public class Cpu {
     private byte and8(byte value1, byte value2) {
         short result16 = 
             (short)(Unsigned.unsignedByte(value1) & Unsigned.unsignedByte(value2));
-        byte result8 = (byte)result16;	
+        byte result8 = (byte)result16;
+        m_state.setOverflowFlag(false);
         updateFlags8(result16);
         return result8;
     }
@@ -1647,7 +1704,8 @@ public class Cpu {
     private short and16(short value1, short value2) {
         int result32 =
             Unsigned.unsignedShort(value1) & Unsigned.unsignedShort(value2);
-        short result16 = (short)result32;		
+        short result16 = (short)result32;
+        m_state.setOverflowFlag(false);
         updateFlags16(result32);
         return result16;
     }	
@@ -1658,8 +1716,10 @@ public class Cpu {
     private byte sub8(byte value1, byte value2) {
         short result16 = 
             (short)(Unsigned.unsignedByte(value1) - Unsigned.unsignedByte(value2));
-        byte result8 = (byte)result16;	
-        updateFlags8(result16);
+        byte result8 = (byte)result16;
+        m_state.setCarryFlag((result16 & 0xFF00) != 0);
+        m_state.setOverflowFlag(signedOverflowSub(value1, value2, result8));
+        updateFlagsNoCarryOverflow8(result8);
         return result8;
     }
 
@@ -1669,8 +1729,10 @@ public class Cpu {
     private short sub16(short value1, short value2) {
         int result32 =
             Unsigned.unsignedShort(value1) - Unsigned.unsignedShort(value2);
-        short result16 = (short)result32;		
-        updateFlags16(result32);
+        short result16 = (short)result32;
+        m_state.setCarryFlag((result32 & 0xFFFF0000L) != 0L);
+        m_state.setOverflowFlag(signedOverflowSub(value1, value2, result16));
+        updateFlagsNoCarryOverflow16(result16);
         return result16;
     }
 
@@ -1680,7 +1742,8 @@ public class Cpu {
     private byte xor8(byte value1, byte value2) {
         short result16 = 
             (short)(Unsigned.unsignedByte(value1) ^ Unsigned.unsignedByte(value2));
-        byte result8 = (byte)result16;	
+        byte result8 = (byte)result16;
+        m_state.setOverflowFlag(false);
         updateFlags8(result16);
         return result8;
     }
@@ -1691,7 +1754,8 @@ public class Cpu {
     private short xor16(short value1, short value2) {
         int result32 =
             Unsigned.unsignedShort(value1) ^ Unsigned.unsignedShort(value2);
-        short result16 = (short)result32;		
+        short result16 = (short)result32;
+        m_state.setOverflowFlag(false);
         updateFlags16(result32);
         return result16;
     }
